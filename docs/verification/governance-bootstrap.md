@@ -37,3 +37,15 @@
 - G02：规范/Git 基线已有产物，PR 仍等待用户审查合并。
 - 外部 CI/人工/客户端/MySQL 证据认证器尚未建立，脚本对最终完成升级默认拒绝，不接受手写 passed。
 - 本地 Hook 可被管理者绕过；脚本、工作流或授权记录本身不构成独立真人证明。不得以本记录代替用户批准。
+
+## 网络恢复、远程验证与用户确认（追加）
+
+之后定位到浏览器使用 Windows 系统代理而 Git 默认直连失败。仅对单次 Git 命令使用现有系统代理后，正常推送成功，未修改持久代理配置、未绕过 Hook，远程更新至 dff25aa1f3e4aa5c87e6472b329f9ebe069ff16c。上文待推送和 CI 未通过为当时历史状态，现已解除。
+
+[Actions run 36834728611](https://github.com/ArturiaGit/mysql-mcp/actions/runs/36834728611) 的 governance job 成功；实际下载 artifact 11147719225（governance-evidence-36834728611-1）核对 source_commit=dff25aa、exit_code=0、54 tests/pass、0 fail/skipped/cancelled/todo。产物到期时间为 2026-10-15T08:11:12Z；过期后需重跑。机器报告仍保留 acceptance=unverified，不自行批准。
+
+随后应用并读取 GitHub main protection API，核实 protected=true、required_status_checks.strict=true、必需 governance（GitHub Actions app_id=15368）、PR 必需、enforce_admins=true、allow_force_pushes=false、allow_deletions=false、会话讨论需解决。required_approving_review_count=0，不宣称已有独立 reviewer；用户确认合并仍是 Agent 行为约束，共享管理账号仍可修改保护。
+
+用户在本次会话明确表示“验收通过”，记录为对本次治理交付的用户确认，不是 Agent 独立验收或对 F01–F28 业务功能的确认。该结论不替代可信外部验收认证器，也不构成 PR 合并/发布授权；PR #1 仍等待明确合并指令。
+
+当前网络、远程 CI 和 main 保护部署阻塞已解除；治理有本地与独立 CI 执行证据，用户确认已记录。自动状态认证与最终交付仍受现有安全限制，不将功能表手工改为 completed。
