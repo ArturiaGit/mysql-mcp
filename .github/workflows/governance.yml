@@ -1,0 +1,42 @@
+name: Governance
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  governance:
+    name: governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate snapshot and execute registered tests
+        env:
+          GOV_ARTIFACT_DIR: ${{ runner.temp }}/governance-evidence
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BRANCH: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = pull_request ]; then
+            node scripts/governance/run.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --branch "$PR_BRANCH"
+          else
+            node scripts/governance/run.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --ci-main
+          fi
+      - name: Upload diagnostic evidence (not acceptance)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/governance-evidence
+          if-no-files-found: warn
+          retention-days: 14

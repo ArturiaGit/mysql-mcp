@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "checks": [
+    {
+      "id": "governance-tests",
+      "command": "node",
+      "args": ["--test", "--test-reporter=tap", "tests/governance/governance.test.mjs"],
+      "timeout_ms": 120000,
+      "parser": "tap",
+      "feature_ids": ["G01", "G02"],
+      "acceptance_ids": ["G01-A1", "G02-A1"]
+    }
+  ]
+}
