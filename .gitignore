@@ -27,3 +27,6 @@ credentials.json
 # Editor / OS local state
 .DS_Store
 Thumbs.db
+
+# Generated local verification outputs (CI uploads as artifacts)
+.governance-evidence/

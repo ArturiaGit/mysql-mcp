@@ -1,6 +1,6 @@
 # Git 工作流
 
-> 状态：用户已确认的 Agent 默认执行约定。当前已建立本地 main 最小基线；应用、CI、Hook、分支保护均未建立。远程仓库和 PR 的真实状态以 GitHub 与交付记录为准，不以规则文本冒充执行证据。
+> 状态：用户已确认的 Agent 默认执行约定。main 最小基线已建立；本轮加入治理门禁。应用尚未实现，Hook/CI/远程保护的实际核实结果见 docs/verification/。
 
 ## 1. 仓库与授权
 
@@ -46,4 +46,10 @@
 
 本次用户单独批准：在 main 创建仅含 .gitignore 的最小基线提交 `bf703ad`，用于首个 PR 的比较基线；随后创建 docs/agent-git-workflow 分支。初始化时允许首次推送该 main 基线，但不把本例外用于后续功能或规范主体提交。
 
-当前规则由 Agent 执行，尚无 Hook/CI 或分支保护的机械阻断。将来增加这些保护需单独实施并记录验证，不得宣称现在已配置。
+本地 Hook 与 CI 由 scripts/governance 实现，安装使用 node scripts/governance/install-hooks.mjs。pre-commit 检查暂存快照，pre-push 检查实际 ref/commit 并运行必要测试；禁止绕过。main 远程保护须按 API 验证，不能仅凭 workflow 文件宣称生效。验收规则见[验收规范](./ACCEPTANCE.md)。
+
+## 7. 防偏离与证据要求
+
+任务开始前登记 governance/tasks.json 并查 governance/features.json 的既有功能/验收标准；修改文件必须落在授权路径，修复复用功能 ID。运行 node scripts/governance/check.mjs 和 node scripts/governance/run.mjs；记录快照、命令、退出码和实际测试统计，CI 独立重跑。
+
+治理变更（包括检查器、工作流、验收标准）需显式标识且用户审查。功能状态不以 PR 正文或手工勾选为准；缺实机/人工证据保持未验收。保护规则要求 PR 与治理检查，不表示当前共享账号具备独立真人身份认证。

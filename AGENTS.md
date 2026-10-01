@@ -25,4 +25,16 @@
 
 ## 初始化例外与当前状态
 
-本次用户单独批准仅含 .gitignore 的 main 基线初始化；例外不得用于后续功能或文档提交。当前应用尚未实现，CI、Hook 和远程分支保护未配置；规则依赖 Agent 执行，不能声称已机械强制。
+首次仅含 .gitignore 的 main 基线是已用完的初始化例外，不得用于后续直提 main。应用尚未实现；治理脚本、Hook、CI 和远程保护的实际部署证据见 docs/verification/，不能仅凭配置文本声称生效。
+
+## 需求与验收门禁
+
+开始任务先读 docs/ACCEPTANCE.md、governance/features.json 和 governance/tasks.json，搜索现有实现/测试与 PR。新功能必须唯一登记；修复复用功能 ID 并增加回归标准，不重复开发。
+
+修改范围必须对应活动任务和需求。先写可观察验收标准，再实现及测试；不得删标准、删测试或改门禁来使功能虚假通过。治理自身变更必须显式登记 governance_change 并由用户审查。
+
+执行 node scripts/governance/check.mjs、node scripts/governance/run.mjs；台账变化时用 node scripts/governance/report.mjs --write 更新派生状态。提交检查暂存快照，推送检查实际 ref/commit，不以工作区或 AI 口头保证替代。
+
+每项功能分别报告实现、验证、验收、交付状态。必要测试失败/跳过/零测试、缺证据、输入摘要变化均不能标完成。机器报告是执行记录而非独立验收；最终还需可核查 CI、必要实机/人工证据及合并记录。同账号 Agent 不能伪造真人批准；外部证据不能可靠认证时保持未验收。
+
+禁止 --no-verify、关闭 hooksPath 或降低远程检查绕过验收。首次治理门禁自身需用户审查，不能声称自证绝对安全。

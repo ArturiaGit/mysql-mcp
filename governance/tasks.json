@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {
+      "id": "TASK-GOV-001",
+      "kind": "maintenance",
+      "status": "in_progress",
+      "feature_ids": ["G01", "G02"],
+      "branch": "docs/agent-git-workflow",
+      "base_commit": "bf703ad0cba3ddcdf1950e61fe5fe1c74b16f543",
+      "authorization": "用户批准治理补强计划，复用 PR #1，允许脚本/Hook/CI/main 保护，不实现业务，不自动合并。",
+      "allowed_paths": ["AGENTS.md", ".gitignore", "docs/", "governance/", "scripts/governance/", "tests/governance/", ".githooks/", ".github/workflows/governance.yml"],
+      "pr": 1,
+      "scope_changes": [],
+      "governance_change": true
+    }
+  ]
+}

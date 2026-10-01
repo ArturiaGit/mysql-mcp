@@ -1,6 +1,6 @@
 # 规划与任务台账
 
-> 状态：规划治理规范已编写，软件实施尚未授权启动。当前没有 plan:new、plan:archive 或自动文档门禁脚本。
+> 状态：MySQL 应用实施尚未启动；已批准 TASK-GOV-001 治理门禁实现。自动检查由 scripts/governance 提供，计划新建/归档脚本仍不存在。
 
 ## 1. 两类记录的边界
 
@@ -23,7 +23,7 @@
 3. **in_progress**：只推进已授权任务，保留未完成项。
 4. **blocked**：列具体阻塞、影响及可继续工作，不把猜测风险当阻塞。
 5. **waiting_for_merge**：实现及约定验收完成，已自动提交、push、创建/更新 PR；记录实际检查与未验证项，等待用户确认合并。
-6. **completed**：用户确认合并且核实合并结果，记录实际提交/PR；不意味着已发布。
+6. **completed**：用户确认合并、核实结果，且所有功能必要实现/验证/人工或实机验收证据可核查；合并本身不能补足证据，不意味着已发布。
 7. **archived**：完成后保留证据和时间，移入未来 `archive/` 并更新索引，不丢失历史。
 
 范围取消可标 cancelled，不能算完成。复用已归档计划需新建增量计划，不修改过去的批准事实。
@@ -63,7 +63,7 @@ main 基线提交：
 
 ## 5. 维护规则
 
-计划文件聚合在本目录，不在 docs 根散放 TODO。当前仅人工维护，不要求执行不存在的归档脚本。未来自动化应在单独授权后实现，并与[审查规范](../CODE_REVIEW.md)同步。
+计划文件聚合在本目录；机器任务及功能真相源为 governance/tasks.json 与 governance/features.json。node scripts/governance/check.mjs 校验范围/重复/覆盖；node scripts/governance/run.mjs 执行登记测试。归档仍人工操作，不执行不存在的自动归档脚本。
 
 涉及真实 MySQL 的步骤必须注明隔离库、账号权限及逐次确认；即使整体开发计划获批也不省略。进度总览见[路线图](../ROADMAP.md)，需求变化先更新[需求基线](../REQUIREMENTS.md)。
 
@@ -72,3 +72,9 @@ main 基线提交：
 授权范围：创建公开 ArturiaGit/mysql-mcp、仅含 .gitignore 的 main 基线、docs/agent-git-workflow 任务分支及首个 PR；不自动合并。基线提交：bf703ad。
 
 本任务最终提交哈希、PR URL、检查及等待合并状态见首个 PR 与交付报告；不把尚未取得的远程结果预填为已完成。宿主审批快照与原始记忆不上传。
+
+## 7. 治理补强任务
+
+TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户批准新增追踪、证据执行器、Hook、CI 与 main 保护，不授权 MySQL 功能。对应 G01/G02，范围由机器任务 allowed_paths 明确限制。
+
+完成状态只能从实现与证据推导，不能通过本台账写 completed 或勾选代替。测试/保护核实结果见[验证索引](../verification/README.md)；人工验收和合并待用户确认。后续修复必须引用已有功能 ID 和新增回归标准。
