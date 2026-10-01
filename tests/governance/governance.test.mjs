@@ -9,7 +9,7 @@ import { statusMarkdown, inputHash } from '../../scripts/governance/lib/core.mjs
 import { execute } from '../../scripts/governance/lib/execute.mjs';
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const env = {...process.env};
-for (const k of Object.keys(env)) if (k.startsWith('GIT_') || k.startsWith('GOV_') || k.startsWith('NODE_TEST_')) delete env[k];
+for (const k of Object.keys(env)) if (k.startsWith('GIT_') || k.startsWith('GOV_') || k.startsWith('NODE_TEST_') || k.startsWith('GITHUB_')) delete env[k];
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(),'gov-test-'));
   t.after(() => fs.rmSync(root,{recursive:true,force:true}));
@@ -103,3 +103,12 @@ test('report requires exact artifacts and execution metadata, never just passed'
   [r=>r.checks[0].feature_ids=['P99'],/invalid\/failed local/],
   [r=>r.checks[0].check_id='unknown',/check set mismatch/]
 ];for(const [mutate,re] of mutations){const report=structuredClone(original);mutate(report);fs.writeFileSync(file,JSON.stringify(report));failure(f.cli('report',['--run',file]),re);}fs.writeFileSync(file,JSON.stringify(original));assert.equal(f.cli('report',['--run',file]).status,0);});
+test('registered tests do not inherit parent GitHub CI context',t=>{
+  const f=fixture(t), keys=['GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REF'];
+  const prior=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
+  t.after(()=>{for(const k of keys)if(prior[k]===undefined)delete process.env[k];else process.env[k]=prior[k];});
+  process.env.GITHUB_ACTIONS='true';process.env.GITHUB_EVENT_NAME='push';process.env.GITHUB_REF='refs/heads/main';
+  f.write('tests/example.test.mjs',"import test from 'node:test';import assert from 'node:assert/strict';test('isolated context',()=>{for(const k of ['GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REF'])assert.equal(process.env[k],undefined);});");
+  const r=execute(f.root,f.data.checks[0],path.join(f.root,'.governance-evidence'));
+  assert.equal(r.local_result,'passed',r.error);assert.equal(r.counts.tests,1);
+});

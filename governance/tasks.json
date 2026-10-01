@@ -13,6 +13,19 @@
       "pr": 1,
       "scope_changes": [],
       "governance_change": true
+    },
+    {
+      "id": "TASK-GOV-002",
+      "kind": "fix",
+      "status": "in_progress",
+      "feature_ids": ["G01"],
+      "branch": "fix/governance-ci-context",
+      "base_commit": "689f9ef01f06f248b62764fe97d0b0fa4171fec3",
+      "authorization": "PR #1 合并后的必要检查失败修复；隔离继承的 CI 环境并增加回归测试，不降低门禁，不自动合并修复 PR。",
+      "allowed_paths": ["governance/features.json", "governance/tasks.json", "governance/checks.json", "scripts/governance/lib/execute.mjs", "tests/governance/governance.test.mjs", "docs/FEATURE_STATUS.md", "docs/verification/"],
+      "pr": 2,
+      "scope_changes": [],
+      "governance_change": true
     }
   ]
 }

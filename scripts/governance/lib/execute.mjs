@@ -19,7 +19,7 @@ export function execute(root, check, outputDir) {
   const started_at = new Date().toISOString();
   const env = { ...process.env };
   // Do not inherit the parent node:test runner or repository redirection into test fixtures.
-  for (const key of Object.keys(env)) if (key.startsWith('NODE_TEST_') || key.startsWith('GIT_') || key.startsWith('GOV_') || key === 'NODE_OPTIONS') delete env[key];
+  for (const key of Object.keys(env)) if (key.startsWith('NODE_TEST_') || key.startsWith('GIT_') || key.startsWith('GOV_') || key.startsWith('GITHUB_') || key === 'NODE_OPTIONS') delete env[key];
   const result = spawnSync(process.execPath, check.args, { cwd: root, env, encoding: 'utf8', timeout: check.timeout_ms, killSignal: 'SIGKILL', maxBuffer: 16 * 1024 * 1024 });
   const stdout = result.stdout || '', stderr = result.stderr || '';
   fs.mkdirSync(outputDir,{recursive:true});
