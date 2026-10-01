@@ -10,8 +10,6 @@ jobs:
     name: governance
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      GOV_ARTIFACT_DIR: ${{ runner.temp }}/governance-evidence
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,6 +21,7 @@ jobs:
           node-version: '24'
       - name: Validate snapshot and execute registered tests
         env:
+          GOV_ARTIFACT_DIR: ${{ runner.temp }}/governance-evidence
           EVENT_NAME: ${{ github.event_name }}
           PR_BRANCH: ${{ github.head_ref }}
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
