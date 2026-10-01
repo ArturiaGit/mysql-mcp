@@ -14,7 +14,7 @@ GitHub Actions 在对应提交独立运行，上传报告及合成测试日志�
 - [Actions 执行列表](https://github.com/ArturiaGit/mysql-mcp/actions)：按目标提交定位实际运行。
 - [功能状态](../FEATURE_STATUS.md)：结构化台账派生，不手动勾完成。
 
-具体本轮测试与保护核实记录在实施完成后补入本目录；没有记录的项目保持未验证。
+本轮实际执行与未通过项见[首次治理记录](./governance-bootstrap.md)，包括本地测试统计、首次 CI 失败与修复待推送状态。未核查项目不标通过。
 
 ## 3. 证据边界
 
