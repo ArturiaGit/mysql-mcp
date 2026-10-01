@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { statusMarkdown, inputHash } from '../../scripts/governance/lib/core.mjs';
 import { execute } from '../../scripts/governance/lib/execute.mjs';
+import { selectMainTask } from '../../scripts/governance/lib/scope.mjs';
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const env = {...process.env};
 for (const k of Object.keys(env)) if (k.startsWith('GIT_') || k.startsWith('GOV_') || k.startsWith('NODE_TEST_') || k.startsWith('GITHUB_')) delete env[k];
@@ -111,4 +112,14 @@ test('registered tests do not inherit parent GitHub CI context',t=>{
   f.write('tests/example.test.mjs',"import test from 'node:test';import assert from 'node:assert/strict';test('isolated context',()=>{for(const k of ['GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REF'])assert.equal(process.env[k],undefined);});");
   const r=execute(f.root,f.data.checks[0],path.join(f.root,'.governance-evidence'));
   assert.equal(r.local_result,'passed',r.error);assert.equal(r.counts.tests,1);
+});
+for(const mode of ['shared-feature','multiple-delta','out-of-scope']) test(`main task delta selection: ${mode}`,t=>{
+  const f=fixture(t);f.git('commit','-m','historical task');const base=f.git('rev-parse','HEAD');
+  f.data.tasks.push({...structuredClone(f.data.tasks[0]),id:'NEW',kind:'fix',branch:'fix/new',base_commit:base});
+  f.data.features[0].task_ids.push('NEW');f.data.features[0].behavior='new repair';
+  if(mode==='multiple-delta')f.data.tasks[0].authorization+=' changed';
+  if(mode==='out-of-scope')f.data.tasks[1].allowed_paths=['docs/'];
+  f.save();f.git('add','.');f.git('commit','-m','repair delta');const head=f.git('rev-parse','HEAD');
+  if(mode==='shared-feature')assert.equal(selectMainTask(f.root,base,head).id,'NEW');
+  else assert.throws(()=>selectMainTask(f.root,base,head),/exactly one associated task/);
 });

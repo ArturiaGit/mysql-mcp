@@ -34,10 +34,17 @@ export function selectMainTask(root, base, head) {
     return old && JSON.stringify(old) !== JSON.stringify(f);
   }).map(f => f.id);
   const candidates = tasks.filter(t => ['in_progress','completed'].includes(t.status) && paths.every(n => t.allowed_paths.some(p => n === p || (p.endsWith('/') && n.startsWith(p)))));
-  const associated = candidates.filter(t => {
+  const changedTasks = tasks.filter(t => {
     const old = previous.find(o => o.id === t.id);
-    return !old || JSON.stringify(old) !== JSON.stringify(t) || changedFeatures.some(id => t.feature_ids.includes(id)) || paths.some(n => features.some(f => t.feature_ids.includes(f.id) && [...f.implementation_paths,...f.test_paths].some(p => n === p || (p.endsWith('/') && n.startsWith(p)))));
+    return !old || JSON.stringify(old) !== JSON.stringify(t);
   });
+  // An unchanged historical task sharing the feature is not the merged task.
+  // Never fall back to a broad historical allowance when an explicit delta is ambiguous/out of scope.
+  if (changedTasks.length) {
+    if (changedTasks.length !== 1 || !candidates.some(t => t.id === changedTasks[0].id)) fail('main delta must identify exactly one associated task; ambiguous/multi-task merge requires explicit split review');
+    return changedTasks[0];
+  }
+  const associated = candidates.filter(t => changedFeatures.some(id => t.feature_ids.includes(id)) || paths.some(n => features.some(f => t.feature_ids.includes(f.id) && [...f.implementation_paths,...f.test_paths].some(p => n === p || (p.endsWith('/') && n.startsWith(p))))));
   if (associated.length !== 1) fail('main delta must identify exactly one associated task; ambiguous/multi-task merge requires explicit split review');
   return associated[0];
 }
