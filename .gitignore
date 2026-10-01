@@ -1,0 +1,29 @@
+# Local agent history and private project memory
+.pi/
+/mysql-mcp-memory.md
+
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+artifacts/
+*.log
+
+# Runtime state and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+runtime/
+.local/
+credentials/
+connections.json
+credentials.json
+*.key
+*.pem
+*.pfx
+*.p12
+
+# Editor / OS local state
+.DS_Store
+Thumbs.db
