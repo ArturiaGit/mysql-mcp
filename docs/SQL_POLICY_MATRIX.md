@@ -1,0 +1,90 @@
+# SQL 语法支持矩阵与风险分级策略规范 (SQL Policy & Risk Matrix)
+
+> 状态：安全策略基线；对应需求 R06、R07、R08、R09，对应特性 F11–F18、F26，提供生产级 SQL 静态分析与动态拦截策略。
+
+---
+
+## 1. 核心设计原则 (Guiding Principles)
+
+1. **零信任与默认拒绝 (Fail Closed by Default)**：
+   - 凡是解析器无法完全解析、语法树存在未知节点、或者不在明确放行白名单内的 SQL 语句，**一律直接拒绝执行**，不得心存侥幸予以放行。
+2. **显式单目标数据库绑定 (Strict Database Scoping)**：
+   - 每次 SQL 执行必须绑定显式声明的目标数据库（`database` 参数），严禁跨数据库访问，严禁利用隐式默认库产生混淆。
+3. **防注入与单语句执行 (Single Statement Only)**：
+   - 严格禁止在单次请求中派发由分号 `;` 拼接的多条复合语句，彻底杜绝堆叠注入（Stacked Queries）风险。
+4. **最小权限与不自动提权 (No Privilege Escalation)**：
+   - 应用不持有 DBA 管理凭据，执行受底层 MySQL 用户账号实际权限约束；应用层门禁在语句派发前先行过滤，避免高危指令触碰数据库。
+
+---
+
+## 2. 风险四级矩阵 (Risk Levels Matrix)
+
+系统将所有进入的 SQL 语句经语法树（AST）解析后，划分为四个严格的风险等级：
+
+| 风险等级 | 操作类别 | 允许的典型语句 | 处理策略与门禁行为 | 交互通道要求 |
+|---|---|---|---|---|
+| **L0 (只读直通)** | 基础只读查询与结构探查 | `SELECT ...`, `EXPLAIN ...`, `DESCRIBE <table>`, `SHOW TABLES`, `SHOW COLUMNS FROM <table>` | **受控直通**：静态校验无写操作、无跨库后，自动附加输出行数截断（默认 1000 行），直接派发只读会话执行 | MCP `query` 工具放行；不可调用变更接口 |
+| **L1 (常规受控 DML)** | 带明确条件的业务写入 | `INSERT INTO ... VALUES (...)`, `UPDATE ... WHERE <cond>`, `DELETE FROM ... WHERE <cond>` | **常规二次审批**：检查语法合法性、验证 WHERE 条件存在性、生成准确请求绑定与指纹，挂起等待用户单次审批 | 原生确认或本地 Web 页面确认目标与 SQL |
+| **L2 (高危 DML / DDL)** | 全量破坏性修改与库表结构变更 | `UPDATE ...` (无 WHERE), `DELETE FROM ...` (无 WHERE), `CREATE TABLE`, `ALTER TABLE`, `DROP TABLE`, `TRUNCATE TABLE`, `CREATE/ALTER/DROP DATABASE` | **高危双重警示审批**：判定为破坏性/不可逆变更；在审批通道中强制标记 `HIGH_RISK`，醒目提示全表覆写或物理删除影响，必须人工强确认 | 本地 Web 管理页面强制警示交互确认 |
+| **L3 (绝对阻断黑名单)** | 跨库、提权、系统交互与未知语句 | 跨库查询、多语句、`INTO OUTFILE`、`LOAD DATA`、`GRANT/REVOKE`、存储过程/触发器、事务控制语句 | **硬性拦截阻断**：严禁派发数据库，返回 `SQL_NOT_ALLOWED`，并记录安全审计事件 | 直接返回错误，拒绝生成任何审批请求 |
+
+---
+
+## 3. L3 绝对阻断黑名单细则 (Prohibited Operations)
+
+以下行为属于系统的**绝对禁止红线**，策略引擎必须无条件拦截：
+
+1. **跨数据库操作拦截**：
+   - 若当前绑定的目标数据库为 `demo_db`，SQL 语句中出现任何形如 `other_db.table_name` 或 `information_schema.*`、`mysql.*`、`performance_schema.*`、`sys.*` 的显式库名前缀，一律判定为跨库越权并直接拦截。
+2. **多语句堆叠注入拦截**：
+   - 语句经过文本标准化（去除首尾空白与合法注释）后，若包含用于语句分隔的分号 `;`，一律拦截。单次请求仅允许且必须是一条独立完整的单语句。
+3. **文件系统与外部交互拦截**：
+   - 严禁 `SELECT ... INTO OUTFILE` / `INTO DUMPFILE`。
+   - 严禁 `LOAD DATA INFILE` / `LOAD XML`。
+4. **账号、权限与系统级命令拦截**：
+   - 严禁 `GRANT`, `REVOKE`, `CREATE USER`, `DROP USER`, `ALTER USER`, `RENAME USER`。
+   - 严禁 `FLUSH PRIVILEGES`, `RESET`, `SHUTDOWN`, `KILL`, `SET GLOBAL`。
+5. **存储程序与动态执行拦截**：
+   - 严禁 `CREATE PROCEDURE`, `ALTER PROCEDURE`, `DROP PROCEDURE`, `CALL`。
+   - 严禁 `CREATE TRIGGER`, `DROP TRIGGER`。
+   - 严禁 `CREATE FUNCTION`, `DROP FUNCTION`。
+   - 严禁 `PREPARE`, `EXECUTE`, `DEALLOCATE PREPARE`。
+6. **用户自管事务语句拦截**：
+   - 首期范围不开放客户端自定义长事务；严禁派发 `BEGIN`, `START TRANSACTION`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`, `SET autocommit = ...`。所有受审批的 DML 均作为单次原子操作执行。
+
+---
+
+## 4. AST 语法树解析与策略流向
+
+```mermaid
+flowchart TD
+    SQL[待执行 SQL 文本] --> T1[文本预处理: LF规范化 / 危险字符探查]
+    T1 --> T2{包含多语句分号 / 提权特征?}
+    T2 -- 是 --> B1[判定 L3: 立即拦截报错 SQL_NOT_ALLOWED]
+    T2 -- 否 --> AST[调用 node-sql-parser 解析为 AST]
+    AST -- 语法错误/未知语法 --> B2[Fail Closed: 拦截未知语法]
+    AST -- 解析成功 --> C1[遍历 AST: 检查表名/库名前缀]
+    C1 --> C2{存在跨库前缀 / 系统库访问?}
+    C2 -- 是 --> B3[判定 L3: 拦截 TARGET_MISMATCH / 越权]
+    C2 -- 否 --> C3{语句类型判定}
+    C3 -- SELECT / SHOW / EXPLAIN --> L0[判定 L0: 附加 LIMIT, 走只读通道]
+    C3 -- INSERT / UPDATE / DELETE --> C4{UPDATE/DELETE 是否缺少 WHERE?}
+    C4 -- 无条件全表修改 --> L2[判定 L2: 标记高危, 走强警示审批]
+    C4 -- 带明确条件 --> L1[判定 L1: 走常规人工二次审批]
+    C3 -- DDL (CREATE/ALTER/DROP/TRUNCATE) --> L2
+    C3 -- 其他非白名单类型 --> B4[判定 L3: 默认拒绝]
+```
+
+---
+
+## 5. 安全审计与指纹提取规范
+
+1. **SQL 规范化指纹 (SQL Fingerprint)**：
+   - 策略引擎对放行（L0）或待审批（L1/L2）的 SQL 进行标准化指纹计算：
+     - 去除无语义多余空白与换行符；
+     - 将连续字面量参数进行位置占位归一化（如 `WHERE id = 123` 抽象为 `WHERE id = ?`）；
+     - 生成 SHA256 结构指纹。
+   - 指纹用于审计去重与防篡改绑定，不用于反推原始敏感业务数据。
+2. **审计日志与脱敏原则**：
+   - 拦截或审批日志中严禁持久化明文敏感参数内容；
+   - 记录要素仅限：`request_id`、`connection_id`、`database`、`risk_level`、`sql_fingerprint`、`decision`、`timestamp`、`error_code`。

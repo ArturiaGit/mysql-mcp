@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-02
 - 关联任务：TASK-GOV-006
-- 关联 PR：待回填（Git 交付后由 record-delivery 与后续台账同步）
-- 关联 Commit：待回填（Git 交付后由 record-delivery 与后续台账同步）
+- 关联 PR：[#6](https://github.com/ArturiaGit/mysql-mcp/pull/6)
+- 关联 Commit：[`fa91179`](https://github.com/ArturiaGit/mysql-mcp/commit/fa911793060028b96597805ce6a1ccddcf82aeef)
 - 责任执行方：Antigravity (Planning / Documentation Delivery) × PI-Desktop (Implementation)
 - 关联功能/需求：G01 (自动化门禁体系), R16
 
