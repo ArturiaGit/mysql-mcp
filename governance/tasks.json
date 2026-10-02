@@ -51,6 +51,25 @@
       "allowed_paths": ["AGENTS.md", "docs/REQUIREMENTS.md", "docs/GIT_WORKFLOW.md", "docs/PROJECT_CONSTRAINTS.md", "docs/ACCEPTANCE.md", "docs/CODE_REVIEW.md", "docs/README.md", "docs/plans/README.md", "docs/verification/README.md", "docs/ROADMAP.md", "docs/FEATURE_STATUS.md", "docs/COLLABORATION_WORKFLOW.md", "docs/plans/antigravity-pi-collaboration.md", "docs/verification/antigravity-pi-collaboration.md", "governance/", "scripts/governance/", "tests/governance/", ".githooks/", ".github/workflows/governance.yml"],
       "plan_path": "docs/plans/antigravity-pi-collaboration.md",
       "mode": "code",
+      "pr": 4,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-GOV-005",
+      "kind": "maintenance",
+      "status": "in_progress",
+      "feature_ids": ["G02"],
+      "branch": "docs/change-management-specification",
+      "base_commit": "b80bab2f773cd4ce8bca1ae56f6385c4b76fc1e8",
+      "authorization": "用户批准变更管理与发版说明集成规约，建立 docs/changes/ 库，强制 Agent 任务前通读，实现 AI 全生命周期管理与 PR/Commit 链接。",
+      "allowed_paths": [
+        "AGENTS.md",
+        "docs/",
+        "governance/"
+      ],
+      "plan_path": "docs/plans/change-management.md",
+      "mode": "docs",
       "pr": null,
       "scope_changes": [],
       "governance_change": true

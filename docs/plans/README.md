@@ -87,3 +87,9 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 - PR 创建前任务 pr 可为 null；真实创建后记录 delivery event，再后续同步任务台账，禁止猜 PR 号。实际[验证记录](../verification/antigravity-pi-collaboration.md)、独立 CI、用户审查及真实交付分别记录，本地诊断不等于验收。
 
 上述历史记录中的等待/失败/未完成保留其当时语境，本次不补造历史交接、不无依据改完成。
+
+## 9. 变更管理规约任务
+
+- [变更管理规范与 Agent 历史感知实施计划](./change-management.md)：TASK-GOV-005，功能 G02，需求 R18。用户批准建立 `docs/changes/` 专属变更库，确立 Agent 开启新任务前的强制通读规则，规范双重视角模板（发版说明与 Agent 工程上下文），并回溯补齐 PR #1 ~ #4 历史变更。
+- 任务分支 `docs/change-management-specification`，main 基线 `b80bab2f773cd4ce8bca1ae56f6385c4b76fc1e8`。模式为 `mode: "docs"`（文档-only），由 Antigravity 按 `planning → documentation_delivery` 推进，不伪造代码开发。
+

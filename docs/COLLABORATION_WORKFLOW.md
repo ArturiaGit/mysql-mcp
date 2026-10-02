@@ -18,9 +18,9 @@ Antigravity 管理根 `AGENTS.md`、`docs/`、规范 Markdown、功能/任务/�
 
 ## 2. 阶段与停止点
 
-1. **planning / Antigravity**：核实仓库/分支/main 基线和既有功能/PR，准备任务分支；先登记可观察验收、范围和禁止事项，再生成给 PI 的交接。
+1. **planning / Antigravity**：核实仓库/分支/main 基线和既有功能/PR，通读 `docs/changes/` 下所有活动未发版变更文档以掌握近期架构演进与警示，准备任务分支；先登记可观察验收、范围和禁止事项，再生成给 PI 的交接（文档-only 任务直接推进至 documentation_delivery）。
 2. **implementation / PI**：用户转交后核验并接受准确 ID/摘要；开始阶段，执行授权技术变更和真实检查，结束时列实际结果、文档同步请求和限制。
-3. **documentation_delivery / Antigravity**：接受实现结果、同步文档/台账，检查结果与代码一致，生成准确交付候选、暂存摘要和 Conventional Commits 提交信息。必要门禁通过后仅由 Antigravity 完成 Git 交付。
+3. **documentation_delivery / Antigravity**：接受实现结果、同步文档/台账，并在 `docs/changes/` 撰写本次任务变更文档（含发版说明板块与 Agent 避坑指南，维护未发版索引），检查结果与代码一致，生成准确交付候选、暂存摘要和 Conventional Commits 提交信息。必要门禁通过后仅由 Antigravity 完成 Git 交付。
 4. **rework / PI**：明确代码缺陷/CI 失败交回 PI，核验接受后只修复授权问题并重测；新交接再回 documentation_delivery，旧结果不再授权交付。
 
 正常路径为 `planning → implementation → documentation_delivery`；返工为 `documentation_delivery → rework → documentation_delivery`。文档-only 由 Antigravity 走 `planning → documentation_delivery`，不伪造 PI 开发或构建阶段。
