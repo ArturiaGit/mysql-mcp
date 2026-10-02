@@ -1,87 +1,79 @@
-# 自动化测试分层与虚拟沙箱隔离规范 (Testing Strategy & Sandbox Isolation)
+# 测试策略与开发环境假数据直连规范 (Testing Strategy & Dev Environment Specification)
 
-> 状态：测试体系基线；对应需求 R14、R16，对应特性 F26、F28，提供跨平台可复现、无真实外部数据库依赖的生产测试指南。
-
----
-
-## 1. 核心安全红线 (Absolute Safety Boundaries)
-
-1. **绝对禁止默认直连真实数据库**：
-   - 自动化测试套件（Unit & Integration Tests）在本地及 CI 执行时，**严禁向任何真实外部 MySQL 服务器发起真实网络连接**。
-   - 严禁在测试代码中硬编码任何真实主机名、数据库名、用户名或密码凭据。
-2. **确定性与无副作用 (Determinism & Zero Side-Effects)**：
-   - 测试必须在完全干净的环境中离线可运行，不依赖本地已安装的特定环境服务（如本地必须运行 mysqld 服务）。
-   - 测试用例执行完毕后，不得在操作系统中遗留悬空进程、开放端口或未清理的持久化文件。
-3. **CI 跨平台可复现性**：
-   - 测试必须在 Windows 10/11 本地开发机与 GitHub Actions Ubuntu 最新 Runner 上均能稳定、快速通过，不得因操作系统平台差异产生非确定性行为。
+> 状态：测试体系基线；对应需求 R14、R16，对应特性 F26、F28。经用户明确确认：**当前开发处于开发环境，目标数据库全为构造的假数据，可以随便用，明确不需要编写复杂的驱动 Mock 或自造测试数据**。
 
 ---
 
-## 2. 三层测试金字塔架构 (Testing Pyramid)
+## 1. 核心定位与原则 (Core Principles)
+
+1. **开发环境假数据直接使用 (Use Dev Database Freely)**：
+   - 当前项目处于纯开发环境，用户本地的 MySQL 数据库内已填充开发专用的假数据（Dummy/Synthetic Data）。
+   - **废除繁琐的 Mock Driver 协议桩要求**：本地开发与实机联调直接连接用户的本地开发 MySQL 实例，直接执行真实 SQL 查询、真实 DML 写入与 DDL 库表结构变更，无需耗费额外工程量自造 Mock 数据或构建虚拟协议套接字。
+2. **生产安全与开发灵活解耦 (Prod Safety vs. Dev Flexibility)**：
+   - 生产环境或未知外部数据库依然坚决遵循安全保护与二次审批原则；
+   - 本地开发环境（`environment: "development"`）允许开发者在假数据库上随心读写，消除过度防御带来的联调阻碍。
+3. **CI 流水线确定性与轻量离线运行 (Deterministic Offline CI)**：
+   - 由于 GitHub Actions Ubuntu Runner 默认无常驻 MySQL 服务，自动化 CI 门禁仅运行无需外部网络连接的纯逻辑单元测试与 TypeScript 静态编译检查，确保远端流水线 100% 秒级稳定通过，绝不因缺少数据库服务报网络连接拒绝（`ECONNREFUSED`）。
+
+---
+
+## 2. 双轨测试模型 (Dual-Track Testing Architecture)
+
+系统确立**“本地开发实机测试为主力，CI 离线门禁为底线”**的双轨架构：
 
 ```mermaid
 flowchart TD
-    subgraph Pyramid["自动化测试分层体系"]
-        L3["Layer 3: 合成客户端与 MCP stdio 探针测试 (Synthetic Client Probes)"]
-        L2["Layer 2: 驱动协议桩与虚拟连接池测试 (Mock Driver / Virtual Socket)"]
-        L1["Layer 1: 纯内存逻辑与策略单元测试 (Pure In-Memory Unit Tests)"]
+    subgraph DevTrack["轨道 1：本地开发实机测试 (Live Dev DB Track - 主力通道)"]
+        LocalDev["本地开发环境 / 测试脚本"] --> Conn["直接连接本地开发 MySQL (localhost:3306)"]
+        Conn --> DevDB[("用户开发数据库 (包含造好的假数据)")]
+        DevDB --> RealExec["真实 SQL 执行: SELECT / INSERT / UPDATE / DELETE / DDL"]
+        RealExec --> RealFeedback["真实驱动回显 / 真实错误码 / 零 Mock 负担"]
     end
 
-    L1 -->|高并发/毫秒级| C1["快速验证: 语法解析 / L0-L3策略 / 状态机 / 脱敏"]
-    L2 -->|无 mysqld 依赖| C2["安全验证: 握手 / 截断 / 错误码映射 / 资源超时释放"]
-    L3 -->|真实管道通信| C3["端到端验证: 工具发现 / elicitation 确认 / 网页后备"]
+    subgraph CITrack["轨道 2：CI 离线自动化门禁 (Offline CI Gate - 持续集成)"]
+        GH["GitHub Actions CI (Ubuntu)"] --> OfflineCheck["纯静态与内存级校验"]
+        OfflineCheck --> T1["TypeScript strict 类型与编译检查 (npm run compile)"]
+        OfflineCheck --> T2["SQL AST 解析与 L0-L3 风险策略逻辑单测"]
+        OfflineCheck --> T3["治理门禁检查 (node scripts/governance/check.mjs)"]
+    end
 ```
 
-### Layer 1: 纯内存逻辑与策略单元测试 (In-Memory Unit Tests)
+### 轨道 1：本地开发实机测试 (Live Dev DB Track)
+- **定位**：功能开发、端到端联调与驱动兼容性实测的主力通道。
+- **配置方式**：
+  - 通过本地管理页面或环境变量（如 `DEV_MYSQL_HOST`、`DEV_MYSQL_PORT`、`DEV_MYSQL_USER`、`DEV_MYSQL_DATABASE`）直接指定用户的本地开发库。
 - **测试范畴**：
-  - SQL 语法树解析与风险等级判别器（严格验证 [`SQL_POLICY_MATRIX.md`](./SQL_POLICY_MATRIX.md) 的 L0 ~ L3 行为）。
-  - 审批状态机（10 种状态转移、版本冲突、到期失效、幂等拦截）。
-  - 敏感数据脱敏过滤器（错误信息屏蔽、日志指纹计算）。
-- **约束指标**：
-  - 纯 CPU 内存计算，零文件系统 I/O，零网络调用；单个用例耗时控制在 5ms 以内，支持高密度批量覆盖。
+  - **真实连接与断连**：验证 `mysql2` 真实建立连接、网络超时、连接池管理；
+  - **真实 SQL 执行**：在开发假数据库上直接测试 `SELECT` 行数截断、`INSERT` 自增主键获取、`UPDATE` 与 `DELETE` 条件生效、`CREATE/DROP TABLE` 结构变更；
+  - **真实错误与脱敏**：故意执行非法语法或键冲突语句，捕获真实 MySQL 错误报文并验证脱敏过滤器有效性。
+- **免 Mock 收益**：彻底规避了手写虚拟 `MockConnection` 或 `FakeSocket` 的高昂维护成本，直接以真实的 MySQL 8.x 响应为准。
 
-### Layer 2: 驱动协议桩与虚拟连接池测试 (Mock Driver & Virtual Socket)
+### 轨道 2：CI 离线自动化门禁 (Offline CI Gate)
+- **定位**：Pull Request 提交与主干合并时的质量与规范门禁。
 - **测试范畴**：
-  - `mysql2` 连接池封装、动态数据库切换、有界测试连接、查询行数截断（`max_rows`）、断线重连与连接泄漏防护。
-- **虚拟沙箱方案**：
-  - 构建轻量级虚拟连接桩（`MockConnection` / `FakeSocket`）：
-    - 模拟 MySQL 原生协议的握手包响应；
-    - 针对测试传入的虚构 SQL，返回确定性的模拟包（`OkPacket`、`ResultSetHeader`、`RowDataPacket` 或 `ErrorPacket`）；
-    - 模拟网络超时（Socket Hang）与连接强制关闭场景。
-  - 彻底规避对真实 MySQL 守护进程的硬性依赖，消除测试端口冲突。
-
-### Layer 3: 合成客户端与 MCP stdio 探针测试 (Synthetic Client Probes)
-- **测试范畴**：
-  - MCP stdio 进程启动、工具清单发现（`tools/list`）、请求派发与结果接收、原生挑战（elicitation）应答与网页后备跳转。
-- **模拟方案**：
-  - 派生子进程启动 MCP 桥接器，在内存中通过双向流管道与标准输入输出交互；
-  - 模拟 AI 客户端发起规范与畸形 JSON-RPC 消息，验证协议解析的健壮性。
+  - TypeScript 严格类型与语法静态检查（`npm run compile`）；
+  - 基于 `node-sql-parser` 的纯内存 AST 解析与策略路由单测（验证 L0~L3 判别规则，纯 CPU 计算，耗时毫秒级）；
+  - 敏感信息掩蔽纯函数测试（验证连接串脱敏、路径脱敏逻辑）；
+  - 治理门禁与交接链完整性检查。
 
 ---
 
-## 3. Windows 平台性能保障与防超时策略
+## 3. Windows 平台性能保障策略
 
-在 Windows 平台上，频繁派生子进程与读写大量小文件极易触发杀毒软件实时防护与文件锁开销，从而导致执行时间呈数倍放大（此前治理套件在 Windows 上执行 68 项测试耗时达 105 秒）。
+由于项目主干治理测试包含大量 Git 与多进程快照检查，在 Windows 平台上为避免 NTFS 文件系统与杀毒软件扫描造成的耗时放大，必须坚决遵循以下准则：
 
-为确保业务测试不踩踏超时红线（如预设的 `timeout_ms`），必须坚决遵循以下准则：
-
-1. **严禁在单测中频繁读写磁盘**：
-   - 业务逻辑测试严禁为每个用例在磁盘上创建临时目录；所有中间配置和测试数据全部注入内存（In-Memory Map 或 Memory Stream）。
-2. **用例级与套件级超时防线**：
-   - 单个单元测试用例超时硬性限制为 5000ms；
-   - 完整业务单元测试套件在 Windows 上的总执行耗时应控制在 30 秒以内。
-3. **并发测试隔离原则**：
-   - 共享内存对象必须随用随建，禁止跨用例共享可变全局状态，防止用例乱序并发执行时产生竞态污染。
+1. **避免单测中密集读写磁盘小文件**：
+   - 纯逻辑单元测试严禁在每个用例中频繁创建与删除临时磁盘目录，中间配置统一注入内存（In-Memory Map）。
+2. **超时阈值动态保障**：
+   - 治理套件在 Windows 上的执行阈值已调优（`governance-tests` 240s，`collaboration-tests` 300s），后续业务测试单测控制在 5ms 级，保证套件执行流畅。
 
 ---
 
-## 4. 负面用例与边界断言要求
+## 4. 边界与负面用例要求
 
-为确保安全门禁的真实拦截能力，**负面与异常测试用例占比不得低于 50%**，必须重点覆盖：
+无论在开发库实机测试还是离线单测中，负面与异常用例占比均不得低于 50%，以确保安全策略真实起效：
 
-1. **注入与绕过负例**：
-   - 混杂多语句分号的 SQL、带特异注释的 SQL、跨库访问前缀、未知异构语法。
-2. **并发与状态冲突负例**：
-   - 审批过期后尝试批准、连接配置发生变更后旧请求重放、同一请求多次重复点击批准。
-3. **异常中断与资源控制负例**：
-   - 查询超大结果集时的行数强截断、模拟连接中断时的 UNKNOWN 保守状态处理、未认证会话访问敏感接口拦截。
+1. **语法与注入拦截负例**：
+   - 混杂多语句分号的 SQL、跨库访问前缀、未知异构语法，必须在派发数据库前被策略引擎拦截并报错 `SQL_NOT_ALLOWED`。
+2. **异常驱动错误负例**：
+   - 针对假数据库触发外键约束、重复键、未知表名报错，验证服务端脱敏过滤器（`maskErrorMessage`）是否正确屏蔽了敏感物理信息。

@@ -91,3 +91,11 @@ R16 的完成判断必须追溯唯一功能、需求、验收标准、实现/测
 阶段为 planning → implementation → documentation_delivery；代码问题 documentation_delivery → rework → documentation_delivery；文档-only 为 planning → documentation_delivery。角色/阶段、任务路径、删除/重命名和版本快照须共同检查，受约束机器产物不能扩大职责。计划/标准/策略/授权改变后旧交接失效，必须重新交接重验。
 
 本地 run 报告及校验后嵌入的 TAP 副本只是诊断，CI 独立重跑；无应用构建工程必须填 not_applicable 及原因，不声称 MySQL 编译通过。Git 交付使用 `GOV_ROLE=antigravity`，Hook 检查实际 staged/ref/msg 和完整候选；角色变量、共享账号及本机记录不能认证真实身份、证明用户已转交或强制抵御同机恶意改写。交接接受、PR 创建/合并均不替代人工验收或数据库逐次批准。
+
+## 10. 测试与开发环境安全边界
+
+依据需求 S10，当前项目所处开发环境的本地数据库内已填充开发专用假数据，可直接连接并自由操作。为避免无意义的过度设计与工程资源浪费，特此明确：
+1. **开发环境免 Mock 准则**：在开发与本地测试环境中，允许且倡导直接连接包含假数据的开发 MySQL 实例执行真实 CRUD 与 DDL 验证，彻底废除开发维护 Mock Driver、FakeSocket 虚拟协议桩的要求。
+2. **生产环境安全不变量不变**：无论未来连接何种环境，C01~C12 规定的密码保护、二次人工审批、只读工具硬拦截、无自动提权等安全约束依然是不可动摇的底线。开发环境的假数据自由读写绝不等于生产环境可以绕过审批。
+3. **CI 环境轻量离线准则**：远端 GitHub Actions Runner 默认无外部数据库常驻，自动化流水线仅运行 TypeScript 类型检查与纯内存逻辑单测（如 SQL AST 语法策略、脱敏过滤器），保障 CI 100% 确定性离线通过。
+

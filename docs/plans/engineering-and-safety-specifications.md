@@ -22,9 +22,10 @@ main 基线提交：fa911793060028b96597805ce6a1ccddcf82aeef
 2. **SQL 语法支持矩阵与风险分级策略规范（`docs/SQL_POLICY_MATRIX.md`）**：
    - 制定 L0（只读直通）、L1（受控 DML 二次审批）、L2（高危 DML/DDL 双重警示确认）、L3（跨库/多语句/提权/文件写入硬拦截）四级安全矩阵；
    - 明确语法解析、参数化与安全审计拦截规则。
-3. **自动化测试分层与虚拟沙箱隔离规范（`docs/TESTING_STRATEGY.md`）**：
-   - 严格落实“自动化测试禁止默认连接真实数据库”红线；
-   - 划分单元测试（纯内存无 I/O）、集成测试（Mock 连接桩与协议模拟器）、客户端探针（虚拟 stdio MCP 客户端）；
+3. **测试策略与开发环境假数据直连规范（`docs/TESTING_STRATEGY.md`）**：
+   - 依据需求 S10 确立“开发环境直连本地假数据库（随便用、免 Mock 桩）+ CI 离线静态轻量门禁”的双轨测试模型；
+   - 彻底废除强制编写维护 Mock Driver / FakeSocket 虚拟协议桩的要求，本地联调与测试直接在开发库真实执行 CRUD 与 DDL 验证；
+   - CI 环境仅运行无数据库依赖的 TypeScript 类型检查与纯内存 AST/脱敏过滤器单测，确保 100% 确定性离线秒级通过；
    - 设定 Windows 下测试超时预防与防 I/O 抖动策略；在 `governance/checks.json` 中将 `governance-tests` 超时阈值由 120s 调整为 240s，防止测试用例增多后 Windows NTFS 多进程 I/O 耗时误报超时。
 4. **跨平台凭据抽象与异常脱敏完善（更新 `docs/DATA_MODELS.md` / `docs/TECH_STACK.md`）**：
    - 引入可插拔 `ICredentialProvider`（生产 Windows Keyring，测试/CI 内存加密桩），解决 Linux CI 无系统 keyring 崩溃问题；
@@ -38,7 +39,7 @@ main 基线提交：fa911793060028b96597805ce6a1ccddcf82aeef
 - `governance/checks.json`：映射 G02-A3 至 governance-tests，并适配 Windows 进程与 I/O 耗时调整 governance-tests 超时阈值（240s）。
 - `docs/ENGINEERING_TOOLCHAIN.md`：新增工程化工具链与构建检查规范。
 - `docs/SQL_POLICY_MATRIX.md`：新增 SQL 语法支持与风险分级策略矩阵。
-- `docs/TESTING_STRATEGY.md`：新增自动化测试沙箱与 Mock 策略规范。
+- `docs/TESTING_STRATEGY.md`：新增测试策略与开发环境假数据直连规范（免 Mock 桩）。
 - `docs/DATA_MODELS.md`：补充凭据提供者接口抽象与异常脱敏规则。
 - `docs/TECH_STACK.md`：补充多环境凭据适配与构建命令说明。
 - `docs/README.md`：更新文档全景索引。
