@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate snapshot and execute registered tests
+      - name: Validate responsibility, handoff chain and snapshot; execute registered tests
         env:
           GOV_ARTIFACT_DIR: ${{ runner.temp }}/governance-evidence
           EVENT_NAME: ${{ github.event_name }}
@@ -28,9 +28,9 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           if [ "$EVENT_NAME" = pull_request ]; then
-            node scripts/governance/run.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --branch "$PR_BRANCH"
+            node scripts/governance/run.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --branch "$PR_BRANCH" --delivery
           else
-            node scripts/governance/run.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --ci-main
+            node scripts/governance/run.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --ci-main --delivery
           fi
       - name: Upload diagnostic evidence (not acceptance)
         if: always()

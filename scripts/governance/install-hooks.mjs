@@ -9,7 +9,7 @@ main(() => {
   if (current && current !== '.githooks') throw new Error(`existing hooksPath retained: ${current}`);
   const old = path.join(git(root,['rev-parse','--absolute-git-dir']),'hooks');
   if (!current && fs.existsSync(old) && fs.readdirSync(old).some(n => !n.endsWith('.sample'))) throw new Error('existing hooks retained; manual integration required');
-  for (const name of ['pre-commit','pre-push']) {
+  for (const name of ['pre-commit','commit-msg','pre-push']) {
     const file = path.join(root,'.githooks',name);
     if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) throw new Error(`missing hook: ${name}`);
     fs.chmodSync(file,0o755);

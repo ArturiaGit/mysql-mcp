@@ -70,13 +70,13 @@ MySQL 只读事务可作为读取的附加防线，不替代分类、函数限�
 | 对外兼容或发布 | VERSIONING、API_AND_PROTOCOLS |
 | 需求或进度 | REQUIREMENTS、ROADMAP、plans/README |
 
-自动治理检查见 scripts/governance 与[验收规范](./ACCEPTANCE.md)。代码-文档内容一致性仍需审查，脚本的路径覆盖不代表理解业务。修改安全约束必须先说明理由、影响及替代措施并获确认，不能借重构放宽。
+自动治理检查见 scripts/governance 与[验收规范](./ACCEPTANCE.md)。PI 实现代码并列文档同步请求，Antigravity 按[协作规范](./COLLABORATION_WORKFLOW.md)接受后同步文档。代码-文档内容一致性仍需审查，脚本的路径覆盖不代表理解业务。修改安全约束必须先说明理由、影响及替代措施并获确认，不能借重构放宽。
 
 ## 7. 已确认的 Agent Git 执行约束
 
-根 [AGENTS.md](../AGENTS.md) 与 [Git 工作流](./GIT_WORKFLOW.md)是执行入口：已授权任务修改前创建或复用对应任务分支，验收后自动 commit、push、创建/更新 PR，再等待用户确认合并。不在 main 开发，不强推，不自动合并或发布。
+根 [AGENTS.md](../AGENTS.md)、[Git 工作流](./GIT_WORKFLOW.md)和[协作规范](./COLLABORATION_WORKFLOW.md)是执行入口：Antigravity 负责 planning、文档/台账/提交信息、任务分支及满足门禁后的 commit、push、创建/更新 PR；PI-Desktop 负责授权代码、测试和构建，通常不直接改规范/台账，不执行本仓库 commit/push/PR。两端 prompt 由用户人工转交，接收方显式核验并接受准确事件 ID/摘要；不自动通信。不在 main 开发，不强推，不自动合并或发布。
 
-当前只批准一次仅含 .gitignore 的 main 初始化基线例外；不扩大为后续直提 main 权限。公开内容禁止包含真实连接信息、业务 SQL/数据、密码、令牌、私人邮箱、本地记忆和 .pi/ 快照。
+首次仅含 .gitignore 的 main 初始化基线例外已用完；不扩大为后续直提 main 权限。另有仅 TASK-GOV-004、分支 `chore/antigravity-pi-handoff`、base `ed631a2201e6b439bc79ca6d241176db68ddad82` 的一次性 bootstrap，允许 PI 启动并改明确限定的规范/台账及治理技术实现，绝不允许 PI commit/push/PR，不用于其他任务。公开内容禁止包含真实连接信息、业务 SQL/数据、密码、令牌、私人邮箱、本地记忆和 .pi/ 快照。
 
 Git 授权不扩大软件需求，也不改变数据库写入/DDL 的逐次确认。用户已授权治理门禁、Hook、CI 和 main 保护；实际部署与测试以 docs/verification/ 的可核查结果为准。
 
@@ -85,3 +85,9 @@ Git 授权不扩大软件需求，也不改变数据库写入/DDL 的逐次确�
 R16 的完成判断必须追溯唯一功能、需求、验收标准、实现/测试文件和被测输入摘要。重复 ID、未覆盖需求、越界路径、证据缺失/失效、测试失败/跳过/零测试必须拦截。不得用同一功能多个新名称规避重复检查。
 
 禁止 AI 自述、手填 passed、路线图勾选或 PR 合并替代实际验收。所有必要实机/人工标准缺失时保持未完成。对独立外部证明尚无可靠认证器时拒绝完成升级，而不是降为相信本地 JSON。
+
+## 9. 协作交接的安全边界
+
+阶段为 planning → implementation → documentation_delivery；代码问题 documentation_delivery → rework → documentation_delivery；文档-only 为 planning → documentation_delivery。角色/阶段、任务路径、删除/重命名和版本快照须共同检查，受约束机器产物不能扩大职责。计划/标准/策略/授权改变后旧交接失效，必须重新交接重验。
+
+本地 run 报告及校验后嵌入的 TAP 副本只是诊断，CI 独立重跑；无应用构建工程必须填 not_applicable 及原因，不声称 MySQL 编译通过。Git 交付使用 `GOV_ROLE=antigravity`，Hook 检查实际 staged/ref/msg 和完整候选；角色变量、共享账号及本机记录不能认证真实身份、证明用户已转交或强制抵御同机恶意改写。交接接受、PR 创建/合并均不替代人工验收或数据库逐次批准。

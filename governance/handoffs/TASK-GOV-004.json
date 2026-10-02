@@ -1,0 +1,2457 @@
+{
+  "schema_version": 1,
+  "task_id": "TASK-GOV-004",
+  "events": [
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E1",
+      "sequence": 1,
+      "previous": null,
+      "at": "2026-10-02T03:16:21.890Z",
+      "type": "begin",
+      "role": "pi-desktop",
+      "phase": "bootstrap",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+      "branch": "chore/antigravity-pi-handoff",
+      "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "feature_ids": [
+        "G01",
+        "G02",
+        "G03"
+      ],
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/pre-commit": "b76620b4858dc7e4b38ab9702b89fd765649a9dc12721c44581f4a85677db524",
+        ".githooks/pre-push": "f2e738011b935eb04b1ba17213b9e2f9ca340dd9fe4787c760a6b16f6c3ff39d",
+        ".github/workflows/governance.yml": "e87cb51bf3a0044ff7ff4ae319a2bdee5ed27875a15a6d57f25c4188abef43f8",
+        ".gitignore": "a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "9d992fddefac3d1ead26a09957815dac4bea430654465ec53abd96963fd4878d",
+        "docs/ACCEPTANCE.md": "d4f30ee0d843733764ed0b8d2ce372f5acd5431d8b51b20a936229b03a0a1580",
+        "docs/API_AND_PROTOCOLS.md": "a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "7b2c2637f8a12cc929cad30564e86a6029d1cda261bc61c32f586af04020d373",
+        "docs/DATA_MODELS.md": "1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "31594364c87f9cfea0e287116445cbca5c0a1b5b29867dae74ccccae6ddf154d",
+        "docs/FRONTEND_UI_GUIDELINES.md": "637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "eb88674a199cd959f8f071efd8279a73d4f9eaa0f7c378d4ce535478bcea495b",
+        "docs/plans/README.md": "03089f86f5eb3fd7d0c4b2648246947f8b9291efee4abbea48fc4c87004e87a4",
+        "docs/PROJECT_CONSTRAINTS.md": "ed7c9092aa1d587feffd9bf8a4b33924e27a16371bd4a7475a5f121845b4d7a5",
+        "docs/README.md": "8b5396dcc5c8a58aac157f448e1ee59f347fdb2d05ea5026acb0e7b9461af3f6",
+        "docs/REQUIREMENTS.md": "8b57b918ce5e63987cf7827b9d72092d591177638efd2f9fbcf78263067712ec",
+        "docs/ROADMAP.md": "02db04c9d7280ff8e13a9e838714a7ba904aadc3b1598de4477cbabce8e5e40f",
+        "docs/TECH_STACK.md": "41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/governance-bootstrap.md": "f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "8249ce6fad1ddf754a8828d4dd5016fea0ebe003563099eace107386eba239b9",
+        "docs/VERSIONING.md": "47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "51ba9b4a2f977569f440d171f9a541b2c7dfd9f2aa484255c0a28ea0bf6c132d",
+        "governance/features.json": "cf2ce08eff9f7744c7cfaeff672636cfa633201211b54b1a0fe574f353348b58",
+        "governance/tasks.json": "f8fae557df99b6940eb1596c82d00f0237d53737be16d9d626a6474c378b3703",
+        "scripts/governance/check.mjs": "cd60815426489308ed313109903986b19c368ad325b0eea1866498cbd9283bda",
+        "scripts/governance/install-hooks.mjs": "bf12c7f3e134165d655061c64503fd771035d6789268026edebe44d24e3b7cf3",
+        "scripts/governance/lib/core.mjs": "3e24d76cebd37daca6a8500125d78ea319a14f6bc78ce96533a4644e6a692a1a",
+        "scripts/governance/lib/execute.mjs": "782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "a32076634e5c1e007991f55f986ac719e6bf68ee0402b4259aaa5e49db08a7e4",
+        "scripts/governance/report.mjs": "fc209c8e96bf8341d79f3fa20d860cfc7ac24b6647a625a88c95bdd067b946de",
+        "scripts/governance/run.mjs": "2704e33ace83a7334f158b608318938326164873dba71f298e6a13c025082c6c",
+        "tests/governance/governance.test.mjs": "61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "contract_sha256": "140e80a2c6e967957aa300ae416a46351872681a4566057234d2f0df75ab49ec",
+      "digest": "27410149a82a16e39f32a390f0a95ac2876b7175297950f9edb901f579aa22c9"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E2",
+      "sequence": 2,
+      "previous": "27410149a82a16e39f32a390f0a95ac2876b7175297950f9edb901f579aa22c9",
+      "at": "2026-10-02T03:48:36.430Z",
+      "type": "handoff",
+      "role": "pi-desktop",
+      "phase": "bootstrap",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "begin": "TASK-GOV-004-E1",
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/pre-commit": "100755:b76620b4858dc7e4b38ab9702b89fd765649a9dc12721c44581f4a85677db524",
+        ".githooks/pre-push": "100755:f2e738011b935eb04b1ba17213b9e2f9ca340dd9fe4787c760a6b16f6c3ff39d",
+        ".github/workflows/governance.yml": "100644:e87cb51bf3a0044ff7ff4ae319a2bdee5ed27875a15a6d57f25c4188abef43f8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:9d992fddefac3d1ead26a09957815dac4bea430654465ec53abd96963fd4878d",
+        "docs/ACCEPTANCE.md": "100644:d4f30ee0d843733764ed0b8d2ce372f5acd5431d8b51b20a936229b03a0a1580",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:7b2c2637f8a12cc929cad30564e86a6029d1cda261bc61c32f586af04020d373",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:31594364c87f9cfea0e287116445cbca5c0a1b5b29867dae74ccccae6ddf154d",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:eb88674a199cd959f8f071efd8279a73d4f9eaa0f7c378d4ce535478bcea495b",
+        "docs/plans/README.md": "100644:03089f86f5eb3fd7d0c4b2648246947f8b9291efee4abbea48fc4c87004e87a4",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:ed7c9092aa1d587feffd9bf8a4b33924e27a16371bd4a7475a5f121845b4d7a5",
+        "docs/README.md": "100644:8b5396dcc5c8a58aac157f448e1ee59f347fdb2d05ea5026acb0e7b9461af3f6",
+        "docs/REQUIREMENTS.md": "100644:8b57b918ce5e63987cf7827b9d72092d591177638efd2f9fbcf78263067712ec",
+        "docs/ROADMAP.md": "100644:02db04c9d7280ff8e13a9e838714a7ba904aadc3b1598de4477cbabce8e5e40f",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:8249ce6fad1ddf754a8828d4dd5016fea0ebe003563099eace107386eba239b9",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:51ba9b4a2f977569f440d171f9a541b2c7dfd9f2aa484255c0a28ea0bf6c132d",
+        "governance/features.json": "100644:cf2ce08eff9f7744c7cfaeff672636cfa633201211b54b1a0fe574f353348b58",
+        "governance/tasks.json": "100644:f8fae557df99b6940eb1596c82d00f0237d53737be16d9d626a6474c378b3703",
+        "scripts/governance/check.mjs": "100644:cd60815426489308ed313109903986b19c368ad325b0eea1866498cbd9283bda",
+        "scripts/governance/install-hooks.mjs": "100644:bf12c7f3e134165d655061c64503fd771035d6789268026edebe44d24e3b7cf3",
+        "scripts/governance/lib/core.mjs": "100644:3e24d76cebd37daca6a8500125d78ea319a14f6bc78ce96533a4644e6a692a1a",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:a32076634e5c1e007991f55f986ac719e6bf68ee0402b4259aaa5e49db08a7e4",
+        "scripts/governance/report.mjs": "100644:fc209c8e96bf8341d79f3fa20d860cfc7ac24b6647a625a88c95bdd067b946de",
+        "scripts/governance/run.mjs": "100644:2704e33ace83a7334f158b608318938326164873dba71f298e6a13c025082c6c",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "after": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:fe6256669f6694818bacd85c4ca7a8a1ac5478232acff35c3138cfbcdb94783b",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "changes": [
+        {
+          "path": ".githooks/commit-msg",
+          "before": null,
+          "after": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+          "action": "add"
+        },
+        {
+          "path": ".githooks/pre-commit",
+          "before": "100755:b76620b4858dc7e4b38ab9702b89fd765649a9dc12721c44581f4a85677db524",
+          "after": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+          "action": "modify"
+        },
+        {
+          "path": ".githooks/pre-push",
+          "before": "100755:f2e738011b935eb04b1ba17213b9e2f9ca340dd9fe4787c760a6b16f6c3ff39d",
+          "after": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+          "action": "modify"
+        },
+        {
+          "path": ".github/workflows/governance.yml",
+          "before": "100644:e87cb51bf3a0044ff7ff4ae319a2bdee5ed27875a15a6d57f25c4188abef43f8",
+          "after": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+          "action": "modify"
+        },
+        {
+          "path": "AGENTS.md",
+          "before": "100644:9d992fddefac3d1ead26a09957815dac4bea430654465ec53abd96963fd4878d",
+          "after": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+          "action": "modify"
+        },
+        {
+          "path": "docs/ACCEPTANCE.md",
+          "before": "100644:d4f30ee0d843733764ed0b8d2ce372f5acd5431d8b51b20a936229b03a0a1580",
+          "after": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+          "action": "modify"
+        },
+        {
+          "path": "docs/CODE_REVIEW.md",
+          "before": "100644:7b2c2637f8a12cc929cad30564e86a6029d1cda261bc61c32f586af04020d373",
+          "after": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+          "action": "modify"
+        },
+        {
+          "path": "docs/COLLABORATION_WORKFLOW.md",
+          "before": null,
+          "after": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+          "action": "add"
+        },
+        {
+          "path": "docs/FEATURE_STATUS.md",
+          "before": "100644:31594364c87f9cfea0e287116445cbca5c0a1b5b29867dae74ccccae6ddf154d",
+          "after": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+          "action": "modify"
+        },
+        {
+          "path": "docs/GIT_WORKFLOW.md",
+          "before": "100644:eb88674a199cd959f8f071efd8279a73d4f9eaa0f7c378d4ce535478bcea495b",
+          "after": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+          "action": "modify"
+        },
+        {
+          "path": "docs/PROJECT_CONSTRAINTS.md",
+          "before": "100644:ed7c9092aa1d587feffd9bf8a4b33924e27a16371bd4a7475a5f121845b4d7a5",
+          "after": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+          "action": "modify"
+        },
+        {
+          "path": "docs/README.md",
+          "before": "100644:8b5396dcc5c8a58aac157f448e1ee59f347fdb2d05ea5026acb0e7b9461af3f6",
+          "after": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+          "action": "modify"
+        },
+        {
+          "path": "docs/REQUIREMENTS.md",
+          "before": "100644:8b57b918ce5e63987cf7827b9d72092d591177638efd2f9fbcf78263067712ec",
+          "after": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+          "action": "modify"
+        },
+        {
+          "path": "docs/ROADMAP.md",
+          "before": "100644:02db04c9d7280ff8e13a9e838714a7ba904aadc3b1598de4477cbabce8e5e40f",
+          "after": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+          "action": "modify"
+        },
+        {
+          "path": "docs/plans/README.md",
+          "before": "100644:03089f86f5eb3fd7d0c4b2648246947f8b9291efee4abbea48fc4c87004e87a4",
+          "after": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+          "action": "modify"
+        },
+        {
+          "path": "docs/plans/antigravity-pi-collaboration.md",
+          "before": null,
+          "after": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+          "action": "add"
+        },
+        {
+          "path": "docs/verification/README.md",
+          "before": "100644:8249ce6fad1ddf754a8828d4dd5016fea0ebe003563099eace107386eba239b9",
+          "after": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+          "action": "modify"
+        },
+        {
+          "path": "docs/verification/antigravity-pi-collaboration.md",
+          "before": null,
+          "after": "100644:fe6256669f6694818bacd85c4ca7a8a1ac5478232acff35c3138cfbcdb94783b",
+          "action": "add"
+        },
+        {
+          "path": "governance/checks.json",
+          "before": "100644:51ba9b4a2f977569f440d171f9a541b2c7dfd9f2aa484255c0a28ea0bf6c132d",
+          "after": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+          "action": "modify"
+        },
+        {
+          "path": "governance/collaboration.json",
+          "before": null,
+          "after": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+          "action": "add"
+        },
+        {
+          "path": "governance/features.json",
+          "before": "100644:cf2ce08eff9f7744c7cfaeff672636cfa633201211b54b1a0fe574f353348b58",
+          "after": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+          "action": "modify"
+        },
+        {
+          "path": "governance/tasks.json",
+          "before": "100644:f8fae557df99b6940eb1596c82d00f0237d53737be16d9d626a6474c378b3703",
+          "after": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+          "action": "modify"
+        },
+        {
+          "path": "scripts/governance/check.mjs",
+          "before": "100644:cd60815426489308ed313109903986b19c368ad325b0eea1866498cbd9283bda",
+          "after": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+          "action": "modify"
+        },
+        {
+          "path": "scripts/governance/handoff.mjs",
+          "before": null,
+          "after": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+          "action": "add"
+        },
+        {
+          "path": "scripts/governance/install-hooks.mjs",
+          "before": "100644:bf12c7f3e134165d655061c64503fd771035d6789268026edebe44d24e3b7cf3",
+          "after": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+          "action": "modify"
+        },
+        {
+          "path": "scripts/governance/lib/collaboration.mjs",
+          "before": null,
+          "after": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+          "action": "add"
+        },
+        {
+          "path": "scripts/governance/lib/core.mjs",
+          "before": "100644:3e24d76cebd37daca6a8500125d78ea319a14f6bc78ce96533a4644e6a692a1a",
+          "after": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+          "action": "modify"
+        },
+        {
+          "path": "scripts/governance/lib/evidence.mjs",
+          "before": null,
+          "after": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+          "action": "add"
+        },
+        {
+          "path": "scripts/governance/lib/validate.mjs",
+          "before": "100644:a32076634e5c1e007991f55f986ac719e6bf68ee0402b4259aaa5e49db08a7e4",
+          "after": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+          "action": "modify"
+        },
+        {
+          "path": "scripts/governance/report.mjs",
+          "before": "100644:fc209c8e96bf8341d79f3fa20d860cfc7ac24b6647a625a88c95bdd067b946de",
+          "after": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+          "action": "modify"
+        },
+        {
+          "path": "scripts/governance/run.mjs",
+          "before": "100644:2704e33ace83a7334f158b608318938326164873dba71f298e6a13c025082c6c",
+          "after": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+          "action": "modify"
+        },
+        {
+          "path": "tests/governance/collaboration-fixture.mjs",
+          "before": null,
+          "after": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+          "action": "add"
+        },
+        {
+          "path": "tests/governance/collaboration-git.test.mjs",
+          "before": null,
+          "after": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+          "action": "add"
+        },
+        {
+          "path": "tests/governance/collaboration.test.mjs",
+          "before": null,
+          "after": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+          "action": "add"
+        }
+      ],
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "acceptance_ids": [
+        "G01-A1",
+        "G01-A2",
+        "G01-A3",
+        "G01-A4",
+        "G02-A1",
+        "G03-A1",
+        "G03-A2",
+        "G03-A3",
+        "G03-A4"
+      ],
+      "acceptance_definitions": [
+        {
+          "id": "G01-A1",
+          "description": "门禁正反测试、暂存快照及真实推送对象测试全部执行",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A2",
+          "description": "实际启用 Hook、独立 CI 成功与 main 保护 API 核实，用户审查治理自身",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        },
+        {
+          "id": "G01-A3",
+          "description": "main-push CI 环境不污染测试夹具，非 CI 上下文仍拒绝 --ci-main",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A4",
+          "description": "main 的准确 base/head 优先识别本次任务，新旧任务共享功能不误判，多个变更任务或越界仍拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A1",
+          "description": "文档、台账、跟踪文件检查及真实分支/提交/PR 记录，用户确认合并",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G03-A1",
+          "description": "合法规划、开发、返工、文档-only 与限定 bootstrap 可执行；错误角色、阶段、任务、摘要、基线及越界增删改拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A2",
+          "description": "交接包含目标、实际结果、文件与原始执行证据、构建/编译或不适用理由、限制和下一步；双向 prompt 确定性完整，生成不自动接收",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A3",
+          "description": "暂存、消息、实际推送对象和 PR/main 快照校验交接；漂移、伪通过、旧证据、改写及 PI 提交拒绝，原治理回归保留",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A4",
+          "description": "真实 Antigravity 接收并负责提交/push/PR/CI，生成下一步 prompt；用户审查治理并确认合并",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        }
+      ],
+      "next_phase": "documentation_delivery",
+      "receiver": "antigravity",
+      "details": {
+        "goal": "落实已批准的 Antigravity × PI-Desktop 人工转交与机械责任/交接门禁，仅治理与相关规范，不实现 MySQL 应用。",
+        "outcome": "已实现单任务阶段链、角色路径/模式快照、准确 ID/摘要接收、确定性双向 prompt、原始执行证据校验、Git staged/ref/message 及 PR/main 上下文门禁。最终 run 实际执行原治理 58/58 和协作 72/72，共 130 项通过，失败/跳过/取消均为零；语法、派生状态、报告/原始产物一致性检查通过。全部公开文档链接/围栏/JSON 模板及 git diff --check 已检查。本次未暂存、提交、push 或创建 PR；源 HEAD 仍为批准的 main 基线。",
+        "result": "ready",
+        "next_actions": [
+          "核对当前任务分支 chore/antigravity-pi-handoff、origin 和工作区，先执行 handoff check，再按此事件 ID/摘要 accept；由 Antigravity begin documentation_delivery。",
+          "审查治理自身和相关文档，保留历史失败及未验收状态；只更新本次文档/台账。代码问题必须明确交回 PI rework，不自行修改源码或构建配置。",
+          "重新执行 node scripts/governance/check.mjs、run.mjs、report.mjs --check --run .governance-evidence/run.json、文档及差异检查；finish details 使用新报告及你编写的 Conventional Commits 信息，形成准确 Antigravity ready/wait 候选。",
+          "仅暂存本任务明确文件，保留 Hook 的候选 100755 模式（新 commit-msg 必要时 git update-index --chmod=+x）；在 GOV_ROLE=antigravity 上下文通过 staged/commit-msg 后提交。分支目前跟踪 origin/main，禁止无参数推送；只用 git push -u origin chore/antigravity-pi-handoff 推送任务分支。",
+          "查询已有 PR；无则创建以 main 为 base 的 PR，记录真实检查和未执行项，核对该实际 head 的独立 Governance CI。执行 record-delivery 的 details 字段为 commit（实际 HEAD）、pr（真实编号）、ci（status/ reason/ url）、next_actions（非空动作数组），不得预填。",
+          "Git/CI 完成后必须生成下一步给 PI-Desktop 的 prompt 由用户转交；CI 失败交回具体返工，成功则等待用户确认合并或新任务授权，不自动开始 MySQL 应用开发。"
+        ],
+        "forbidden": [
+          "PI-Desktop 不执行本仓库 commit、push、PR；Antigravity 不自行改代码/构建来修复失败。",
+          "不绕过 Hook、关闭 hooksPath、force push、向 main 推送、自动合并、删除分支、Tag 或发布。",
+          "不将 .pi/、本地项目记忆、秘密或 .governance-evidence/ 原始本地目录入库；只使用经核对的脱敏诊断交接记录。",
+          "不连接数据库、不改客户端、不执行 MySQL 写入/DDL；交接不扩大已批准范围。"
+        ],
+        "documentation_requests": [
+          "复核 docs/COLLABORATION_WORKFLOW.md、Git/验收/安全/审查规范与实际 CLI 一致；本次已按限定 bootstrap 同步这些文件。",
+          "docs/verification/antigravity-pi-collaboration.md 保留执行/失败历史；追加真实 Antigravity 接收、commit/PR/CI，勿把模拟 CI 当远程成功。",
+          "PR 号创建前保持 null；创建后仅在合法 documentation_delivery 阶段同步真实台账并重新形成候选，不猜编号或手改完成状态。"
+        ],
+        "limitations": [
+          "本地执行报告及嵌入原始 TAP 为诊断，不是独立 CI、工具身份或真人转交/验收认证。",
+          "本次真实 Antigravity 接收、commit/push/PR、独立 CI 和合并后 CI 尚未执行；G03-A4 与最终验收/交付需后续证据。",
+          "MySQL 应用、真实客户端和数据库功能仍未实现；没有应用 package 或编译工程，不宣称应用构建通过。",
+          "最初未转交的 bootstrap E1 是内容摘要；模式增强后只对准确批准的该 Git 基线推导 mode 并保留原事件，后续事件/新任务均绑定内容与 mode。"
+        ],
+        "blockers": [],
+        "build": {
+          "status": "not_applicable",
+          "reason": "本轮为直接运行的 Node .mjs 治理工具，无 MySQL 应用 package.json 或构建/编译工程；已执行语法和实际测试。",
+          "check_ids": []
+        },
+        "verification": [
+          {
+            "check_id": "governance-tests",
+            "reason": "实际执行原治理回归 58/58，通过完整 TAP 与产物摘要检查，保留原门禁。"
+          },
+          {
+            "check_id": "collaboration-tests",
+            "reason": "实际执行阶段/证据及 Git 交付回归 72/72；包括 scratch 内真实 Hook、本地 bare 推送及准确 PR/main squash 上下文。"
+          }
+        ]
+      },
+      "check_definitions": [
+        {
+          "id": "governance-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/governance.test.mjs"
+          ],
+          "timeout_ms": 120000,
+          "parser": "tap",
+          "feature_ids": [
+            "G01",
+            "G02"
+          ],
+          "acceptance_ids": [
+            "G01-A1",
+            "G01-A3",
+            "G01-A4",
+            "G02-A1"
+          ]
+        },
+        {
+          "id": "collaboration-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/collaboration.test.mjs",
+            "tests/governance/collaboration-git.test.mjs"
+          ],
+          "timeout_ms": 300000,
+          "parser": "tap",
+          "feature_ids": [
+            "G03"
+          ],
+          "acceptance_ids": [
+            "G03-A1",
+            "G03-A2",
+            "G03-A3"
+          ]
+        }
+      ],
+      "evidence": {
+        "report": {
+          "schema_version": 1,
+          "trust": "local-diagnostic-only",
+          "started_at": "2026-10-02T03:36:51.048Z",
+          "environment": {
+            "node": "v24.16.0",
+            "platform": "win32",
+            "arch": "x64"
+          },
+          "checks": [
+            {
+              "check_id": "governance-tests",
+              "feature_ids": [
+                "G01",
+                "G02"
+              ],
+              "acceptance_ids": [
+                "G01-A1",
+                "G01-A3",
+                "G01-A4",
+                "G02-A1"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/governance.test.mjs"
+              ],
+              "check_definition_sha256": "e9dde2395080bcda3f222787a305a38e8ea8e1bc2447a0200dff2cfdd6e74fa2",
+              "started_at": "2026-10-02T03:36:52.369Z",
+              "ended_at": "2026-10-02T03:38:07.335Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 58,
+                "pass": 58,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "governance-tests.tap",
+                  "sha256": "725a3300779d3cb97d25b3457a6b16d6be7f2d78c47691310bc7087b60c52b47"
+                },
+                {
+                  "path": "governance-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            },
+            {
+              "check_id": "collaboration-tests",
+              "feature_ids": [
+                "G03"
+              ],
+              "acceptance_ids": [
+                "G03-A1",
+                "G03-A2",
+                "G03-A3"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/collaboration.test.mjs",
+                "tests/governance/collaboration-git.test.mjs"
+              ],
+              "check_definition_sha256": "dc17c40a23c2a40a39f8a5208c6ead94e2b78043529c5692bb8a3182f990a766",
+              "started_at": "2026-10-02T03:38:07.335Z",
+              "ended_at": "2026-10-02T03:42:02.252Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 72,
+                "pass": 72,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "collaboration-tests.tap",
+                  "sha256": "b11e824c3236517fc9560028e1be14f066c26984d69891cdee924ce86726ccfa"
+                },
+                {
+                  "path": "collaboration-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            }
+          ],
+          "acceptance": "unverified",
+          "task_id": "TASK-GOV-004",
+          "feature_ids": [
+            "G01",
+            "G02",
+            "G03"
+          ],
+          "task_status_claim": "in_progress",
+          "task_completion": "unauthenticated",
+          "source_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+          "snapshot_tree": null,
+          "input_sha256": "c54f62a093b3617d1b65dc6723d0642167078a38a527033282a07597b1c73b79",
+          "development_sha256": "5db89d2b9880cee5eb4345d92a7d3eeb91f333852b67f9274f615a4b1367939e",
+          "local_result": "passed",
+          "ended_at": "2026-10-02T03:42:02.262Z"
+        },
+        "artifacts": {
+          "governance-tests.tap": "TAP version 13\n# Subtest: valid planned feature and deterministic report\nok 1 - valid planned feature and deterministic report\n  ---\n  duration_ms: 1459.0178\n  type: 'test'\n  ...\n# Subtest: duplicate feature ID\nok 2 - duplicate feature ID\n  ---\n  duration_ms: 577.2566\n  type: 'test'\n  ...\n# Subtest: duplicate normalized key\nok 3 - duplicate normalized key\n  ---\n  duration_ms: 582.9897\n  type: 'test'\n  ...\n# Subtest: duplicate acceptance ID\nok 4 - duplicate acceptance ID\n  ---\n  duration_ms: 578.7872\n  type: 'test'\n  ...\n# Subtest: duplicate task ID\nok 5 - duplicate task ID\n  ---\n  duration_ms: 572.3862\n  type: 'test'\n  ...\n# Subtest: undefined requirement\nok 6 - undefined requirement\n  ---\n  duration_ms: 662.3164\n  type: 'test'\n  ...\n# Subtest: missing dependency\nok 7 - missing dependency\n  ---\n  duration_ms: 661.5506\n  type: 'test'\n  ...\n# Subtest: dependency cycle\nok 8 - dependency cycle\n  ---\n  duration_ms: 670.5109\n  type: 'test'\n  ...\n# Subtest: unknown status\nok 9 - unknown status\n  ---\n  duration_ms: 673.1125\n  type: 'test'\n  ...\n# Subtest: path traversal\nok 10 - path traversal\n  ---\n  duration_ms: 650.3661\n  type: 'test'\n  ...\n# Subtest: missing implementation\nok 11 - missing implementation\n  ---\n  duration_ms: 666.5407\n  type: 'test'\n  ...\n# Subtest: forged passed evidence\nok 12 - forged passed evidence\n  ---\n  duration_ms: 651.5909\n  type: 'test'\n  ...\n# Subtest: mock masquerading as real mysql\nok 13 - mock masquerading as real mysql\n  ---\n  duration_ms: 660.928\n  type: 'test'\n  ...\n# Subtest: manual acceptance claim\nok 14 - manual acceptance claim\n  ---\n  duration_ms: 651.0872\n  type: 'test'\n  ...\n# Subtest: feature completion claim\nok 15 - feature completion claim\n  ---\n  duration_ms: 654.1731\n  type: 'test'\n  ...\n# Subtest: unapproved governance modification\nok 16 - unapproved governance modification\n  ---\n  duration_ms: 1167.5984\n  type: 'test'\n  ...\n# Subtest: scope violation\nok 17 - scope violation\n  ---\n  duration_ms: 1154.0959\n  type: 'test'\n  ...\n# Subtest: shell command\nok 18 - shell command\n  ---\n  duration_ms: 650.1831\n  type: 'test'\n  ...\n# Subtest: node eval injection\nok 19 - node eval injection\n  ---\n  duration_ms: 646.0365\n  type: 'test'\n  ...\n# Subtest: task collision\nok 20 - task collision\n  ---\n  duration_ms: 646.1891\n  type: 'test'\n  ...\n# Subtest: uncovered confirmed requirement\nok 21 - uncovered confirmed requirement\n  ---\n  duration_ms: 663.151\n  type: 'test'\n  ...\n# Subtest: checked roadmap cannot grant completion\nok 22 - checked roadmap cannot grant completion\n  ---\n  duration_ms: 662.6335\n  type: 'test'\n  ...\n# Subtest: tracked confidential path\nok 23 - tracked confidential path\n  ---\n  duration_ms: 701.4391\n  type: 'test'\n  ...\n# Subtest: staged invalid record cannot be masked by unstaged repair\nok 24 - staged invalid record cannot be masked by unstaged repair\n  ---\n  duration_ms: 2660.698\n  type: 'test'\n  ...\n# Subtest: staged checker, not unstaged checker, is executed\nok 25 - staged checker, not unstaged checker, is executed\n  ---\n  duration_ms: 1742.0903\n  type: 'test'\n  ...\n# Subtest: valid staged snapshot executes registered tests\nok 26 - valid staged snapshot executes registered tests\n  ---\n  duration_ms: 3640.8324\n  type: 'test'\n  ...\n# Subtest: main staged commit rejected\nok 27 - main staged commit rejected\n  ---\n  duration_ms: 662.095\n  type: 'test'\n  ...\n# Subtest: remote branch mismatch\nok 28 - remote branch mismatch\n  ---\n  duration_ms: 756.7722\n  type: 'test'\n  ...\n# Subtest: main push\nok 29 - main push\n  ---\n  duration_ms: 744.7487\n  type: 'test'\n  ...\n# Subtest: delete push\nok 30 - delete push\n  ---\n  duration_ms: 737.0078\n  type: 'test'\n  ...\n# Subtest: oid mismatch\nok 31 - oid mismatch\n  ---\n  duration_ms: 829.1991\n  type: 'test'\n  ...\n# Subtest: unknown commit\nok 32 - unknown commit\n  ---\n  duration_ms: 766.2788\n  type: 'test'\n  ...\n# Subtest: push validates object rather than repaired worktree\nok 33 - push validates object rather than repaired worktree\n  ---\n  duration_ms: 1923.6035\n  type: 'test'\n  ...\n# Subtest: valid actual push object\nok 34 - valid actual push object\n  ---\n  duration_ms: 3591.8789\n  type: 'test'\n  ...\n# Subtest: actual execution rejects failure\nok 35 - actual execution rejects failure\n  ---\n  duration_ms: 651.7164\n  type: 'test'\n  ...\n# Subtest: actual execution rejects skipped\nok 36 - actual execution rejects skipped\n  ---\n  duration_ms: 648.2595\n  type: 'test'\n  ...\n# Subtest: actual execution rejects zero tests\nok 37 - actual execution rejects zero tests\n  ---\n  duration_ms: 660.7012\n  type: 'test'\n  ...\n# Subtest: actual execution rejects timeout\nok 38 - actual execution rejects timeout\n  ---\n  duration_ms: 598.2712\n  type: 'test'\n  ...\n# Subtest: run report verifies artifacts, detects tampering and stale inputs\nok 39 - run report verifies artifacts, detects tampering and stale inputs\n  ---\n  duration_ms: 4074.5327\n  type: 'test'\n  ...\n# Subtest: input digest changes with source content\nok 40 - input digest changes with source content\n  ---\n  duration_ms: 578.2601\n  type: 'test'\n  ...\n# Subtest: deleted criterion requires explicit authorized scope record\nok 41 - deleted criterion requires explicit authorized scope record\n  ---\n  duration_ms: 2221.6416\n  type: 'test'\n  ...\n# Subtest: hook installer refuses existing hooksPath without modification\nok 42 - hook installer refuses existing hooksPath without modification\n  ---\n  duration_ms: 680.197\n  type: 'test'\n  ...\n# Subtest: CI compares actual base/head scope despite clean checkout\nok 43 - CI compares actual base/head scope despite clean checkout\n  ---\n  duration_ms: 2193.4098\n  type: 'test'\n  ...\n# Subtest: push wrong task branch rejected even with matching refs\nok 44 - push wrong task branch rejected even with matching refs\n  ---\n  duration_ms: 1939.3274\n  type: 'test'\n  ...\n# Subtest: implemented feature paths must exist and be tracked\nok 45 - implemented feature paths must exist and be tracked\n  ---\n  duration_ms: 1066.2458\n  type: 'test'\n  ...\n# Subtest: mutable base cannot hide committed out-of-scope path from origin main\nok 46 - mutable base cannot hide committed out-of-scope path from origin main\n  ---\n  duration_ms: 1871.7008\n  type: 'test'\n  ...\n# Subtest: HEAD task baseline cannot be advanced without remote\nok 47 - HEAD task baseline cannot be advanced without remote\n  ---\n  duration_ms: 1109.3326\n  type: 'test'\n  ...\n# Subtest: nonancestor task base rejected\nok 48 - nonancestor task base rejected\n  ---\n  duration_ms: 1365.6061\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: local\nok 49 - existing feature scope checked against trusted registry: local\n  ---\n  duration_ms: 1256.3528\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: staged\nok 50 - existing feature scope checked against trusted registry: staged\n  ---\n  duration_ms: 2312.7343\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: CI\nok 51 - existing feature scope checked against trusted registry: CI\n  ---\n  duration_ms: 2336.33\n  type: 'test'\n  ...\n# Subtest: explicit feature scope authorization permits reviewed change\nok 52 - explicit feature scope authorization permits reviewed change\n  ---\n  duration_ms: 1513.8223\n  type: 'test'\n  ...\n# Subtest: main CI selects completed delta task despite unrelated active branches; no push permission\nok 53 - main CI selects completed delta task despite unrelated active branches; no push permission\n  ---\n  duration_ms: 5619.09\n  type: 'test'\n  ...\n# Subtest: report requires exact artifacts and execution metadata, never just passed\nok 54 - report requires exact artifacts and execution metadata, never just passed\n  ---\n  duration_ms: 3621.9052\n  type: 'test'\n  ...\n# Subtest: registered tests do not inherit parent GitHub CI context\nok 55 - registered tests do not inherit parent GitHub CI context\n  ---\n  duration_ms: 652.8727\n  type: 'test'\n  ...\n# Subtest: main task delta selection: shared-feature\nok 56 - main task delta selection: shared-feature\n  ---\n  duration_ms: 1016.9765\n  type: 'test'\n  ...\n# Subtest: main task delta selection: multiple-delta\nok 57 - main task delta selection: multiple-delta\n  ---\n  duration_ms: 1030.9324\n  type: 'test'\n  ...\n# Subtest: main task delta selection: out-of-scope\nok 58 - main task delta selection: out-of-scope\n  ---\n  duration_ms: 1034.2059\n  type: 'test'\n  ...\n1..58\n# tests 58\n# suites 0\n# pass 58\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 74888.8088\n",
+          "governance-tests.stderr.log": "",
+          "collaboration-tests.tap": "TAP version 13\n# Subtest: history rewrite detected against committed prefix\nok 1 - history rewrite detected against committed prefix\n  ---\n  duration_ms: 9929.7512\n  type: 'test'\n  ...\n# Subtest: policy cannot be removed after deployment\nok 2 - policy cannot be removed after deployment\n  ---\n  duration_ms: 9736.5462\n  type: 'test'\n  ...\n# Subtest: actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\nok 3 - actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\n  ---\n  duration_ms: 30727.7361\n  type: 'test'\n  ...\n# Subtest: staged bad snapshot cannot be masked by unstaged repair\nok 4 - staged bad snapshot cannot be masked by unstaged repair\n  ---\n  duration_ms: 12102.3907\n  type: 'test'\n  ...\n# Subtest: old committed object cannot be masked by repaired working copy\nok 5 - old committed object cannot be masked by repaired working copy\n  ---\n  duration_ms: 12203.4588\n  type: 'test'\n  ...\n# Subtest: PR exact base/head and squash main independent context both pass\nok 6 - PR exact base/head and squash main independent context both pass\n  ---\n  duration_ms: 17414.068\n  type: 'test'\n  ...\n# Subtest: delivery success produces next PI prompt; failure explicitly accepts rework\nok 7 - delivery success produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 14166.1608\n  type: 'test'\n  ...\n# Subtest: delivery failure produces next PI prompt; failure explicitly accepts rework\nok 8 - delivery failure produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 12247.0735\n  type: 'test'\n  ...\n# Subtest: historical task cannot authorize new task branch changes\nok 9 - historical task cannot authorize new task branch changes\n  ---\n  duration_ms: 9806.7516\n  type: 'test'\n  ...\n# Subtest: missing Git role is rejected even for valid candidate\nok 10 - missing Git role is rejected even for valid candidate\n  ---\n  duration_ms: 11802.1762\n  type: 'test'\n  ...\n# Subtest: reject revokes completed Git candidate until fresh planning\nok 11 - reject revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 13772.2592\n  type: 'test'\n  ...\n# Subtest: cancel revokes completed Git candidate until fresh planning\nok 12 - cancel revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 13657.8\n  type: 'test'\n  ...\n# Subtest: Git mode-only change is subject to role and candidate snapshot\nok 13 - Git mode-only change is subject to role and candidate snapshot\n  ---\n  duration_ms: 10139.3743\n  type: 'test'\n  ...\n# Subtest: valid dual prompts, explicit acceptance, development and delivery candidate\nok 14 - valid dual prompts, explicit acceptance, development and delivery candidate\n  ---\n  duration_ms: 10064.4944\n  type: 'test'\n  ...\n# Subtest: document-only workflow has no fabricated PI development\nok 15 - document-only workflow has no fabricated PI development\n  ---\n  duration_ms: 5832.6879\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/planning\nok 16 - reject wrong/missing planning role pi-desktop/planning\n  ---\n  duration_ms: 646.551\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role antigravity/implementation\nok 17 - reject wrong/missing planning role antigravity/implementation\n  ---\n  duration_ms: 647.3686\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/bootstrap\nok 18 - reject wrong/missing planning role pi-desktop/bootstrap\n  ---\n  duration_ms: 647.3796\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/implementation\nok 19 - reject wrong/missing planning role pi-desktop/implementation\n  ---\n  duration_ms: 648.1661\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot add code in planning\nok 20 - Antigravity cannot add code in planning\n  ---\n  duration_ms: 1250.065\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot delete code in planning\nok 21 - Antigravity cannot delete code in planning\n  ---\n  duration_ms: 1226.9066\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot rename code in planning\nok 22 - Antigravity cannot rename code in planning\n  ---\n  duration_ms: 1241.7781\n  type: 'test'\n  ...\n# Subtest: PI cannot add documentation/registry\nok 23 - PI cannot add documentation/registry\n  ---\n  duration_ms: 3242.7625\n  type: 'test'\n  ...\n# Subtest: PI cannot delete documentation/registry\nok 24 - PI cannot delete documentation/registry\n  ---\n  duration_ms: 3257.3045\n  type: 'test'\n  ...\n# Subtest: PI cannot rename documentation/registry\nok 25 - PI cannot rename documentation/registry\n  ---\n  duration_ms: 3186.5149\n  type: 'test'\n  ...\n# Subtest: PI cannot registry documentation/registry\nok 26 - PI cannot registry documentation/registry\n  ---\n  duration_ms: 3192.3499\n  type: 'test'\n  ...\n# Subtest: unclassified and overlapping path policies rejected\nok 27 - unclassified and overlapping path policies rejected\n  ---\n  duration_ms: 1234.7979\n  type: 'test'\n  ...\n# Subtest: bad receiver role\nok 28 - bad receiver role\n  ---\n  duration_ms: 2233.7277\n  type: 'test'\n  ...\n# Subtest: bad receiver digest\nok 29 - bad receiver digest\n  ---\n  duration_ms: 1958.0536\n  type: 'test'\n  ...\n# Subtest: bad receiver duplicate\nok 30 - bad receiver duplicate\n  ---\n  duration_ms: 2612.5587\n  type: 'test'\n  ...\n# Subtest: reject kept and requires replanning\nok 31 - reject kept and requires replanning\n  ---\n  duration_ms: 3178.919\n  type: 'test'\n  ...\n# Subtest: cancel kept and requires replanning\nok 32 - cancel kept and requires replanning\n  ---\n  duration_ms: 3202.538\n  type: 'test'\n  ...\n# Subtest: handoff content rejects goal\nok 33 - handoff content rejects goal\n  ---\n  duration_ms: 5493.4506\n  type: 'test'\n  ...\n# Subtest: handoff content rejects placeholder\nok 34 - handoff content rejects placeholder\n  ---\n  duration_ms: 5513.6991\n  type: 'test'\n  ...\n# Subtest: handoff content rejects next actions\nok 35 - handoff content rejects next actions\n  ---\n  duration_ms: 5457.5569\n  type: 'test'\n  ...\n# Subtest: handoff content rejects limitations\nok 36 - handoff content rejects limitations\n  ---\n  duration_ms: 5497.6682\n  type: 'test'\n  ...\n# Subtest: handoff content rejects build reason\nok 37 - handoff content rejects build reason\n  ---\n  duration_ms: 5515.0055\n  type: 'test'\n  ...\n# Subtest: handoff content rejects blocker ready\nok 38 - handoff content rejects blocker ready\n  ---\n  duration_ms: 5483.5911\n  type: 'test'\n  ...\n# Subtest: handoff content rejects verification reference\nok 39 - handoff content rejects verification reference\n  ---\n  duration_ms: 5564.0645\n  type: 'test'\n  ...\n# Subtest: handoff content rejects missing verification\nok 40 - handoff content rejects missing verification\n  ---\n  duration_ms: 5687.4182\n  type: 'test'\n  ...\n# Subtest: handoff content rejects PI commit message\nok 41 - handoff content rejects PI commit message\n  ---\n  duration_ms: 5523.5557\n  type: 'test'\n  ...\n# Subtest: tampered handoff digest rejected\nok 42 - tampered handoff digest rejected\n  ---\n  duration_ms: 1834.6767\n  type: 'test'\n  ...\n# Subtest: tampered handoff role rejected\nok 43 - tampered handoff role rejected\n  ---\n  duration_ms: 1813.5435\n  type: 'test'\n  ...\n# Subtest: tampered handoff branch rejected\nok 44 - tampered handoff branch rejected\n  ---\n  duration_ms: 1876.594\n  type: 'test'\n  ...\n# Subtest: tampered handoff base rejected\nok 45 - tampered handoff base rejected\n  ---\n  duration_ms: 1855.5182\n  type: 'test'\n  ...\n# Subtest: tampered handoff features rejected\nok 46 - tampered handoff features rejected\n  ---\n  duration_ms: 1907.3704\n  type: 'test'\n  ...\n# Subtest: tampered handoff acceptance rejected\nok 47 - tampered handoff acceptance rejected\n  ---\n  duration_ms: 1888.3439\n  type: 'test'\n  ...\n# Subtest: tampered handoff receiver rejected\nok 48 - tampered handoff receiver rejected\n  ---\n  duration_ms: 1869.3047\n  type: 'test'\n  ...\n# Subtest: tampered handoff omission rejected\nok 49 - tampered handoff omission rejected\n  ---\n  duration_ms: 1882.0465\n  type: 'test'\n  ...\n# Subtest: tampered handoff manifest rejected\nok 50 - tampered handoff manifest rejected\n  ---\n  duration_ms: 1893.1534\n  type: 'test'\n  ...\n# Subtest: tampered handoff chain rejected\nok 51 - tampered handoff chain rejected\n  ---\n  duration_ms: 1852.5974\n  type: 'test'\n  ...\n# Subtest: post-handoff code drift rejected\nok 52 - post-handoff code drift rejected\n  ---\n  duration_ms: 6548.849\n  type: 'test'\n  ...\n# Subtest: post-handoff plan drift rejected\nok 53 - post-handoff plan drift rejected\n  ---\n  duration_ms: 6471.9599\n  type: 'test'\n  ...\n# Subtest: plan change in documentation requires replanning/rework, not old evidence\nok 54 - plan change in documentation requires replanning/rework, not old evidence\n  ---\n  duration_ms: 9441.1686\n  type: 'test'\n  ...\n# Subtest: rework retains previous failures and executes new code checks\nok 55 - rework retains previous failures and executes new code checks\n  ---\n  duration_ms: 15689.9245\n  type: 'test'\n  ...\n# Subtest: evidence TAP cannot grant handoff\nok 56 - evidence TAP cannot grant handoff\n  ---\n  duration_ms: 5322.8899\n  type: 'test'\n  ...\n# Subtest: evidence counts cannot grant handoff\nok 57 - evidence counts cannot grant handoff\n  ---\n  duration_ms: 5364.1593\n  type: 'test'\n  ...\n# Subtest: evidence source cannot grant handoff\nok 58 - evidence source cannot grant handoff\n  ---\n  duration_ms: 5505.4742\n  type: 'test'\n  ...\n# Subtest: evidence task cannot grant handoff\nok 59 - evidence task cannot grant handoff\n  ---\n  duration_ms: 5557.09\n  type: 'test'\n  ...\n# Subtest: evidence stale cannot grant handoff\nok 60 - evidence stale cannot grant handoff\n  ---\n  duration_ms: 5316.5037\n  type: 'test'\n  ...\n# Subtest: evidence failed cannot grant handoff\nok 61 - evidence failed cannot grant handoff\n  ---\n  duration_ms: 5272.8823\n  type: 'test'\n  ...\n# Subtest: saved prompt mismatch and strict CLI options rejected\nok 62 - saved prompt mismatch and strict CLI options rejected\n  ---\n  duration_ms: 4063.1715\n  type: 'test'\n  ...\n# Subtest: copied bootstrap and historical task cannot bypass policy\nok 63 - copied bootstrap and historical task cannot bypass policy\n  ---\n  duration_ms: 709.4375\n  type: 'test'\n  ...\n# Subtest: new task without handoff log fails closed\nok 64 - new task without handoff log fails closed\n  ---\n  duration_ms: 1483.6442\n  type: 'test'\n  ...\n# Subtest: required future build and compilation actually execute without shell\nok 65 - required future build and compilation actually execute without shell\n  ---\n  duration_ms: 3920.9062\n  type: 'test'\n  ...\n# Subtest: unsafe/missing build definition cannot claim compilation\nok 66 - unsafe/missing build definition cannot claim compilation\n  ---\n  duration_ms: 819.1352\n  type: 'test'\n  ...\n# Subtest: manifest is portable across Git LF and Windows CRLF checkout\nok 67 - manifest is portable across Git LF and Windows CRLF checkout\n  ---\n  duration_ms: 912.1669\n  type: 'test'\n  ...\n# Subtest: task authorization changes can be replanned but invalidate old delivery\nok 68 - task authorization changes can be replanned but invalidate old delivery\n  ---\n  duration_ms: 20062.9418\n  type: 'test'\n  ...\n# Subtest: application package cannot silently declare build not applicable\nok 69 - application package cannot silently declare build not applicable\n  ---\n  duration_ms: 5481.1702\n  type: 'test'\n  ...\n# Subtest: failed original tests cannot produce ready handoff\nok 70 - failed original tests cannot produce ready handoff\n  ---\n  duration_ms: 5268.0803\n  type: 'test'\n  ...\n# Subtest: missing declared plan cannot grant ready planning\nok 71 - missing declared plan cannot grant ready planning\n  ---\n  duration_ms: 1622.9601\n  type: 'test'\n  ...\n# Subtest: finish and receive require actual active task branch\nok 72 - finish and receive require actual active task branch\n  ---\n  duration_ms: 1933.7138\n  type: 'test'\n  ...\n1..72\n# tests 72\n# suites 0\n# pass 72\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 234834.5312\n",
+          "collaboration-tests.stderr.log": ""
+        }
+      },
+      "build_evidence": null,
+      "digest": "c63234f1b88f24180828dcf4c11ba3704b5238c7f5238bbecec4d61ade902f6e"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E3",
+      "sequence": 3,
+      "previous": "c63234f1b88f24180828dcf4c11ba3704b5238c7f5238bbecec4d61ade902f6e",
+      "at": "2026-10-02T06:47:17.522Z",
+      "type": "receipt",
+      "role": "antigravity",
+      "handoff": "TASK-GOV-004-E2",
+      "handoff_digest": "c63234f1b88f24180828dcf4c11ba3704b5238c7f5238bbecec4d61ade902f6e",
+      "decision": "accept",
+      "reason": "用户转交后显式核验准确交接 ID、摘要和当前快照。",
+      "snapshot_sha256": "6fe4a468deeae398909275bd0a788e15aa3c36ba1780bfef19ea9cf145e8b180",
+      "digest": "26de15b1d6704386511cc81307bedb6d17d9f498ac461165bed55cf43c086b2e"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E4",
+      "sequence": 4,
+      "previous": "26de15b1d6704386511cc81307bedb6d17d9f498ac461165bed55cf43c086b2e",
+      "at": "2026-10-02T06:47:24.969Z",
+      "type": "begin",
+      "role": "antigravity",
+      "phase": "documentation_delivery",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+      "branch": "chore/antigravity-pi-handoff",
+      "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "feature_ids": [
+        "G01",
+        "G02",
+        "G03"
+      ],
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:fe6256669f6694818bacd85c4ca7a8a1ac5478232acff35c3138cfbcdb94783b",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "digest": "829db80b62296ea0035741a7b0ad48d48d10988d29d1c0d98462bb5b81cc4cf4"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E5",
+      "sequence": 5,
+      "previous": "829db80b62296ea0035741a7b0ad48d48d10988d29d1c0d98462bb5b81cc4cf4",
+      "at": "2026-10-02T07:01:48.194Z",
+      "type": "handoff",
+      "role": "antigravity",
+      "phase": "documentation_delivery",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "begin": "TASK-GOV-004-E4",
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:fe6256669f6694818bacd85c4ca7a8a1ac5478232acff35c3138cfbcdb94783b",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "after": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "changes": [
+        {
+          "path": "docs/verification/antigravity-pi-collaboration.md",
+          "before": "100644:fe6256669f6694818bacd85c4ca7a8a1ac5478232acff35c3138cfbcdb94783b",
+          "after": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+          "action": "modify"
+        }
+      ],
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "acceptance_ids": [
+        "G01-A1",
+        "G01-A2",
+        "G01-A3",
+        "G01-A4",
+        "G02-A1",
+        "G03-A1",
+        "G03-A2",
+        "G03-A3",
+        "G03-A4"
+      ],
+      "acceptance_definitions": [
+        {
+          "id": "G01-A1",
+          "description": "门禁正反测试、暂存快照及真实推送对象测试全部执行",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A2",
+          "description": "实际启用 Hook、独立 CI 成功与 main 保护 API 核实，用户审查治理自身",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        },
+        {
+          "id": "G01-A3",
+          "description": "main-push CI 环境不污染测试夹具，非 CI 上下文仍拒绝 --ci-main",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A4",
+          "description": "main 的准确 base/head 优先识别本次任务，新旧任务共享功能不误判，多个变更任务或越界仍拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A1",
+          "description": "文档、台账、跟踪文件检查及真实分支/提交/PR 记录，用户确认合并",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G03-A1",
+          "description": "合法规划、开发、返工、文档-only 与限定 bootstrap 可执行；错误角色、阶段、任务、摘要、基线及越界增删改拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A2",
+          "description": "交接包含目标、实际结果、文件与原始执行证据、构建/编译或不适用理由、限制和下一步；双向 prompt 确定性完整，生成不自动接收",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A3",
+          "description": "暂存、消息、实际推送对象和 PR/main 快照校验交接；漂移、伪通过、旧证据、改写及 PI 提交拒绝，原治理回归保留",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A4",
+          "description": "真实 Antigravity 接收并负责提交/push/PR/CI，生成下一步 prompt；用户审查治理并确认合并",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        }
+      ],
+      "next_phase": "rework",
+      "receiver": "pi-desktop",
+      "details": {
+        "goal": "落实已批准的 Antigravity × PI-Desktop 人工转交与机械责任/交接门禁，仅治理与相关规范，不实现 MySQL 应用。",
+        "outcome": "Antigravity 已显式接收 TASK-GOV-004-E2，完成文档核验并启动 documentation_delivery。在本地重跑完整检查时，governance-tests 58/58 通过，但 collaboration-tests 在当前 Windows 环境下执行耗时超过预设的 300000ms（5分钟）硬超时限制被中断（collaboration.test.mjs 单独耗时约 316.8 秒）。按照职责约定，Antigravity 不自行修改测试代码或擅自放宽门禁，阶段判定为 blocked，回传 PI-Desktop 明确返工。",
+        "next_actions": [
+          "PI-Desktop 显式核验接收本交接事件并 begin rework 阶段。",
+          "优化 collaboration.test.mjs 与 collaboration-git.test.mjs 测试夹具性能，减少 Windows 下子进程与 Git 临时仓库开销；或提出文档同步请求评估拆分登记检查。",
+          "在本地实际重跑完整套件（确保在超时限制内通过，无超时/跳过/失败）并生成有效 run 报告后，重新 finish 交回 Antigravity documentation_delivery。"
+        ],
+        "forbidden": [
+          "PI-Desktop 不执行本仓库 commit、push、PR；Antigravity 不自行改代码/构建来修复失败。",
+          "不绕过 Hook、关闭 hooksPath、force push、向 main 推送、自动合并、删除分支、Tag 或发布。",
+          "不将 .pi/、本地项目记忆、秘密或 .governance-evidence/ 原始本地目录入库；只使用经核对的脱敏诊断交接记录。",
+          "不连接数据库、不改客户端、不执行 MySQL 写入/DDL；交接不扩大已批准范围。"
+        ],
+        "documentation_requests": [
+          "docs/verification/antigravity-pi-collaboration.md 已由 Antigravity 同步本次接收及超时返工历史；PI 如需拆分 check_definitions 或调整超时配置，请在 rework 中提出明确文档同步请求。"
+        ],
+        "limitations": [
+          "本地执行报告及嵌入原始 TAP 为诊断，不是独立 CI、工具身份或真人转交/验收认证。",
+          "本次因 collaboration-tests 在 Windows 环境超时，未达到 ready 交付条件；G03-A4 及最终验收保持未验收。",
+          "MySQL 应用、真实客户端和数据库功能仍未实现；没有应用 package 或编译工程，不宣称应用构建通过。"
+        ],
+        "blockers": [
+          "collaboration-tests 在 Windows 环境执行耗时超过 300000ms 超时限制，导致 run.mjs 中断退出（exit_code: null, signal: SIGKILL, timed_out: true）。"
+        ],
+        "result": "blocked",
+        "build": {
+          "status": "not_applicable",
+          "reason": "本轮为治理 Node .mjs 工具与规范，无 MySQL 应用 package.json 或构建/编译工程；已执行语法和实际测试。",
+          "check_ids": []
+        },
+        "verification": [
+          {
+            "check_id": "governance-tests",
+            "reason": "原治理套件 58/58 执行通过。"
+          },
+          {
+            "check_id": "collaboration-tests",
+            "reason": "协作测试套件因执行耗时超过 300000ms 超时失败，需 PI-Desktop 返工优化。"
+          }
+        ]
+      },
+      "check_definitions": [
+        {
+          "id": "governance-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/governance.test.mjs"
+          ],
+          "timeout_ms": 120000,
+          "parser": "tap",
+          "feature_ids": [
+            "G01",
+            "G02"
+          ],
+          "acceptance_ids": [
+            "G01-A1",
+            "G01-A3",
+            "G01-A4",
+            "G02-A1"
+          ]
+        },
+        {
+          "id": "collaboration-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/collaboration.test.mjs",
+            "tests/governance/collaboration-git.test.mjs"
+          ],
+          "timeout_ms": 300000,
+          "parser": "tap",
+          "feature_ids": [
+            "G03"
+          ],
+          "acceptance_ids": [
+            "G03-A1",
+            "G03-A2",
+            "G03-A3"
+          ]
+        }
+      ],
+      "evidence": null,
+      "build_evidence": null,
+      "digest": "21963bafa5b69aa4742479bbb1bc9674f8023fc5eed3a2989b98fcdd714cd926"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E6",
+      "sequence": 6,
+      "previous": "21963bafa5b69aa4742479bbb1bc9674f8023fc5eed3a2989b98fcdd714cd926",
+      "at": "2026-10-02T07:10:18.634Z",
+      "type": "receipt",
+      "role": "pi-desktop",
+      "handoff": "TASK-GOV-004-E5",
+      "handoff_digest": "21963bafa5b69aa4742479bbb1bc9674f8023fc5eed3a2989b98fcdd714cd926",
+      "decision": "accept",
+      "reason": "用户转交后显式核验准确交接 ID、摘要和当前快照。",
+      "snapshot_sha256": "a6eb0130a979743a38e667d3c19e2184d9af533ae57061e5481fb64a06895300",
+      "digest": "7a556493ebe75bb5fd35b38a4f3f8764f4840be0ce8a784311bad4b376837996"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E7",
+      "sequence": 7,
+      "previous": "7a556493ebe75bb5fd35b38a4f3f8764f4840be0ce8a784311bad4b376837996",
+      "at": "2026-10-02T07:10:19.660Z",
+      "type": "begin",
+      "role": "pi-desktop",
+      "phase": "rework",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+      "branch": "chore/antigravity-pi-handoff",
+      "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "feature_ids": [
+        "G01",
+        "G02",
+        "G03"
+      ],
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "digest": "bbe508ffe0d1237f29b6fa04f5fc58bd9d55f0b5833c08b3befca794b9fda5bf"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E8",
+      "sequence": 8,
+      "previous": "bbe508ffe0d1237f29b6fa04f5fc58bd9d55f0b5833c08b3befca794b9fda5bf",
+      "at": "2026-10-02T07:19:10.813Z",
+      "type": "handoff",
+      "role": "pi-desktop",
+      "phase": "rework",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "begin": "TASK-GOV-004-E7",
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "after": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:d96d6a02f25926cfa1240f51a55316291b210bff5f9f0068f5acb5ef00340316",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "changes": [
+        {
+          "path": "tests/governance/collaboration-fixture.mjs",
+          "before": "100644:ecfaa5d40b9ce1585d5283f60ed098b718f5d224a21f30b8ca963e653e15cb1b",
+          "after": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+          "action": "modify"
+        },
+        {
+          "path": "tests/governance/collaboration.test.mjs",
+          "before": "100644:cc56bfa312720c616d69eb891d21e2b787641f686350dce92a3d5bf0a6cfba99",
+          "after": "100644:d96d6a02f25926cfa1240f51a55316291b210bff5f9f0068f5acb5ef00340316",
+          "action": "modify"
+        }
+      ],
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "acceptance_ids": [
+        "G01-A1",
+        "G01-A2",
+        "G01-A3",
+        "G01-A4",
+        "G02-A1",
+        "G03-A1",
+        "G03-A2",
+        "G03-A3",
+        "G03-A4"
+      ],
+      "acceptance_definitions": [
+        {
+          "id": "G01-A1",
+          "description": "门禁正反测试、暂存快照及真实推送对象测试全部执行",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A2",
+          "description": "实际启用 Hook、独立 CI 成功与 main 保护 API 核实，用户审查治理自身",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        },
+        {
+          "id": "G01-A3",
+          "description": "main-push CI 环境不污染测试夹具，非 CI 上下文仍拒绝 --ci-main",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A4",
+          "description": "main 的准确 base/head 优先识别本次任务，新旧任务共享功能不误判，多个变更任务或越界仍拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A1",
+          "description": "文档、台账、跟踪文件检查及真实分支/提交/PR 记录，用户确认合并",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G03-A1",
+          "description": "合法规划、开发、返工、文档-only 与限定 bootstrap 可执行；错误角色、阶段、任务、摘要、基线及越界增删改拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A2",
+          "description": "交接包含目标、实际结果、文件与原始执行证据、构建/编译或不适用理由、限制和下一步；双向 prompt 确定性完整，生成不自动接收",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A3",
+          "description": "暂存、消息、实际推送对象和 PR/main 快照校验交接；漂移、伪通过、旧证据、改写及 PI 提交拒绝，原治理回归保留",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A4",
+          "description": "真实 Antigravity 接收并负责提交/push/PR/CI，生成下一步 prompt；用户审查治理并确认合并",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        }
+      ],
+      "next_phase": "documentation_delivery",
+      "receiver": "antigravity",
+      "details": {
+        "goal": "修复 TASK-GOV-004 的 Windows collaboration-tests 超时，保留全部既有门禁与测试，仅优化合成夹具准备开销。",
+        "outcome": "已核验并显式接收 E5（E6），开始 rework（E7）。共享夹具改为每个测试进程创建一次只读合成 Git 基线，再完整复制至每个测试独立目录；不共享工作区、索引、refs、对象文件或执行证据。新增隔离性回归覆盖现存及后建夹具的工作区、索引、HEAD、origin/main、配置、证据及交接记录。仅修改 collaboration-fixture.mjs 和 collaboration.test.mjs，collaboration-git.test.mjs 通过共享夹具受益；没有修改检查定义、超时、规范或台账。Windows Node v24.16.0 正式 check/run 通过：governance-tests 58/58（76.468 秒），collaboration-tests 73/73（217.483 秒，300 秒限制内），均 exit 0、无失败/跳过/取消/超时。语法检查、单独隔离性测试、只读 report 和 git diff --check 通过；diff 检查仅出现现有 LF/CRLF 提示。",
+        "next_actions": [
+          "Antigravity 核验本事件 ID/SHA256、两项测试变更和真实报告，显式 accept 后 begin documentation_delivery。",
+          "同步验证记录，保留 E5 历史超时，记录 E6/E7、本轮优化、新增隔离性测试及完整 run 的数量和耗时；无需拆分检查或调整超时。",
+          "按职责检查交付候选并重跑必要门禁，仅由 Antigravity 执行暂存、commit、push、PR 和查询独立 CI；真实 Git 交付后 record-delivery，生成由用户转交的 prompt。",
+          "G03-A4、独立 CI、用户审查和合并尚未完成；交付后等待用户确认，不自动合并或启动新任务。"
+        ],
+        "forbidden": [
+          "PI-Desktop 不执行本仓库 commit、push 或 PR；Antigravity 不自行改代码修复失败。",
+          "不绕过 Hook、不关闭 hooksPath、不 force push、不向 main 推送、不自动合并或删除分支、不创建 Tag 或发布。",
+          "不将 .pi/、本地记忆、秘密或 .governance-evidence/ 原始目录入库；交接只使用核对过的合成诊断证据。",
+          "不连接数据库、不改客户端、不执行 MySQL 写入或 DDL，不扩大授权范围。"
+        ],
+        "documentation_requests": [
+          "docs/verification/antigravity-pi-collaboration.md：保留 E5 超时历史并同步本轮返工结果：只读合成 Git 基线按进程复用、各夹具完整独立复制，新增隔离性回归；完整 run governance-tests 58/58、76.468 秒，collaboration-tests 73/73、217.483 秒，无失败/跳过/取消/超时，300000ms 未变更。记录本次 ready 仅为 PI 本地返工可交接，不是最终验收或独立 CI。"
+        ],
+        "limitations": [
+          "本地执行报告及嵌入 TAP 仅为诊断，不是独立 CI、真实工具身份或真人转交/验收认证；角色声明不是身份认证。",
+          "本次计时仅代表当前 Windows Node v24.16.0 环境的一次完整正式 run，不能保证所有机器或负载下相同耗时。",
+          "G01/G02/G03 最终人工验收、G03-A4、Git 交付、独立 CI 和合并均未由本轮完成，保持未验收。",
+          "MySQL 应用、真实客户端和数据库功能仍未实现；没有应用 package 或编译工程，不宣称应用构建通过。"
+        ],
+        "blockers": [],
+        "result": "ready",
+        "build": {
+          "status": "not_applicable",
+          "reason": "仅治理 Node .mjs 测试夹具变更，无 MySQL 应用 package 或构建/编译工程；已执行语法和实际测试。",
+          "check_ids": []
+        },
+        "verification": [
+          {
+            "check_id": "governance-tests",
+            "reason": "完整正式 run 保留原治理回归 58/58，通过，无失败、跳过、取消或超时，耗时 76.468 秒。"
+          },
+          {
+            "check_id": "collaboration-tests",
+            "reason": "完整正式 run 覆盖协作与真实 Git/Hook 测试及新增夹具隔离性回归，73/73 通过，无失败、跳过、取消或超时，耗时 217.483 秒，未改变 300000ms 限制。"
+          }
+        ]
+      },
+      "check_definitions": [
+        {
+          "id": "governance-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/governance.test.mjs"
+          ],
+          "timeout_ms": 120000,
+          "parser": "tap",
+          "feature_ids": [
+            "G01",
+            "G02"
+          ],
+          "acceptance_ids": [
+            "G01-A1",
+            "G01-A3",
+            "G01-A4",
+            "G02-A1"
+          ]
+        },
+        {
+          "id": "collaboration-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/collaboration.test.mjs",
+            "tests/governance/collaboration-git.test.mjs"
+          ],
+          "timeout_ms": 300000,
+          "parser": "tap",
+          "feature_ids": [
+            "G03"
+          ],
+          "acceptance_ids": [
+            "G03-A1",
+            "G03-A2",
+            "G03-A3"
+          ]
+        }
+      ],
+      "evidence": {
+        "report": {
+          "schema_version": 1,
+          "trust": "local-diagnostic-only",
+          "started_at": "2026-10-02T07:12:37.936Z",
+          "environment": {
+            "node": "v24.16.0",
+            "platform": "win32",
+            "arch": "x64"
+          },
+          "checks": [
+            {
+              "check_id": "governance-tests",
+              "feature_ids": [
+                "G01",
+                "G02"
+              ],
+              "acceptance_ids": [
+                "G01-A1",
+                "G01-A3",
+                "G01-A4",
+                "G02-A1"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/governance.test.mjs"
+              ],
+              "check_definition_sha256": "e9dde2395080bcda3f222787a305a38e8ea8e1bc2447a0200dff2cfdd6e74fa2",
+              "started_at": "2026-10-02T07:12:39.286Z",
+              "ended_at": "2026-10-02T07:13:55.754Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 58,
+                "pass": 58,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "governance-tests.tap",
+                  "sha256": "b7b00163f0236d2be35c2fef7c084bd04df615d12c740c508b6be74f4913d0d6"
+                },
+                {
+                  "path": "governance-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            },
+            {
+              "check_id": "collaboration-tests",
+              "feature_ids": [
+                "G03"
+              ],
+              "acceptance_ids": [
+                "G03-A1",
+                "G03-A2",
+                "G03-A3"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/collaboration.test.mjs",
+                "tests/governance/collaboration-git.test.mjs"
+              ],
+              "check_definition_sha256": "dc17c40a23c2a40a39f8a5208c6ead94e2b78043529c5692bb8a3182f990a766",
+              "started_at": "2026-10-02T07:13:55.754Z",
+              "ended_at": "2026-10-02T07:17:33.237Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 73,
+                "pass": 73,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "collaboration-tests.tap",
+                  "sha256": "c428b41dc8ac771589d8a9ae482d75c981d1c6de7a8fc32c3038ffcdab8f7756"
+                },
+                {
+                  "path": "collaboration-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            }
+          ],
+          "acceptance": "unverified",
+          "task_id": "TASK-GOV-004",
+          "feature_ids": [
+            "G01",
+            "G02",
+            "G03"
+          ],
+          "task_status_claim": "in_progress",
+          "task_completion": "unauthenticated",
+          "source_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+          "snapshot_tree": null,
+          "input_sha256": "7366e1641bc2f7588aeb745a46518d1da41f59f12be883ef05b9c6f182ef0e56",
+          "development_sha256": "f64580675f5f00064a7cd6e3a092da98c4226a2475116ae0caf019ed7fb0487a",
+          "local_result": "passed",
+          "ended_at": "2026-10-02T07:17:33.247Z"
+        },
+        "artifacts": {
+          "governance-tests.tap": "TAP version 13\n# Subtest: valid planned feature and deterministic report\nok 1 - valid planned feature and deterministic report\n  ---\n  duration_ms: 1525.2031\n  type: 'test'\n  ...\n# Subtest: duplicate feature ID\nok 2 - duplicate feature ID\n  ---\n  duration_ms: 609.3892\n  type: 'test'\n  ...\n# Subtest: duplicate normalized key\nok 3 - duplicate normalized key\n  ---\n  duration_ms: 593.1735\n  type: 'test'\n  ...\n# Subtest: duplicate acceptance ID\nok 4 - duplicate acceptance ID\n  ---\n  duration_ms: 592.029\n  type: 'test'\n  ...\n# Subtest: duplicate task ID\nok 5 - duplicate task ID\n  ---\n  duration_ms: 608.5765\n  type: 'test'\n  ...\n# Subtest: undefined requirement\nok 6 - undefined requirement\n  ---\n  duration_ms: 706.6839\n  type: 'test'\n  ...\n# Subtest: missing dependency\nok 7 - missing dependency\n  ---\n  duration_ms: 691.9538\n  type: 'test'\n  ...\n# Subtest: dependency cycle\nok 8 - dependency cycle\n  ---\n  duration_ms: 663.7422\n  type: 'test'\n  ...\n# Subtest: unknown status\nok 9 - unknown status\n  ---\n  duration_ms: 687.3622\n  type: 'test'\n  ...\n# Subtest: path traversal\nok 10 - path traversal\n  ---\n  duration_ms: 692.3016\n  type: 'test'\n  ...\n# Subtest: missing implementation\nok 11 - missing implementation\n  ---\n  duration_ms: 697.9635\n  type: 'test'\n  ...\n# Subtest: forged passed evidence\nok 12 - forged passed evidence\n  ---\n  duration_ms: 684.6198\n  type: 'test'\n  ...\n# Subtest: mock masquerading as real mysql\nok 13 - mock masquerading as real mysql\n  ---\n  duration_ms: 695.0081\n  type: 'test'\n  ...\n# Subtest: manual acceptance claim\nok 14 - manual acceptance claim\n  ---\n  duration_ms: 662.8332\n  type: 'test'\n  ...\n# Subtest: feature completion claim\nok 15 - feature completion claim\n  ---\n  duration_ms: 661.5675\n  type: 'test'\n  ...\n# Subtest: unapproved governance modification\nok 16 - unapproved governance modification\n  ---\n  duration_ms: 1160.327\n  type: 'test'\n  ...\n# Subtest: scope violation\nok 17 - scope violation\n  ---\n  duration_ms: 1162.3956\n  type: 'test'\n  ...\n# Subtest: shell command\nok 18 - shell command\n  ---\n  duration_ms: 682.6264\n  type: 'test'\n  ...\n# Subtest: node eval injection\nok 19 - node eval injection\n  ---\n  duration_ms: 660.4345\n  type: 'test'\n  ...\n# Subtest: task collision\nok 20 - task collision\n  ---\n  duration_ms: 680.6126\n  type: 'test'\n  ...\n# Subtest: uncovered confirmed requirement\nok 21 - uncovered confirmed requirement\n  ---\n  duration_ms: 669.4979\n  type: 'test'\n  ...\n# Subtest: checked roadmap cannot grant completion\nok 22 - checked roadmap cannot grant completion\n  ---\n  duration_ms: 671.0775\n  type: 'test'\n  ...\n# Subtest: tracked confidential path\nok 23 - tracked confidential path\n  ---\n  duration_ms: 712.622\n  type: 'test'\n  ...\n# Subtest: staged invalid record cannot be masked by unstaged repair\nok 24 - staged invalid record cannot be masked by unstaged repair\n  ---\n  duration_ms: 2713.9392\n  type: 'test'\n  ...\n# Subtest: staged checker, not unstaged checker, is executed\nok 25 - staged checker, not unstaged checker, is executed\n  ---\n  duration_ms: 1729.3129\n  type: 'test'\n  ...\n# Subtest: valid staged snapshot executes registered tests\nok 26 - valid staged snapshot executes registered tests\n  ---\n  duration_ms: 3566.8816\n  type: 'test'\n  ...\n# Subtest: main staged commit rejected\nok 27 - main staged commit rejected\n  ---\n  duration_ms: 674.1617\n  type: 'test'\n  ...\n# Subtest: remote branch mismatch\nok 28 - remote branch mismatch\n  ---\n  duration_ms: 744.3973\n  type: 'test'\n  ...\n# Subtest: main push\nok 29 - main push\n  ---\n  duration_ms: 730.0341\n  type: 'test'\n  ...\n# Subtest: delete push\nok 30 - delete push\n  ---\n  duration_ms: 736.9116\n  type: 'test'\n  ...\n# Subtest: oid mismatch\nok 31 - oid mismatch\n  ---\n  duration_ms: 822.5904\n  type: 'test'\n  ...\n# Subtest: unknown commit\nok 32 - unknown commit\n  ---\n  duration_ms: 788.8886\n  type: 'test'\n  ...\n# Subtest: push validates object rather than repaired worktree\nok 33 - push validates object rather than repaired worktree\n  ---\n  duration_ms: 1979.271\n  type: 'test'\n  ...\n# Subtest: valid actual push object\nok 34 - valid actual push object\n  ---\n  duration_ms: 3659.4908\n  type: 'test'\n  ...\n# Subtest: actual execution rejects failure\nok 35 - actual execution rejects failure\n  ---\n  duration_ms: 665.1277\n  type: 'test'\n  ...\n# Subtest: actual execution rejects skipped\nok 36 - actual execution rejects skipped\n  ---\n  duration_ms: 664.4231\n  type: 'test'\n  ...\n# Subtest: actual execution rejects zero tests\nok 37 - actual execution rejects zero tests\n  ---\n  duration_ms: 655.6128\n  type: 'test'\n  ...\n# Subtest: actual execution rejects timeout\nok 38 - actual execution rejects timeout\n  ---\n  duration_ms: 598.5986\n  type: 'test'\n  ...\n# Subtest: run report verifies artifacts, detects tampering and stale inputs\nok 39 - run report verifies artifacts, detects tampering and stale inputs\n  ---\n  duration_ms: 4178.0037\n  type: 'test'\n  ...\n# Subtest: input digest changes with source content\nok 40 - input digest changes with source content\n  ---\n  duration_ms: 587.7572\n  type: 'test'\n  ...\n# Subtest: deleted criterion requires explicit authorized scope record\nok 41 - deleted criterion requires explicit authorized scope record\n  ---\n  duration_ms: 2249.8406\n  type: 'test'\n  ...\n# Subtest: hook installer refuses existing hooksPath without modification\nok 42 - hook installer refuses existing hooksPath without modification\n  ---\n  duration_ms: 692.7069\n  type: 'test'\n  ...\n# Subtest: CI compares actual base/head scope despite clean checkout\nok 43 - CI compares actual base/head scope despite clean checkout\n  ---\n  duration_ms: 2260.7575\n  type: 'test'\n  ...\n# Subtest: push wrong task branch rejected even with matching refs\nok 44 - push wrong task branch rejected even with matching refs\n  ---\n  duration_ms: 1961.6447\n  type: 'test'\n  ...\n# Subtest: implemented feature paths must exist and be tracked\nok 45 - implemented feature paths must exist and be tracked\n  ---\n  duration_ms: 1087.3299\n  type: 'test'\n  ...\n# Subtest: mutable base cannot hide committed out-of-scope path from origin main\nok 46 - mutable base cannot hide committed out-of-scope path from origin main\n  ---\n  duration_ms: 1935.9079\n  type: 'test'\n  ...\n# Subtest: HEAD task baseline cannot be advanced without remote\nok 47 - HEAD task baseline cannot be advanced without remote\n  ---\n  duration_ms: 1123.1058\n  type: 'test'\n  ...\n# Subtest: nonancestor task base rejected\nok 48 - nonancestor task base rejected\n  ---\n  duration_ms: 1420.7819\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: local\nok 49 - existing feature scope checked against trusted registry: local\n  ---\n  duration_ms: 1271.0469\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: staged\nok 50 - existing feature scope checked against trusted registry: staged\n  ---\n  duration_ms: 2367.864\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: CI\nok 51 - existing feature scope checked against trusted registry: CI\n  ---\n  duration_ms: 2382.2672\n  type: 'test'\n  ...\n# Subtest: explicit feature scope authorization permits reviewed change\nok 52 - explicit feature scope authorization permits reviewed change\n  ---\n  duration_ms: 1546.6704\n  type: 'test'\n  ...\n# Subtest: main CI selects completed delta task despite unrelated active branches; no push permission\nok 53 - main CI selects completed delta task despite unrelated active branches; no push permission\n  ---\n  duration_ms: 5761.3576\n  type: 'test'\n  ...\n# Subtest: report requires exact artifacts and execution metadata, never just passed\nok 54 - report requires exact artifacts and execution metadata, never just passed\n  ---\n  duration_ms: 3715.7249\n  type: 'test'\n  ...\n# Subtest: registered tests do not inherit parent GitHub CI context\nok 55 - registered tests do not inherit parent GitHub CI context\n  ---\n  duration_ms: 668.8292\n  type: 'test'\n  ...\n# Subtest: main task delta selection: shared-feature\nok 56 - main task delta selection: shared-feature\n  ---\n  duration_ms: 1052.5793\n  type: 'test'\n  ...\n# Subtest: main task delta selection: multiple-delta\nok 57 - main task delta selection: multiple-delta\n  ---\n  duration_ms: 1042.2057\n  type: 'test'\n  ...\n# Subtest: main task delta selection: out-of-scope\nok 58 - main task delta selection: out-of-scope\n  ---\n  duration_ms: 1063.9416\n  type: 'test'\n  ...\n1..58\n# tests 58\n# suites 0\n# pass 58\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 76391.172\n",
+          "governance-tests.stderr.log": "",
+          "collaboration-tests.tap": "TAP version 13\n# Subtest: history rewrite detected against committed prefix\nok 1 - history rewrite detected against committed prefix\n  ---\n  duration_ms: 10156.5065\n  type: 'test'\n  ...\n# Subtest: policy cannot be removed after deployment\nok 2 - policy cannot be removed after deployment\n  ---\n  duration_ms: 9547.6071\n  type: 'test'\n  ...\n# Subtest: actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\nok 3 - actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\n  ---\n  duration_ms: 30802.8106\n  type: 'test'\n  ...\n# Subtest: staged bad snapshot cannot be masked by unstaged repair\nok 4 - staged bad snapshot cannot be masked by unstaged repair\n  ---\n  duration_ms: 11924.1947\n  type: 'test'\n  ...\n# Subtest: old committed object cannot be masked by repaired working copy\nok 5 - old committed object cannot be masked by repaired working copy\n  ---\n  duration_ms: 11945.3732\n  type: 'test'\n  ...\n# Subtest: PR exact base/head and squash main independent context both pass\nok 6 - PR exact base/head and squash main independent context both pass\n  ---\n  duration_ms: 17169.879\n  type: 'test'\n  ...\n# Subtest: delivery success produces next PI prompt; failure explicitly accepts rework\nok 7 - delivery success produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 13846.162\n  type: 'test'\n  ...\n# Subtest: delivery failure produces next PI prompt; failure explicitly accepts rework\nok 8 - delivery failure produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 12066.0801\n  type: 'test'\n  ...\n# Subtest: historical task cannot authorize new task branch changes\nok 9 - historical task cannot authorize new task branch changes\n  ---\n  duration_ms: 9574.6463\n  type: 'test'\n  ...\n# Subtest: missing Git role is rejected even for valid candidate\nok 10 - missing Git role is rejected even for valid candidate\n  ---\n  duration_ms: 11642.4782\n  type: 'test'\n  ...\n# Subtest: reject revokes completed Git candidate until fresh planning\nok 11 - reject revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 13526.8119\n  type: 'test'\n  ...\n# Subtest: cancel revokes completed Git candidate until fresh planning\nok 12 - cancel revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 13556.6262\n  type: 'test'\n  ...\n# Subtest: Git mode-only change is subject to role and candidate snapshot\nok 13 - Git mode-only change is subject to role and candidate snapshot\n  ---\n  duration_ms: 9999.7749\n  type: 'test'\n  ...\n# Subtest: valid dual prompts, explicit acceptance, development and delivery candidate\nok 14 - valid dual prompts, explicit acceptance, development and delivery candidate\n  ---\n  duration_ms: 10291.9478\n  type: 'test'\n  ...\n# Subtest: document-only workflow has no fabricated PI development\nok 15 - document-only workflow has no fabricated PI development\n  ---\n  duration_ms: 5561.1235\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/planning\nok 16 - reject wrong/missing planning role pi-desktop/planning\n  ---\n  duration_ms: 242.7429\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role antigravity/implementation\nok 17 - reject wrong/missing planning role antigravity/implementation\n  ---\n  duration_ms: 239.1807\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/bootstrap\nok 18 - reject wrong/missing planning role pi-desktop/bootstrap\n  ---\n  duration_ms: 237.0492\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/implementation\nok 19 - reject wrong/missing planning role pi-desktop/implementation\n  ---\n  duration_ms: 251.5407\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot add code in planning\nok 20 - Antigravity cannot add code in planning\n  ---\n  duration_ms: 848.4679\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot delete code in planning\nok 21 - Antigravity cannot delete code in planning\n  ---\n  duration_ms: 857.1916\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot rename code in planning\nok 22 - Antigravity cannot rename code in planning\n  ---\n  duration_ms: 837.4622\n  type: 'test'\n  ...\n# Subtest: PI cannot add documentation/registry\nok 23 - PI cannot add documentation/registry\n  ---\n  duration_ms: 2910.5583\n  type: 'test'\n  ...\n# Subtest: PI cannot delete documentation/registry\nok 24 - PI cannot delete documentation/registry\n  ---\n  duration_ms: 2887.4616\n  type: 'test'\n  ...\n# Subtest: PI cannot rename documentation/registry\nok 25 - PI cannot rename documentation/registry\n  ---\n  duration_ms: 2839.0381\n  type: 'test'\n  ...\n# Subtest: PI cannot registry documentation/registry\nok 26 - PI cannot registry documentation/registry\n  ---\n  duration_ms: 2837.7924\n  type: 'test'\n  ...\n# Subtest: unclassified and overlapping path policies rejected\nok 27 - unclassified and overlapping path policies rejected\n  ---\n  duration_ms: 841.7646\n  type: 'test'\n  ...\n# Subtest: bad receiver role\nok 28 - bad receiver role\n  ---\n  duration_ms: 1848.0753\n  type: 'test'\n  ...\n# Subtest: bad receiver digest\nok 29 - bad receiver digest\n  ---\n  duration_ms: 1586.1089\n  type: 'test'\n  ...\n# Subtest: bad receiver duplicate\nok 30 - bad receiver duplicate\n  ---\n  duration_ms: 2238.0199\n  type: 'test'\n  ...\n# Subtest: reject kept and requires replanning\nok 31 - reject kept and requires replanning\n  ---\n  duration_ms: 2832.8712\n  type: 'test'\n  ...\n# Subtest: cancel kept and requires replanning\nok 32 - cancel kept and requires replanning\n  ---\n  duration_ms: 2850.4128\n  type: 'test'\n  ...\n# Subtest: handoff content rejects goal\nok 33 - handoff content rejects goal\n  ---\n  duration_ms: 5132.4323\n  type: 'test'\n  ...\n# Subtest: handoff content rejects placeholder\nok 34 - handoff content rejects placeholder\n  ---\n  duration_ms: 5179.4654\n  type: 'test'\n  ...\n# Subtest: handoff content rejects next actions\nok 35 - handoff content rejects next actions\n  ---\n  duration_ms: 5213.1135\n  type: 'test'\n  ...\n# Subtest: handoff content rejects limitations\nok 36 - handoff content rejects limitations\n  ---\n  duration_ms: 5149.5904\n  type: 'test'\n  ...\n# Subtest: handoff content rejects build reason\nok 37 - handoff content rejects build reason\n  ---\n  duration_ms: 5116.0251\n  type: 'test'\n  ...\n# Subtest: handoff content rejects blocker ready\nok 38 - handoff content rejects blocker ready\n  ---\n  duration_ms: 5266.7498\n  type: 'test'\n  ...\n# Subtest: handoff content rejects verification reference\nok 39 - handoff content rejects verification reference\n  ---\n  duration_ms: 5262.5156\n  type: 'test'\n  ...\n# Subtest: handoff content rejects missing verification\nok 40 - handoff content rejects missing verification\n  ---\n  duration_ms: 5155.0815\n  type: 'test'\n  ...\n# Subtest: handoff content rejects PI commit message\nok 41 - handoff content rejects PI commit message\n  ---\n  duration_ms: 5163.43\n  type: 'test'\n  ...\n# Subtest: tampered handoff digest rejected\nok 42 - tampered handoff digest rejected\n  ---\n  duration_ms: 1383.6817\n  type: 'test'\n  ...\n# Subtest: tampered handoff role rejected\nok 43 - tampered handoff role rejected\n  ---\n  duration_ms: 1400.0099\n  type: 'test'\n  ...\n# Subtest: tampered handoff branch rejected\nok 44 - tampered handoff branch rejected\n  ---\n  duration_ms: 1420.116\n  type: 'test'\n  ...\n# Subtest: tampered handoff base rejected\nok 45 - tampered handoff base rejected\n  ---\n  duration_ms: 1476.5185\n  type: 'test'\n  ...\n# Subtest: tampered handoff features rejected\nok 46 - tampered handoff features rejected\n  ---\n  duration_ms: 1454.2664\n  type: 'test'\n  ...\n# Subtest: tampered handoff acceptance rejected\nok 47 - tampered handoff acceptance rejected\n  ---\n  duration_ms: 1437.5778\n  type: 'test'\n  ...\n# Subtest: tampered handoff receiver rejected\nok 48 - tampered handoff receiver rejected\n  ---\n  duration_ms: 1429.397\n  type: 'test'\n  ...\n# Subtest: tampered handoff omission rejected\nok 49 - tampered handoff omission rejected\n  ---\n  duration_ms: 1421.1877\n  type: 'test'\n  ...\n# Subtest: tampered handoff manifest rejected\nok 50 - tampered handoff manifest rejected\n  ---\n  duration_ms: 1462.4036\n  type: 'test'\n  ...\n# Subtest: tampered handoff chain rejected\nok 51 - tampered handoff chain rejected\n  ---\n  duration_ms: 1446.6471\n  type: 'test'\n  ...\n# Subtest: post-handoff code drift rejected\nok 52 - post-handoff code drift rejected\n  ---\n  duration_ms: 6246.7719\n  type: 'test'\n  ...\n# Subtest: post-handoff plan drift rejected\nok 53 - post-handoff plan drift rejected\n  ---\n  duration_ms: 6295.0451\n  type: 'test'\n  ...\n# Subtest: plan change in documentation requires replanning/rework, not old evidence\nok 54 - plan change in documentation requires replanning/rework, not old evidence\n  ---\n  duration_ms: 9146.8362\n  type: 'test'\n  ...\n# Subtest: rework retains previous failures and executes new code checks\nok 55 - rework retains previous failures and executes new code checks\n  ---\n  duration_ms: 15573.7643\n  type: 'test'\n  ...\n# Subtest: evidence TAP cannot grant handoff\nok 56 - evidence TAP cannot grant handoff\n  ---\n  duration_ms: 5000.3434\n  type: 'test'\n  ...\n# Subtest: evidence counts cannot grant handoff\nok 57 - evidence counts cannot grant handoff\n  ---\n  duration_ms: 5027.1249\n  type: 'test'\n  ...\n# Subtest: evidence source cannot grant handoff\nok 58 - evidence source cannot grant handoff\n  ---\n  duration_ms: 5215.3199\n  type: 'test'\n  ...\n# Subtest: evidence task cannot grant handoff\nok 59 - evidence task cannot grant handoff\n  ---\n  duration_ms: 5171.3382\n  type: 'test'\n  ...\n# Subtest: evidence stale cannot grant handoff\nok 60 - evidence stale cannot grant handoff\n  ---\n  duration_ms: 5046.4389\n  type: 'test'\n  ...\n# Subtest: evidence failed cannot grant handoff\nok 61 - evidence failed cannot grant handoff\n  ---\n  duration_ms: 4976.8003\n  type: 'test'\n  ...\n# Subtest: saved prompt mismatch and strict CLI options rejected\nok 62 - saved prompt mismatch and strict CLI options rejected\n  ---\n  duration_ms: 3749.2182\n  type: 'test'\n  ...\n# Subtest: copied bootstrap and historical task cannot bypass policy\nok 63 - copied bootstrap and historical task cannot bypass policy\n  ---\n  duration_ms: 237.138\n  type: 'test'\n  ...\n# Subtest: new task without handoff log fails closed\nok 64 - new task without handoff log fails closed\n  ---\n  duration_ms: 1120.5114\n  type: 'test'\n  ...\n# Subtest: required future build and compilation actually execute without shell\nok 65 - required future build and compilation actually execute without shell\n  ---\n  duration_ms: 3549.8014\n  type: 'test'\n  ...\n# Subtest: unsafe/missing build definition cannot claim compilation\nok 66 - unsafe/missing build definition cannot claim compilation\n  ---\n  duration_ms: 342.7574\n  type: 'test'\n  ...\n# Subtest: manifest is portable across Git LF and Windows CRLF checkout\nok 67 - manifest is portable across Git LF and Windows CRLF checkout\n  ---\n  duration_ms: 448.9112\n  type: 'test'\n  ...\n# Subtest: task authorization changes can be replanned but invalidate old delivery\nok 68 - task authorization changes can be replanned but invalidate old delivery\n  ---\n  duration_ms: 20093.4327\n  type: 'test'\n  ...\n# Subtest: application package cannot silently declare build not applicable\nok 69 - application package cannot silently declare build not applicable\n  ---\n  duration_ms: 5272.3715\n  type: 'test'\n  ...\n# Subtest: failed original tests cannot produce ready handoff\nok 70 - failed original tests cannot produce ready handoff\n  ---\n  duration_ms: 4917.5299\n  type: 'test'\n  ...\n# Subtest: missing declared plan cannot grant ready planning\nok 71 - missing declared plan cannot grant ready planning\n  ---\n  duration_ms: 1196.0432\n  type: 'test'\n  ...\n# Subtest: finish and receive require actual active task branch\nok 72 - finish and receive require actual active task branch\n  ---\n  duration_ms: 1526.7329\n  type: 'test'\n  ...\n# Subtest: copied baseline isolates worktree, index, refs, config and evidence\nok 73 - copied baseline isolates worktree, index, refs, config and evidence\n  ---\n  duration_ms: 3054.377\n  type: 'test'\n  ...\n1..73\n# tests 73\n# suites 0\n# pass 73\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 217399.0631\n",
+          "collaboration-tests.stderr.log": ""
+        }
+      },
+      "build_evidence": null,
+      "digest": "020d22d76bf33409370017748005aa4ff8a076293d09c53482f041f6d771f882"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E9",
+      "sequence": 9,
+      "previous": "020d22d76bf33409370017748005aa4ff8a076293d09c53482f041f6d771f882",
+      "at": "2026-10-02T07:21:24.611Z",
+      "type": "receipt",
+      "role": "antigravity",
+      "handoff": "TASK-GOV-004-E8",
+      "handoff_digest": "020d22d76bf33409370017748005aa4ff8a076293d09c53482f041f6d771f882",
+      "decision": "accept",
+      "reason": "用户转交后显式核验准确交接 ID、摘要和当前快照。",
+      "snapshot_sha256": "640ce240596dcba6cccbe8df17fb514235757c658ce5033ee5caabca3a4b261c",
+      "digest": "c518ea092a10d5bda750ee75f6c36194c7dc5c384d8fb8c029d43dd8436a5265"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E10",
+      "sequence": 10,
+      "previous": "c518ea092a10d5bda750ee75f6c36194c7dc5c384d8fb8c029d43dd8436a5265",
+      "at": "2026-10-02T07:21:30.766Z",
+      "type": "begin",
+      "role": "antigravity",
+      "phase": "documentation_delivery",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+      "branch": "chore/antigravity-pi-handoff",
+      "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "feature_ids": [
+        "G01",
+        "G02",
+        "G03"
+      ],
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:d96d6a02f25926cfa1240f51a55316291b210bff5f9f0068f5acb5ef00340316",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "digest": "5ee5e8d384e8ba960f5ae831dad0146e0352f4bbbd01b84fde8cd47f4e591179"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-004-E11",
+      "sequence": 11,
+      "previous": "5ee5e8d384e8ba960f5ae831dad0146e0352f4bbbd01b84fde8cd47f4e591179",
+      "at": "2026-10-02T07:29:25.702Z",
+      "type": "handoff",
+      "role": "antigravity",
+      "phase": "documentation_delivery",
+      "task_definition": {
+        "id": "TASK-GOV-004",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G01",
+          "G02",
+          "G03"
+        ],
+        "branch": "chore/antigravity-pi-handoff",
+        "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+        "authorization": "用户批准 Antigravity/PI-Desktop 人工转交与机械门禁计划；本次 PI 可限定引导更新规范和台账，不得 commit/push/PR；不开发 MySQL 应用。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/REQUIREMENTS.md",
+          "docs/GIT_WORKFLOW.md",
+          "docs/PROJECT_CONSTRAINTS.md",
+          "docs/ACCEPTANCE.md",
+          "docs/CODE_REVIEW.md",
+          "docs/README.md",
+          "docs/plans/README.md",
+          "docs/verification/README.md",
+          "docs/ROADMAP.md",
+          "docs/FEATURE_STATUS.md",
+          "docs/COLLABORATION_WORKFLOW.md",
+          "docs/plans/antigravity-pi-collaboration.md",
+          "docs/verification/antigravity-pi-collaboration.md",
+          "governance/",
+          "scripts/governance/",
+          "tests/governance/",
+          ".githooks/",
+          ".github/workflows/governance.yml"
+        ],
+        "plan_path": "docs/plans/antigravity-pi-collaboration.md",
+        "mode": "code",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "begin": "TASK-GOV-004-E10",
+      "source_head": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:d96d6a02f25926cfa1240f51a55316291b210bff5f9f0068f5acb5ef00340316",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "after": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:d06793b1690b13963a01445aa3155da535ae4f05bc017cb0cbb9dc925e279f05",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:c3bf2d166c1b189ff96b4337d5cbc4481138f72e6558a06c1c513a8ed4871d3f",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:a8a950883324c3df884e8a735be747d696a788b5408b584b8b165ed936789a7e",
+        "docs/ARCHITECTURE.md": "100644:03b2186abd53e5b78e2b646e1949b61f897b37d22985e28ce447659733fefa36",
+        "docs/CODE_REVIEW.md": "100644:097ad9d57797dba4287acb59e09d83c8e50c05e7cd6d3758229b1c8dd8af65b8",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:b0645295870a171d2af704948a1b222bd75781323f0719e7c437ed3dd2a532f4",
+        "docs/DATA_MODELS.md": "100644:1df212ab5ed5ce2e30d4e151c69c2ebf5abd13e8f1d05a5201fec266933bbc94",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:ed9f7f88f71806f0ed343150c8e44ff29040a796577c6ae6b192777b2d4f12cf",
+        "docs/FEATURE_STATUS.md": "100644:4149649c9ea7a3b857e0e1a7b0bed2b4a9ba397fc9f52635d702b9318fe840f8",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/README.md": "100644:a41a00de0c147154111b61f27582421ad642ea01b78eec4c1a8bdc45805f1352",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:e5c735e7a88a5a4247d055e507db6f89c9583e6c4363e9d05421b96c683dc885",
+        "docs/README.md": "100644:615f9093ac2052f6628155af0c7ed1ad828b12be356aa119717b928bd68b7579",
+        "docs/REQUIREMENTS.md": "100644:f741f109b1f3c4b255d9b72b4240b3c74b9c62c32a88630c20027257b3b28830",
+        "docs/ROADMAP.md": "100644:ecaa652ab1126b80ca62c32102ca78b407a977757343bab1dc73069bb4816ba9",
+        "docs/TECH_STACK.md": "100644:41f3d024e6e2db5e6e2b2062a9ccfcab0aa8d172a406084ab0ee16f29948544b",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:aac49c2ab5ca9e01998c6462005eb563e38fa6d4ac484fa92e1d85c030402e66",
+        "docs/VERSIONING.md": "100644:47696fd835582ae2bded3063cb3965727cd49c31564f0beb8af0e90aafca3874",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:2e14c73499bdba9616cc6bff7c23a3f1fbf393aacb31ffa281f2c4c859815f4a",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:2f59c702c67d221cdf5eac8909efb051992bcdbff6e684f2ddd84b8f60d18848",
+        "governance/tasks.json": "100644:9c7814c2159c9350d580f3193666bd07783ad81dfb0d8f4c740589d1155a65dc",
+        "scripts/governance/check.mjs": "100644:23f304382836c6ca9a47986deec9b8bc466cccb9877fdc4653e1c2fb26587794",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:c8dba2e5484b8f54e2f030578b7deba7b1e5ef9b6cc1e8e5455c1108b999970e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:a6078e039a1f1838a1483ed3c1658801ac406a5ffb8f6a1990373362e3037123",
+        "scripts/governance/lib/validate.mjs": "100644:bb01ef93fc2d8200dd4658127ada2a608665f22b84b10f4949a21ec5a9543a6d",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:991e212de5e891e8fcfc36678134a3d2c5671ff3e2a676d19560d7d23d5ba38c",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:4742a76c7d17db41a0b49539156ec5e68dac26204d27f57b565572e6ea0b3948",
+        "tests/governance/collaboration.test.mjs": "100644:d96d6a02f25926cfa1240f51a55316291b210bff5f9f0068f5acb5ef00340316",
+        "tests/governance/governance.test.mjs": "100644:61512e78b269f274c607c9480c9e074408f4b40ea4ca69c95b001174939ea106"
+      },
+      "changes": [
+        {
+          "path": "docs/verification/antigravity-pi-collaboration.md",
+          "before": "100644:689a9e529233f57879b84d929f909c204e8e436b7a87ab85e4beb6b08ced9344",
+          "after": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+          "action": "modify"
+        }
+      ],
+      "contract_sha256": "861a57a0ee567a220ec320316f8bd4505d991da1d28f04a2fd355d3c427eaa09",
+      "acceptance_ids": [
+        "G01-A1",
+        "G01-A2",
+        "G01-A3",
+        "G01-A4",
+        "G02-A1",
+        "G03-A1",
+        "G03-A2",
+        "G03-A3",
+        "G03-A4"
+      ],
+      "acceptance_definitions": [
+        {
+          "id": "G01-A1",
+          "description": "门禁正反测试、暂存快照及真实推送对象测试全部执行",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A2",
+          "description": "实际启用 Hook、独立 CI 成功与 main 保护 API 核实，用户审查治理自身",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        },
+        {
+          "id": "G01-A3",
+          "description": "main-push CI 环境不污染测试夹具，非 CI 上下文仍拒绝 --ci-main",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G01-A4",
+          "description": "main 的准确 base/head 优先识别本次任务，新旧任务共享功能不误判，多个变更任务或越界仍拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A1",
+          "description": "文档、台账、跟踪文件检查及真实分支/提交/PR 记录，用户确认合并",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G03-A1",
+          "description": "合法规划、开发、返工、文档-only 与限定 bootstrap 可执行；错误角色、阶段、任务、摘要、基线及越界增删改拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A2",
+          "description": "交接包含目标、实际结果、文件与原始执行证据、构建/编译或不适用理由、限制和下一步；双向 prompt 确定性完整，生成不自动接收",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A3",
+          "description": "暂存、消息、实际推送对象和 PR/main 快照校验交接；漂移、伪通过、旧证据、改写及 PI 提交拒绝，原治理回归保留",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A4",
+          "description": "真实 Antigravity 接收并负责提交/push/PR/CI，生成下一步 prompt；用户审查治理并确认合并",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        }
+      ],
+      "next_phase": "wait",
+      "receiver": "pi-desktop",
+      "details": {
+        "goal": "落实已批准的 Antigravity × PI-Desktop 人工转交与机械责任/交接门禁，仅治理与相关规范，不实现 MySQL 应用。",
+        "outcome": "Antigravity 核验接收 PI-Desktop 返工 E8，同步验证记录并重新全量执行治理与协作套件。governance-tests 58/58、collaboration-tests 73/73 全部通过，无失败/跳过/取消/超时。形成 documentation_delivery 的 ready/wait 候选，准备提交信息与 Git 交付。",
+        "next_actions": [
+          "暂存本任务明确授权文件，保留 Hook 候选 100755 模式（.githooks/commit-msg 执行 git update-index --chmod=+x）。",
+          "在 GOV_ROLE=antigravity 上下文执行 git commit，提交信息与候选完全一致。",
+          "使用 git push -u origin chore/antigravity-pi-handoff 推送任务分支。",
+          "创建以 main 为 base 的 PR，核实独立 Governance CI 状态。",
+          "使用 record-delivery 命令核验真实 commit、PR、CI 信息并生成交付交接事件与回传 Prompt。"
+        ],
+        "forbidden": [
+          "PI-Desktop 不执行本仓库 commit、push、PR；Antigravity 不自行改代码/构建来修复失败。",
+          "不绕过 Hook、关闭 hooksPath、force push、向 main 推送、自动合并、删除分支、Tag 或发布。",
+          "不将 .pi/、本地项目记忆、秘密或 .governance-evidence/ 原始本地目录入库；只使用经核对的脱敏诊断交接记录。",
+          "不连接数据库、不改客户端、不执行 MySQL 写入/DDL；交接不扩大已批准范围。"
+        ],
+        "documentation_requests": [],
+        "limitations": [
+          "本地执行报告及嵌入原始 TAP 为诊断，不是独立 CI、工具身份或真人转交/验收认证。",
+          "MySQL 应用、真实客户端和数据库功能仍未实现；没有应用 package 或编译工程，不宣称应用构建通过。",
+          "最终合并仍需用户审查门禁与人工确认，不自动合并。"
+        ],
+        "blockers": [],
+        "result": "ready",
+        "commit_message": "chore(governance): enforce antigravity pi handoff and delivery gates",
+        "build": {
+          "status": "not_applicable",
+          "reason": "本轮为治理 Node .mjs 工具与规范，无 MySQL 应用 package.json 或构建/编译工程；已执行语法和实际测试。",
+          "check_ids": []
+        },
+        "verification": [
+          {
+            "check_id": "governance-tests",
+            "reason": "执行原治理回归测试 58/58，全部通过。"
+          },
+          {
+            "check_id": "collaboration-tests",
+            "reason": "执行返工优化后的协作门禁与 Git 交付测试 73/73，全部通过。"
+          }
+        ]
+      },
+      "check_definitions": [
+        {
+          "id": "governance-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/governance.test.mjs"
+          ],
+          "timeout_ms": 120000,
+          "parser": "tap",
+          "feature_ids": [
+            "G01",
+            "G02"
+          ],
+          "acceptance_ids": [
+            "G01-A1",
+            "G01-A3",
+            "G01-A4",
+            "G02-A1"
+          ]
+        },
+        {
+          "id": "collaboration-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/collaboration.test.mjs",
+            "tests/governance/collaboration-git.test.mjs"
+          ],
+          "timeout_ms": 300000,
+          "parser": "tap",
+          "feature_ids": [
+            "G03"
+          ],
+          "acceptance_ids": [
+            "G03-A1",
+            "G03-A2",
+            "G03-A3"
+          ]
+        }
+      ],
+      "evidence": {
+        "report": {
+          "schema_version": 1,
+          "trust": "local-diagnostic-only",
+          "started_at": "2026-10-02T07:22:03.501Z",
+          "environment": {
+            "node": "v24.16.0",
+            "platform": "win32",
+            "arch": "x64"
+          },
+          "checks": [
+            {
+              "check_id": "governance-tests",
+              "feature_ids": [
+                "G01",
+                "G02"
+              ],
+              "acceptance_ids": [
+                "G01-A1",
+                "G01-A3",
+                "G01-A4",
+                "G02-A1"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/governance.test.mjs"
+              ],
+              "check_definition_sha256": "e9dde2395080bcda3f222787a305a38e8ea8e1bc2447a0200dff2cfdd6e74fa2",
+              "started_at": "2026-10-02T07:22:05.298Z",
+              "ended_at": "2026-10-02T07:23:41.734Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 58,
+                "pass": 58,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "governance-tests.tap",
+                  "sha256": "a34197e86dd27474c20bb717a7b96bba2115d13209cfe8e16edef45fae03d86f"
+                },
+                {
+                  "path": "governance-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            },
+            {
+              "check_id": "collaboration-tests",
+              "feature_ids": [
+                "G03"
+              ],
+              "acceptance_ids": [
+                "G03-A1",
+                "G03-A2",
+                "G03-A3"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/collaboration.test.mjs",
+                "tests/governance/collaboration-git.test.mjs"
+              ],
+              "check_definition_sha256": "dc17c40a23c2a40a39f8a5208c6ead94e2b78043529c5692bb8a3182f990a766",
+              "started_at": "2026-10-02T07:23:41.734Z",
+              "ended_at": "2026-10-02T07:28:26.891Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 73,
+                "pass": 73,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "collaboration-tests.tap",
+                  "sha256": "af160d97c1441f6738c746dde2b06050f26ab6e44c3e4a6cc65c82164ba846fb"
+                },
+                {
+                  "path": "collaboration-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            }
+          ],
+          "acceptance": "unverified",
+          "task_id": "TASK-GOV-004",
+          "feature_ids": [
+            "G01",
+            "G02",
+            "G03"
+          ],
+          "task_status_claim": "in_progress",
+          "task_completion": "unauthenticated",
+          "source_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+          "snapshot_tree": null,
+          "input_sha256": "7d768e63667c47b50e3038fbf8d98dbad37411adff8822e4c883f3643308c6f6",
+          "development_sha256": "f64580675f5f00064a7cd6e3a092da98c4226a2475116ae0caf019ed7fb0487a",
+          "local_result": "passed",
+          "ended_at": "2026-10-02T07:28:26.902Z"
+        },
+        "artifacts": {
+          "governance-tests.tap": "TAP version 13\n# Subtest: valid planned feature and deterministic report\nok 1 - valid planned feature and deterministic report\n  ---\n  duration_ms: 1884.8682\n  type: 'test'\n  ...\n# Subtest: duplicate feature ID\nok 2 - duplicate feature ID\n  ---\n  duration_ms: 705.1555\n  type: 'test'\n  ...\n# Subtest: duplicate normalized key\nok 3 - duplicate normalized key\n  ---\n  duration_ms: 702.7467\n  type: 'test'\n  ...\n# Subtest: duplicate acceptance ID\nok 4 - duplicate acceptance ID\n  ---\n  duration_ms: 697.2991\n  type: 'test'\n  ...\n# Subtest: duplicate task ID\nok 5 - duplicate task ID\n  ---\n  duration_ms: 713.3717\n  type: 'test'\n  ...\n# Subtest: undefined requirement\nok 6 - undefined requirement\n  ---\n  duration_ms: 833.6731\n  type: 'test'\n  ...\n# Subtest: missing dependency\nok 7 - missing dependency\n  ---\n  duration_ms: 830.4988\n  type: 'test'\n  ...\n# Subtest: dependency cycle\nok 8 - dependency cycle\n  ---\n  duration_ms: 830.6153\n  type: 'test'\n  ...\n# Subtest: unknown status\nok 9 - unknown status\n  ---\n  duration_ms: 830.5848\n  type: 'test'\n  ...\n# Subtest: path traversal\nok 10 - path traversal\n  ---\n  duration_ms: 834.4227\n  type: 'test'\n  ...\n# Subtest: missing implementation\nok 11 - missing implementation\n  ---\n  duration_ms: 821.7653\n  type: 'test'\n  ...\n# Subtest: forged passed evidence\nok 12 - forged passed evidence\n  ---\n  duration_ms: 828.4189\n  type: 'test'\n  ...\n# Subtest: mock masquerading as real mysql\nok 13 - mock masquerading as real mysql\n  ---\n  duration_ms: 824.678\n  type: 'test'\n  ...\n# Subtest: manual acceptance claim\nok 14 - manual acceptance claim\n  ---\n  duration_ms: 823.7244\n  type: 'test'\n  ...\n# Subtest: feature completion claim\nok 15 - feature completion claim\n  ---\n  duration_ms: 823.1636\n  type: 'test'\n  ...\n# Subtest: unapproved governance modification\nok 16 - unapproved governance modification\n  ---\n  duration_ms: 1523.9989\n  type: 'test'\n  ...\n# Subtest: scope violation\nok 17 - scope violation\n  ---\n  duration_ms: 1534.3336\n  type: 'test'\n  ...\n# Subtest: shell command\nok 18 - shell command\n  ---\n  duration_ms: 826.7037\n  type: 'test'\n  ...\n# Subtest: node eval injection\nok 19 - node eval injection\n  ---\n  duration_ms: 824.2046\n  type: 'test'\n  ...\n# Subtest: task collision\nok 20 - task collision\n  ---\n  duration_ms: 829.0188\n  type: 'test'\n  ...\n# Subtest: uncovered confirmed requirement\nok 21 - uncovered confirmed requirement\n  ---\n  duration_ms: 818.1207\n  type: 'test'\n  ...\n# Subtest: checked roadmap cannot grant completion\nok 22 - checked roadmap cannot grant completion\n  ---\n  duration_ms: 824.5299\n  type: 'test'\n  ...\n# Subtest: tracked confidential path\nok 23 - tracked confidential path\n  ---\n  duration_ms: 884.3464\n  type: 'test'\n  ...\n# Subtest: staged invalid record cannot be masked by unstaged repair\nok 24 - staged invalid record cannot be masked by unstaged repair\n  ---\n  duration_ms: 3541.7569\n  type: 'test'\n  ...\n# Subtest: staged checker, not unstaged checker, is executed\nok 25 - staged checker, not unstaged checker, is executed\n  ---\n  duration_ms: 2213.0035\n  type: 'test'\n  ...\n# Subtest: valid staged snapshot executes registered tests\nok 26 - valid staged snapshot executes registered tests\n  ---\n  duration_ms: 4660.8735\n  type: 'test'\n  ...\n# Subtest: main staged commit rejected\nok 27 - main staged commit rejected\n  ---\n  duration_ms: 829.7282\n  type: 'test'\n  ...\n# Subtest: remote branch mismatch\nok 28 - remote branch mismatch\n  ---\n  duration_ms: 881.6449\n  type: 'test'\n  ...\n# Subtest: main push\nok 29 - main push\n  ---\n  duration_ms: 890.0035\n  type: 'test'\n  ...\n# Subtest: delete push\nok 30 - delete push\n  ---\n  duration_ms: 895.4284\n  type: 'test'\n  ...\n# Subtest: oid mismatch\nok 31 - oid mismatch\n  ---\n  duration_ms: 1008.1565\n  type: 'test'\n  ...\n# Subtest: unknown commit\nok 32 - unknown commit\n  ---\n  duration_ms: 953.3965\n  type: 'test'\n  ...\n# Subtest: push validates object rather than repaired worktree\nok 33 - push validates object rather than repaired worktree\n  ---\n  duration_ms: 2512.2535\n  type: 'test'\n  ...\n# Subtest: valid actual push object\nok 34 - valid actual push object\n  ---\n  duration_ms: 4784.9233\n  type: 'test'\n  ...\n# Subtest: actual execution rejects failure\nok 35 - actual execution rejects failure\n  ---\n  duration_ms: 797.6054\n  type: 'test'\n  ...\n# Subtest: actual execution rejects skipped\nok 36 - actual execution rejects skipped\n  ---\n  duration_ms: 798.7563\n  type: 'test'\n  ...\n# Subtest: actual execution rejects zero tests\nok 37 - actual execution rejects zero tests\n  ---\n  duration_ms: 794.0371\n  type: 'test'\n  ...\n# Subtest: actual execution rejects timeout\nok 38 - actual execution rejects timeout\n  ---\n  duration_ms: 727.0297\n  type: 'test'\n  ...\n# Subtest: run report verifies artifacts, detects tampering and stale inputs\nok 39 - run report verifies artifacts, detects tampering and stale inputs\n  ---\n  duration_ms: 5320.9265\n  type: 'test'\n  ...\n# Subtest: input digest changes with source content\nok 40 - input digest changes with source content\n  ---\n  duration_ms: 731.6551\n  type: 'test'\n  ...\n# Subtest: deleted criterion requires explicit authorized scope record\nok 41 - deleted criterion requires explicit authorized scope record\n  ---\n  duration_ms: 2931.9549\n  type: 'test'\n  ...\n# Subtest: hook installer refuses existing hooksPath without modification\nok 42 - hook installer refuses existing hooksPath without modification\n  ---\n  duration_ms: 869.3056\n  type: 'test'\n  ...\n# Subtest: CI compares actual base/head scope despite clean checkout\nok 43 - CI compares actual base/head scope despite clean checkout\n  ---\n  duration_ms: 2940.8133\n  type: 'test'\n  ...\n# Subtest: push wrong task branch rejected even with matching refs\nok 44 - push wrong task branch rejected even with matching refs\n  ---\n  duration_ms: 2534.2374\n  type: 'test'\n  ...\n# Subtest: implemented feature paths must exist and be tracked\nok 45 - implemented feature paths must exist and be tracked\n  ---\n  duration_ms: 1404.8676\n  type: 'test'\n  ...\n# Subtest: mutable base cannot hide committed out-of-scope path from origin main\nok 46 - mutable base cannot hide committed out-of-scope path from origin main\n  ---\n  duration_ms: 2447.2589\n  type: 'test'\n  ...\n# Subtest: HEAD task baseline cannot be advanced without remote\nok 47 - HEAD task baseline cannot be advanced without remote\n  ---\n  duration_ms: 1424.0593\n  type: 'test'\n  ...\n# Subtest: nonancestor task base rejected\nok 48 - nonancestor task base rejected\n  ---\n  duration_ms: 1763.9117\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: local\nok 49 - existing feature scope checked against trusted registry: local\n  ---\n  duration_ms: 1595.2137\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: staged\nok 50 - existing feature scope checked against trusted registry: staged\n  ---\n  duration_ms: 3053.8299\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: CI\nok 51 - existing feature scope checked against trusted registry: CI\n  ---\n  duration_ms: 3066.8913\n  type: 'test'\n  ...\n# Subtest: explicit feature scope authorization permits reviewed change\nok 52 - explicit feature scope authorization permits reviewed change\n  ---\n  duration_ms: 1955.6449\n  type: 'test'\n  ...\n# Subtest: main CI selects completed delta task despite unrelated active branches; no push permission\nok 53 - main CI selects completed delta task despite unrelated active branches; no push permission\n  ---\n  duration_ms: 7411.2265\n  type: 'test'\n  ...\n# Subtest: report requires exact artifacts and execution metadata, never just passed\nok 54 - report requires exact artifacts and execution metadata, never just passed\n  ---\n  duration_ms: 4455.995\n  type: 'test'\n  ...\n# Subtest: registered tests do not inherit parent GitHub CI context\nok 55 - registered tests do not inherit parent GitHub CI context\n  ---\n  duration_ms: 801.748\n  type: 'test'\n  ...\n# Subtest: main task delta selection: shared-feature\nok 56 - main task delta selection: shared-feature\n  ---\n  duration_ms: 1318.894\n  type: 'test'\n  ...\n# Subtest: main task delta selection: multiple-delta\nok 57 - main task delta selection: multiple-delta\n  ---\n  duration_ms: 1523.195\n  type: 'test'\n  ...\n# Subtest: main task delta selection: out-of-scope\nok 58 - main task delta selection: out-of-scope\n  ---\n  duration_ms: 1333.3302\n  type: 'test'\n  ...\n1..58\n# tests 58\n# suites 0\n# pass 58\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 96353.3206\n",
+          "governance-tests.stderr.log": "",
+          "collaboration-tests.tap": "TAP version 13\n# Subtest: history rewrite detected against committed prefix\nok 1 - history rewrite detected against committed prefix\n  ---\n  duration_ms: 13386.5872\n  type: 'test'\n  ...\n# Subtest: policy cannot be removed after deployment\nok 2 - policy cannot be removed after deployment\n  ---\n  duration_ms: 12483.5097\n  type: 'test'\n  ...\n# Subtest: actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\nok 3 - actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\n  ---\n  duration_ms: 34813.9154\n  type: 'test'\n  ...\n# Subtest: staged bad snapshot cannot be masked by unstaged repair\nok 4 - staged bad snapshot cannot be masked by unstaged repair\n  ---\n  duration_ms: 15676.7819\n  type: 'test'\n  ...\n# Subtest: old committed object cannot be masked by repaired working copy\nok 5 - old committed object cannot be masked by repaired working copy\n  ---\n  duration_ms: 15772.1998\n  type: 'test'\n  ...\n# Subtest: PR exact base/head and squash main independent context both pass\nok 6 - PR exact base/head and squash main independent context both pass\n  ---\n  duration_ms: 22303.5618\n  type: 'test'\n  ...\n# Subtest: delivery success produces next PI prompt; failure explicitly accepts rework\nok 7 - delivery success produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 18149.6087\n  type: 'test'\n  ...\n# Subtest: delivery failure produces next PI prompt; failure explicitly accepts rework\nok 8 - delivery failure produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 15731.0686\n  type: 'test'\n  ...\n# Subtest: historical task cannot authorize new task branch changes\nok 9 - historical task cannot authorize new task branch changes\n  ---\n  duration_ms: 12428.7185\n  type: 'test'\n  ...\n# Subtest: missing Git role is rejected even for valid candidate\nok 10 - missing Git role is rejected even for valid candidate\n  ---\n  duration_ms: 15246.4283\n  type: 'test'\n  ...\n# Subtest: reject revokes completed Git candidate until fresh planning\nok 11 - reject revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 17818.4451\n  type: 'test'\n  ...\n# Subtest: cancel revokes completed Git candidate until fresh planning\nok 12 - cancel revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 17794.2564\n  type: 'test'\n  ...\n# Subtest: Git mode-only change is subject to role and candidate snapshot\nok 13 - Git mode-only change is subject to role and candidate snapshot\n  ---\n  duration_ms: 13032.1613\n  type: 'test'\n  ...\n# Subtest: valid dual prompts, explicit acceptance, development and delivery candidate\nok 14 - valid dual prompts, explicit acceptance, development and delivery candidate\n  ---\n  duration_ms: 13522.2161\n  type: 'test'\n  ...\n# Subtest: document-only workflow has no fabricated PI development\nok 15 - document-only workflow has no fabricated PI development\n  ---\n  duration_ms: 7287.2239\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/planning\nok 16 - reject wrong/missing planning role pi-desktop/planning\n  ---\n  duration_ms: 296.451\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role antigravity/implementation\nok 17 - reject wrong/missing planning role antigravity/implementation\n  ---\n  duration_ms: 296.8886\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/bootstrap\nok 18 - reject wrong/missing planning role pi-desktop/bootstrap\n  ---\n  duration_ms: 292.9075\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/implementation\nok 19 - reject wrong/missing planning role pi-desktop/implementation\n  ---\n  duration_ms: 290.6586\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot add code in planning\nok 20 - Antigravity cannot add code in planning\n  ---\n  duration_ms: 1107.3594\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot delete code in planning\nok 21 - Antigravity cannot delete code in planning\n  ---\n  duration_ms: 1098.6763\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot rename code in planning\nok 22 - Antigravity cannot rename code in planning\n  ---\n  duration_ms: 1100.4952\n  type: 'test'\n  ...\n# Subtest: PI cannot add documentation/registry\nok 23 - PI cannot add documentation/registry\n  ---\n  duration_ms: 3772.0279\n  type: 'test'\n  ...\n# Subtest: PI cannot delete documentation/registry\nok 24 - PI cannot delete documentation/registry\n  ---\n  duration_ms: 3790.7492\n  type: 'test'\n  ...\n# Subtest: PI cannot rename documentation/registry\nok 25 - PI cannot rename documentation/registry\n  ---\n  duration_ms: 3813.115\n  type: 'test'\n  ...\n# Subtest: PI cannot registry documentation/registry\nok 26 - PI cannot registry documentation/registry\n  ---\n  duration_ms: 3809.7735\n  type: 'test'\n  ...\n# Subtest: unclassified and overlapping path policies rejected\nok 27 - unclassified and overlapping path policies rejected\n  ---\n  duration_ms: 1092.4466\n  type: 'test'\n  ...\n# Subtest: bad receiver role\nok 28 - bad receiver role\n  ---\n  duration_ms: 2497.7069\n  type: 'test'\n  ...\n# Subtest: bad receiver digest\nok 29 - bad receiver digest\n  ---\n  duration_ms: 2065.2478\n  type: 'test'\n  ...\n# Subtest: bad receiver duplicate\nok 30 - bad receiver duplicate\n  ---\n  duration_ms: 3002.0126\n  type: 'test'\n  ...\n# Subtest: reject kept and requires replanning\nok 31 - reject kept and requires replanning\n  ---\n  duration_ms: 3796.7681\n  type: 'test'\n  ...\n# Subtest: cancel kept and requires replanning\nok 32 - cancel kept and requires replanning\n  ---\n  duration_ms: 3815.659\n  type: 'test'\n  ...\n# Subtest: handoff content rejects goal\nok 33 - handoff content rejects goal\n  ---\n  duration_ms: 6809.3012\n  type: 'test'\n  ...\n# Subtest: handoff content rejects placeholder\nok 34 - handoff content rejects placeholder\n  ---\n  duration_ms: 6758.3417\n  type: 'test'\n  ...\n# Subtest: handoff content rejects next actions\nok 35 - handoff content rejects next actions\n  ---\n  duration_ms: 6789.247\n  type: 'test'\n  ...\n# Subtest: handoff content rejects limitations\nok 36 - handoff content rejects limitations\n  ---\n  duration_ms: 6742.4128\n  type: 'test'\n  ...\n# Subtest: handoff content rejects build reason\nok 37 - handoff content rejects build reason\n  ---\n  duration_ms: 6798.2929\n  type: 'test'\n  ...\n# Subtest: handoff content rejects blocker ready\nok 38 - handoff content rejects blocker ready\n  ---\n  duration_ms: 6797.9196\n  type: 'test'\n  ...\n# Subtest: handoff content rejects verification reference\nok 39 - handoff content rejects verification reference\n  ---\n  duration_ms: 6752.019\n  type: 'test'\n  ...\n# Subtest: handoff content rejects missing verification\nok 40 - handoff content rejects missing verification\n  ---\n  duration_ms: 6797.7031\n  type: 'test'\n  ...\n# Subtest: handoff content rejects PI commit message\nok 41 - handoff content rejects PI commit message\n  ---\n  duration_ms: 6778.8372\n  type: 'test'\n  ...\n# Subtest: tampered handoff digest rejected\nok 42 - tampered handoff digest rejected\n  ---\n  duration_ms: 1842.3562\n  type: 'test'\n  ...\n# Subtest: tampered handoff role rejected\nok 43 - tampered handoff role rejected\n  ---\n  duration_ms: 1833.4684\n  type: 'test'\n  ...\n# Subtest: tampered handoff branch rejected\nok 44 - tampered handoff branch rejected\n  ---\n  duration_ms: 1893.1196\n  type: 'test'\n  ...\n# Subtest: tampered handoff base rejected\nok 45 - tampered handoff base rejected\n  ---\n  duration_ms: 1918.9665\n  type: 'test'\n  ...\n# Subtest: tampered handoff features rejected\nok 46 - tampered handoff features rejected\n  ---\n  duration_ms: 1897.9831\n  type: 'test'\n  ...\n# Subtest: tampered handoff acceptance rejected\nok 47 - tampered handoff acceptance rejected\n  ---\n  duration_ms: 1908.1078\n  type: 'test'\n  ...\n# Subtest: tampered handoff receiver rejected\nok 48 - tampered handoff receiver rejected\n  ---\n  duration_ms: 1908.5313\n  type: 'test'\n  ...\n# Subtest: tampered handoff omission rejected\nok 49 - tampered handoff omission rejected\n  ---\n  duration_ms: 1901.6034\n  type: 'test'\n  ...\n# Subtest: tampered handoff manifest rejected\nok 50 - tampered handoff manifest rejected\n  ---\n  duration_ms: 1908.1668\n  type: 'test'\n  ...\n# Subtest: tampered handoff chain rejected\nok 51 - tampered handoff chain rejected\n  ---\n  duration_ms: 1910.7939\n  type: 'test'\n  ...\n# Subtest: post-handoff code drift rejected\nok 52 - post-handoff code drift rejected\n  ---\n  duration_ms: 8132.8592\n  type: 'test'\n  ...\n# Subtest: post-handoff plan drift rejected\nok 53 - post-handoff plan drift rejected\n  ---\n  duration_ms: 8197.1932\n  type: 'test'\n  ...\n# Subtest: plan change in documentation requires replanning/rework, not old evidence\nok 54 - plan change in documentation requires replanning/rework, not old evidence\n  ---\n  duration_ms: 11965.3163\n  type: 'test'\n  ...\n# Subtest: rework retains previous failures and executes new code checks\nok 55 - rework retains previous failures and executes new code checks\n  ---\n  duration_ms: 20514.5759\n  type: 'test'\n  ...\n# Subtest: evidence TAP cannot grant handoff\nok 56 - evidence TAP cannot grant handoff\n  ---\n  duration_ms: 6518.8792\n  type: 'test'\n  ...\n# Subtest: evidence counts cannot grant handoff\nok 57 - evidence counts cannot grant handoff\n  ---\n  duration_ms: 6548.4186\n  type: 'test'\n  ...\n# Subtest: evidence source cannot grant handoff\nok 58 - evidence source cannot grant handoff\n  ---\n  duration_ms: 6777.0312\n  type: 'test'\n  ...\n# Subtest: evidence task cannot grant handoff\nok 59 - evidence task cannot grant handoff\n  ---\n  duration_ms: 6806.4868\n  type: 'test'\n  ...\n# Subtest: evidence stale cannot grant handoff\nok 60 - evidence stale cannot grant handoff\n  ---\n  duration_ms: 6589.6438\n  type: 'test'\n  ...\n# Subtest: evidence failed cannot grant handoff\nok 61 - evidence failed cannot grant handoff\n  ---\n  duration_ms: 6495.9209\n  type: 'test'\n  ...\n# Subtest: saved prompt mismatch and strict CLI options rejected\nok 62 - saved prompt mismatch and strict CLI options rejected\n  ---\n  duration_ms: 4900.1852\n  type: 'test'\n  ...\n# Subtest: copied bootstrap and historical task cannot bypass policy\nok 63 - copied bootstrap and historical task cannot bypass policy\n  ---\n  duration_ms: 282.7497\n  type: 'test'\n  ...\n# Subtest: new task without handoff log fails closed\nok 64 - new task without handoff log fails closed\n  ---\n  duration_ms: 1445.4021\n  type: 'test'\n  ...\n# Subtest: required future build and compilation actually execute without shell\nok 65 - required future build and compilation actually execute without shell\n  ---\n  duration_ms: 4657.1812\n  type: 'test'\n  ...\n# Subtest: unsafe/missing build definition cannot claim compilation\nok 66 - unsafe/missing build definition cannot claim compilation\n  ---\n  duration_ms: 466.7826\n  type: 'test'\n  ...\n# Subtest: manifest is portable across Git LF and Windows CRLF checkout\nok 67 - manifest is portable across Git LF and Windows CRLF checkout\n  ---\n  duration_ms: 568.7376\n  type: 'test'\n  ...\n# Subtest: task authorization changes can be replanned but invalidate old delivery\nok 68 - task authorization changes can be replanned but invalidate old delivery\n  ---\n  duration_ms: 26559.4057\n  type: 'test'\n  ...\n# Subtest: application package cannot silently declare build not applicable\nok 69 - application package cannot silently declare build not applicable\n  ---\n  duration_ms: 6787.623\n  type: 'test'\n  ...\n# Subtest: failed original tests cannot produce ready handoff\nok 70 - failed original tests cannot produce ready handoff\n  ---\n  duration_ms: 6486.9403\n  type: 'test'\n  ...\n# Subtest: missing declared plan cannot grant ready planning\nok 71 - missing declared plan cannot grant ready planning\n  ---\n  duration_ms: 1558.6875\n  type: 'test'\n  ...\n# Subtest: finish and receive require actual active task branch\nok 72 - finish and receive require actual active task branch\n  ---\n  duration_ms: 1998.2171\n  type: 'test'\n  ...\n# Subtest: copied baseline isolates worktree, index, refs, config and evidence\nok 73 - copied baseline isolates worktree, index, refs, config and evidence\n  ---\n  duration_ms: 3926.1386\n  type: 'test'\n  ...\n1..73\n# tests 73\n# suites 0\n# pass 73\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 285071.0459\n",
+          "collaboration-tests.stderr.log": ""
+        }
+      },
+      "build_evidence": null,
+      "digest": "9210f2ce3264d329b25d99030eea5c2504ea6a29e5c92b5bf5fc6d1f59900053"
+    }
+  ]
+}

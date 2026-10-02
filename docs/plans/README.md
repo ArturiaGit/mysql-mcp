@@ -1,12 +1,12 @@
 # 规划与任务台账
 
-> 状态：MySQL 应用实施尚未启动；已批准 TASK-GOV-001 治理门禁实现。自动检查由 scripts/governance 提供，计划新建/归档脚本仍不存在。
+> 状态：MySQL 应用实施尚未启动。当前批准的协作治理任务为 TASK-GOV-004，G03/R17，并扩展 G01/G02；历史任务记录保留，不由本索引无依据升级完成。自动检查由 scripts/governance 提供，计划新建/归档脚本仍不存在。
 
 ## 1. 两类记录的边界
 
 `docs/plans/` 用于项目实施计划及其验证记录；宿主 `.pi/plan/` 是会话审批快照，保留原样，不当成运行代码，也不把存在快照视为批准其全部内容。
 
-先前已交付规范文档；本次新增授权为公开仓库初始化和 Agent 默认 Git 流程。此前软件计划仍是历史提案，不登记为正在开发。Git 常规交付不再逐次询问，具体规则见 [Git 工作流](../GIT_WORKFLOW.md)。
+先前软件计划仍是历史提案，不登记为正在开发。当前分工为 Antigravity 规划/文档/台账/Git 交付，PI 代码/测试/构建，双方 prompt 由用户手动转交并由接收方显式接受。Git 常规交付由 Antigravity 执行，不逐次询问；PI 不执行本仓库 commit/push/PR。规则见[协作规范](../COLLABORATION_WORKFLOW.md)与[Git 工作流](../GIT_WORKFLOW.md)。
 
 ## 2. 软件计划台账
 
@@ -22,7 +22,7 @@
 2. **approved**：记录用户批准的准确范围与不包含事项。
 3. **in_progress**：只推进已授权任务，保留未完成项。
 4. **blocked**：列具体阻塞、影响及可继续工作，不把猜测风险当阻塞。
-5. **waiting_for_merge**：实现及约定验收完成，已自动提交、push、创建/更新 PR；记录实际检查与未验证项，等待用户确认合并。
+5. **waiting_for_merge**：约定交付检查满足，Antigravity 已真实提交、push、创建/更新 PR；记录实际检查、未验证项和交付事件，生成下一步 prompt，等待用户确认合并，不等于功能全部验收。
 6. **completed**：用户确认合并、核实结果，且所有功能必要实现/验证/人工或实机验收证据可核查；合并本身不能补足证据，不意味着已发布。
 7. **archived**：完成后保留证据和时间，移入未来 `archive/` 并更新索引，不丢失历史。
 
@@ -63,7 +63,7 @@ main 基线提交：
 
 ## 5. 维护规则
 
-计划文件聚合在本目录；机器任务及功能真相源为 governance/tasks.json 与 governance/features.json。node scripts/governance/check.mjs 校验范围/重复/覆盖；node scripts/governance/run.mjs 执行登记测试。归档仍人工操作，不执行不存在的自动归档脚本。
+计划文件聚合在本目录；机器任务及功能真相源为 governance/tasks.json 与 governance/features.json，通常由 Antigravity 在 planning/documentation_delivery 维护。node scripts/governance/check.mjs 校验范围/重复/覆盖；node scripts/governance/run.mjs 执行登记测试。PI 报告实际实现/测试及文档同步请求，不直接改规范/台账（仅本次限定 bootstrap 例外）。归档仍人工操作，不执行不存在的自动归档脚本。
 
 涉及真实 MySQL 的步骤必须注明隔离库、账号权限及逐次确认；即使整体开发计划获批也不省略。进度总览见[路线图](../ROADMAP.md)，需求变化先更新[需求基线](../REQUIREMENTS.md)。
 
@@ -73,8 +73,17 @@ main 基线提交：
 
 本任务最终提交哈希、PR URL、检查及等待合并状态见首个 PR 与交付报告；不把尚未取得的远程结果预填为已完成。宿主审批快照与原始记忆不上传。
 
-## 7. 治理补强任务
+## 7. 历史治理补强任务
 
 TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户批准新增追踪、证据执行器、Hook、CI 与 main 保护，不授权 MySQL 功能。对应 G01/G02，范围由机器任务 allowed_paths 明确限制。
 
 完成状态只能从实现与证据推导，不能通过本台账写 completed 或勾选代替。测试/保护核实结果见[验证索引](../verification/README.md)；人工验收和合并待用户确认。后续修复必须引用已有功能 ID 和新增回归标准。
+
+## 8. 当前协作治理任务
+
+- [Antigravity × PI-Desktop 协作计划](./antigravity-pi-collaboration.md)：TASK-GOV-004，功能 G03，需求 R17，并扩展 G01/G02；已获本次流程建立授权，具体可观察标准以该计划和机器登记为准。
+- 任务分支 `chore/antigravity-pi-handoff`，main 基线 `ed631a2201e6b439bc79ca6d241176db68ddad82`。一次性 bootstrap 允许 PI 启动并改明确限定规范/台账及治理技术实现，绝不允许 PI 本仓库 commit/push/PR，不复用于后续任务。
+- 阶段 planning → implementation → documentation_delivery；代码问题进入 rework 再回 documentation_delivery；文档-only planning → documentation_delivery。计划生命周期不是交接事件状态，也不证明用户已转交。
+- PR 创建前任务 pr 可为 null；真实创建后记录 delivery event，再后续同步任务台账，禁止猜 PR 号。实际[验证记录](../verification/antigravity-pi-collaboration.md)、独立 CI、用户审查及真实交付分别记录，本地诊断不等于验收。
+
+上述历史记录中的等待/失败/未完成保留其当时语境，本次不补造历史交接、不无依据改完成。
