@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+  "enabled_base": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+  "roles": {
+    "antigravity": ["AGENTS.md", "docs/", "*.md", ".gitignore", "governance/features.json", "governance/tasks.json", "governance/checks.json", "governance/collaboration.json"],
+    "pi-desktop": ["mysql-mcp/", "scripts/governance/", "tests/governance/", ".githooks/", ".github/workflows/"]
+  },
+  "git_role": "antigravity",
+  "phases": {
+    "planning": "antigravity",
+    "implementation": "pi-desktop",
+    "documentation_delivery": "antigravity",
+    "rework": "pi-desktop"
+  },
+  "bootstrap": {
+    "task_id": "TASK-GOV-004",
+    "branch": "chore/antigravity-pi-handoff",
+    "base_commit": "ed631a2201e6b439bc79ca6d241176db68ddad82",
+    "authorization": "用户批准本次 PI-Desktop 限定引导更新协作规范与台账；禁止其 commit/push/PR。此例外不适用于后续任务。",
+    "documentation_paths": ["AGENTS.md", "docs/REQUIREMENTS.md", "docs/GIT_WORKFLOW.md", "docs/PROJECT_CONSTRAINTS.md", "docs/ACCEPTANCE.md", "docs/CODE_REVIEW.md", "docs/README.md", "docs/plans/README.md", "docs/verification/README.md", "docs/ROADMAP.md", "docs/FEATURE_STATUS.md", "docs/COLLABORATION_WORKFLOW.md", "docs/plans/antigravity-pi-collaboration.md", "docs/verification/antigravity-pi-collaboration.md", "governance/features.json", "governance/tasks.json", "governance/checks.json", "governance/collaboration.json"]
+  }
+}

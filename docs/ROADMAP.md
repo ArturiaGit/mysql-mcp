@@ -4,13 +4,13 @@
 
 ## 1. 文档基线
 
-项目规范已经建立；本轮按 R16 增加功能登记、证据执行及 Git 门禁。逐项实现/验证/验收/交付状态见[功能状态](./FEATURE_STATUS.md)，该表由脚本生成，不手工宣称完成。
+项目规范已经建立；R16 治理覆盖功能登记、证据执行及 Git 门禁，当前 R17/G03 协作任务增加角色分工、用户人工转交与机械交接链。逐项实现/验证/验收/交付状态见[功能状态](./FEATURE_STATUS.md)，该表由脚本生成，不手工宣称完成；协作入口见[协作规范](./COLLABORATION_WORKFLOW.md)。
 
 ## 2. 软件阶段（全部未完成）
 
 ### Phase 1：工具链及可行性
 
-进入条件：软件实施获授权，复核工作区变更。
+进入条件：软件实施获授权，Antigravity 完成 planning 登记和任务分支准备，用户人工转交 prompt，PI 核验接受后复核工作区并执行授权技术范围；协作治理获批不自动授权应用开发。
 
 - [ ] 建立 Node.js/TypeScript 工程和锁文件。
 - [ ] 验证 Windows 凭据模块，虚构凭据 CRUD/重启后清理。
@@ -59,7 +59,7 @@
 
 - [ ] 验证 MySQL 版本、权限、连接、列库列表和结构。
 - [ ] 在隔离库验证读取、DML/DDL 的允许及拒绝路径。
-- [ ] 完善启动、升级、限制说明和实际测试报告。
+- [ ] PI 提交真实测试结果和文档同步请求，Antigravity 接受后完善启动、升级、限制说明和实际测试报告，再依约定完成 Git 交付。
 - [ ] 用户确定首个业务查询，按授权范围验收。
 
 退出条件：真实检查有证据，业务库未被自动修改；剩余限制公开，发布另行授权。
@@ -74,4 +74,8 @@
 
 ## 5. 治理任务（不计入业务阶段完成）
 
-G01：需求覆盖、重复登记、范围和证据校验，暂存/推送快照门禁及独立 CI。G02：规范与 Git 交付基线。当前同属 TASK-GOV-001，复用 PR #1，用户确认合并前不标最终完成。实际测试与保护核实见[验证索引](./verification/README.md)。
+G01：需求覆盖、重复登记、范围和证据校验，暂存/推送快照门禁及独立 CI。G02：规范与 Git 交付基线。首次 TASK-GOV-001/PR #1 及后续修复任务的历史证据与失败保留，最终状态以机器登记/真实验收和合并证据推导，本次不无依据升级。实际测试与保护核实见[验证索引](./verification/README.md)。
+
+G03/R17：Antigravity 负责 planning/文档/提交信息/Git 交付，PI 负责 implementation/rework 代码/测试/构建，用户人工转交双方 prompt，接收方验证准确事件 ID/摘要；正常 planning → implementation → documentation_delivery，返工再回 documentation_delivery，文档-only planning → documentation_delivery。对应当前 TASK-GOV-004，并扩展 G01/G02；[计划](./plans/antigravity-pi-collaboration.md)与[验证记录](./verification/antigravity-pi-collaboration.md)分别记录可观察标准与实际结果。
+
+本次分支 `chore/antigravity-pi-handoff`、base `ed631a2201e6b439bc79ca6d241176db68ddad82` 的一次性 bootstrap 允许 PI 启动并更新明确限定规范/台账及治理技术实现，绝不允许 PI 本仓库 commit/push/PR。本地 run/TAP 仅为诊断，Antigravity 真实交付、独立 CI、用户审查和验收分别待证据核实；不预填 PR 号，不声称编译 MySQL，不发布或自动合并。

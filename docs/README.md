@@ -19,7 +19,8 @@
 | [前端 UI 规范](./FRONTEND_UI_GUIDELINES.md) | 连接管理、审批界面及交互状态 |
 | [部署与运维](./DEPLOYMENT_GUIDE.md) | Windows 运行规划和三客户端兼容验证 |
 | [代码审查](./CODE_REVIEW.md) | 分层、测试矩阵和拟建质量门禁 |
-| [Git 工作流](./GIT_WORKFLOW.md) | 已确认的先建分支、验收后自动提交/push/PR、等待合并规则 |
+| [Git 工作流](./GIT_WORKFLOW.md) | Antigravity 分支/提交信息/commit/push/PR、真实 CI 与等待用户合并规则 |
+| [人工转交与协作门禁](./COLLABORATION_WORKFLOW.md) | Antigravity 规划/文档/Git，PI 代码/测试/构建，用户转交 prompt；阶段/命令/首次例外与信任限制 |
 | [版本管理](./VERSIONING.md) | 应用版本、契约兼容与发布规则 |
 | [阶段路线图](./ROADMAP.md) | 未实施任务及阶段退出条件 |
 | [视觉验证](./VISUAL_VERIFICATION.md) | UI 检查矩阵和证据规范 |
@@ -30,7 +31,7 @@
 
 推荐阅读顺序：需求 → 约束 → 架构 → 数据模型 → 接口 → 其他专题。接口字段以接口文档为准，模型与状态以数据模型为准，安全不变量以约束文档为准；发现冲突必须修订，不能自行选择宽松规则。
 
-Agent 开始任务先读根 [AGENTS.md](../AGENTS.md)。Git 常规交付已获持续授权，但不得据此启动未授权的新功能、合并或发布。
+Agent 开始任务先读根 [AGENTS.md](../AGENTS.md)和协作规范。Git 常规交付授权的执行方为 Antigravity，PI 不执行本仓库 commit/push/PR；用户手动转交双方 prompt，接收方显式核验接受。不得据此启动未授权的新功能、合并或发布。
 
 ## 3. 状态与规范力度
 
@@ -56,4 +57,4 @@ Agent 开始任务先读根 [AGENTS.md](../AGENTS.md)。Git 常规交付已获�
 
 ## 5. 当前交付边界
 
-当前交付包含规范与 Node 治理工具、Hook/CI 配置；真实运行和保护核实见验证索引。MySQL 应用、客户端接入和数据库验证尚未实施。治理测试通过不代表业务功能完成，PR 仍等待用户确认合并。
+当前交付包含规范与 Node 治理工具、Hook/CI 配置；真实运行和保护核实见验证索引。MySQL 应用、客户端接入和数据库验证尚未实施。治理测试通过不代表业务功能完成，PR 合并仍需用户确认。新增 G03/R17/TASK-GOV-004 协作任务的[计划](./plans/antigravity-pi-collaboration.md)与[验证记录](./verification/antigravity-pi-collaboration.md)分别描述授权/验收范围和实际结果，不提前声明 Git 交付或独立 CI 已完成。本次 bootstrap 仅允许 PI 在限定任务/分支/基线内改明确规范/台账，不允许 PI 提交。

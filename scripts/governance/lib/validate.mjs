@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { git, files, load, safePath, requirements, statusMarkdown } from './core.mjs';
 import { trustedBase, registryAt, selectMainTask } from './scope.mjs';
+import { readPolicy, validateCollaboration, validateBuildDefinitions } from './collaboration.mjs';
 
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const list = (x, name) => { assert(Array.isArray(x), `missing array ${name}`); return x; };
@@ -11,7 +12,7 @@ function unique(items, label, key = x => x.id) {
   for (const item of items) { const id = key(item); assert(text(id) && !seen.has(id), `duplicate or invalid ${label}: ${id}`); seen.add(id); }
   return seen;
 }
-export function validate(root, { branch, base, head, checkReport = true, ciMain = false } = {}) {
+export function validate(root, { branch, base, head, checkReport = true, ciMain = false, delivery = false, localGit = false, message } = {}) {
   const data = load(root), { features, tasks, checks } = data;
   const featureIds = unique(features, 'feature ID'); unique(features, 'feature key', f => f.key?.trim().toLowerCase().normalize('NFKC'));
   const taskIds = unique(tasks, 'task ID'), checkIds = unique(checks, 'check ID');
@@ -25,7 +26,8 @@ export function validate(root, { branch, base, head, checkReport = true, ciMain 
     assert(safePath(p), `unsafe path: ${p}`);
     const matches = names.filter(n => n === p || (p.endsWith('/') && n.startsWith(p)));
     assert(matches.length && matches.every(n => fs.existsSync(path.join(root, n))), `missing implementation/test path: ${p}`);
-    assert(matches.every(n => tracked.has(n) || process.env.GOV_TREE), `untracked implementation/test path: ${p}`);
+    const developmental = !delivery && !head && !process.env.GOV_TREE && readPolicy(root,false) && features.some(f => f.implementation === 'in_progress' && [...f.implementation_paths,...f.test_paths].includes(p));
+    assert(matches.every(n => tracked.has(n) || process.env.GOV_TREE || developmental), `untracked implementation/test path: ${p}`);
   }
   for (const f of features) {
     assert(['product','engineering','constraint'].includes(f.kind), `unknown feature kind: ${f.id}`);
@@ -70,7 +72,8 @@ export function validate(root, { branch, base, head, checkReport = true, ciMain 
   for (const t of tasks) {
     assert(['maintenance','new','fix'].includes(t.kind) && ['in_progress','completed','cancelled'].includes(t.status), `unknown task kind/status: ${t.id}`);
     assert(text(t.branch) && !['main','master'].includes(t.branch) && text(t.authorization) && /^[a-f0-9]{40,64}$/.test(t.base_commit), `invalid task authorization/branch/base: ${t.id}`);
-    assert(Number.isInteger(t.pr) && t.pr > 0, `missing PR: ${t.id}`);
+    assert(t.pr === null || (Number.isInteger(t.pr) && t.pr > 0), `invalid PR: ${t.id}`);
+    validateBuildDefinitions(t);
     assert(list(t.allowed_paths,'allowed_paths').length && t.allowed_paths.every(safePath), `unsafe allowed path: ${t.id}`);
     list(t.scope_changes,'scope_changes'); assert(typeof t.governance_change === 'boolean', `missing governance_change: ${t.id}`);
     assert(list(t.feature_ids,'feature_ids').length && t.feature_ids.every(id => featureIds.has(id)), `unknown task feature: ${t.id}`);
@@ -122,5 +125,6 @@ export function validate(root, { branch, base, head, checkReport = true, ciMain 
   const oldReqs = requirements(git(root,['show',`${comparisonRef}:docs/REQUIREMENTS.md`],true));
   removed.push(...oldReqs.filter(r => !reqs.includes(r)));
   for (const id of removed) assert(task.scope_changes.some(s => s && typeof s === 'object' && s.id === id && s.action === 'remove' && text(s.reason) && text(s.authorization)), `missing authorized scope_changes removal: ${id}`);
-  return { data, task, names };
+  const collaboration = validateCollaboration(root,task,{delivery:delivery || Boolean(head),localGit,base,head,ciMain,message,changed:[...changed]});
+  return { data, task, names, collaboration };
 }

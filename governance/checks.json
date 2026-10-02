@@ -9,6 +9,15 @@
       "parser": "tap",
       "feature_ids": ["G01", "G02"],
       "acceptance_ids": ["G01-A1", "G01-A3", "G01-A4", "G02-A1"]
+    },
+    {
+      "id": "collaboration-tests",
+      "command": "node",
+      "args": ["--test", "--test-reporter=tap", "tests/governance/collaboration.test.mjs", "tests/governance/collaboration-git.test.mjs"],
+      "timeout_ms": 300000,
+      "parser": "tap",
+      "feature_ids": ["G03"],
+      "acceptance_ids": ["G03-A1", "G03-A2", "G03-A3"]
     }
   ]
 }

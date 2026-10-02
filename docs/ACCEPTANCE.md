@@ -9,7 +9,7 @@
 ## 2. 单一登记与任务启动
 
 - `governance/features.json`：稳定功能 ID/key、需求、行为、依赖、实现/测试路径、验收项和必要证据类型。复合需求拆为功能及独立验收项，不能用“数据库支持”一个项目代替所有 SQL/客户端。
-- `governance/tasks.json`：任务、类型、分支、基线、功能、授权范围、允许路径、PR。修改前先登记并搜索现有实现、测试与 PR。
+- `governance/tasks.json`：任务、类型、分支、基线、功能、授权范围、允许路径、PR，由 Antigravity 在 planning 登记并搜索现有实现、测试与 PR。创建 PR 前允许 `pr: null`；真实创建后先记 delivery event，再后续同步台账，不猜 PR 号。本次 bootstrap 限定例外见协作规范。
 - `governance/checks.json`：可运行检查的命令/参数数组、超时、解析器和关联验收项。当前仅 Node 内置测试，无业务依赖安装。
 - 修改已登记功能应复用 ID；修复必须说明回归标准，扩展须说明新增验收范围，不建立同义重复功能。
 - 同一功能不能被冲突的活动新增任务重复占用。允许路径是授权上限，不证明该路径内任何功能都获授权。
@@ -28,7 +28,7 @@ node scripts/governance/install-hooks.mjs
 
 最后一个命令只在获授权的仓库安装本地 Hook；已有 hooksPath 或自定义 Hook 不自动覆盖。普通 report 默认只读；生成的 `docs/FEATURE_STATUS.md` 必须与登记一致。新文件须进入明确暂存集后再执行基于 Git 跟踪快照的检查，不以未跟踪文件充当实现证据。
 
-提交前读取暂存快照，不使用未暂存修改掩盖错误；推送前检查 stdin 中实际 ref/OID，对待推送提交重新检查及执行必要测试。main/master 直接提交或推送、删除 ref、不匹配任务分支均拒绝。CI 根据 PR base/head 检查完整范围并独立执行。
+由 Antigravity 执行 Git 交付，本地操作使用 `GOV_ROLE=antigravity`。提交前读取实际暂存快照和完整交接候选，commit-msg 校验实际提交信息，不使用未暂存修改掩盖错误；推送前检查 stdin 中实际 ref/OID，对待推送提交重新检查及执行必要测试。main/master 直接提交或推送、删除 ref、不匹配任务分支均拒绝。CI 根据 PR base/head 检查完整范围并独立执行。角色变量不是身份认证，实际部署须有验证记录。
 
 ## 4. 硬拦截
 
@@ -42,6 +42,7 @@ node scripts/governance/install-hooks.mjs
 | 证据 | 无输入/检查定义摘要、版本、时间、命令、结果和产物；输入变化后旧证据失效 |
 | 完成 | 缺必要自动/实机/人工证据、依赖未完成、用模拟替代实机、手改派生状态或路线图勾选 |
 | Git | main/master 操作、错误实际推送分支/对象、必要门禁失败 |
+| 协作 | 缺任务交接、角色/阶段错误、越界修改、删除/重命名绕过、乱序或摘要错误、计划漂移、旧候选或实际提交信息不一致 |
 
 计划阶段没有实现文件不阻止登记，但不能据此变成已实现/完成；未来申请更高状态需要完整证据。
 
@@ -49,7 +50,7 @@ node scripts/governance/install-hooks.mjs
 
 执行器使用可执行文件及参数数组，禁任意 shell 拼接。记录 schema、任务、功能、验收项、源提交/快照摘要、检查定义摘要、命令、环境、开始/结束、退出码、测试总数/失败/跳过，以及输出文件和摘要。报告与自身输出不纳入被测输入，避免自引用；源码、测试、配置或锁文件变化需重跑。
 
-本地报告用于诊断，不能成为独立完成功能的证书。GitHub Actions 应在对应提交独立运行，保留 run/job/artifact 可查链接；复制 CI 字段到本地 JSON 不能产生信任。原始输出只使用合成数据，禁止真实凭据/SQL/结果入公开日志。
+本地报告用于诊断，不能成为独立完成功能的证书。implementation/rework/bootstrap 的 ready 交接须读取实际 run.json，按现有 run 输出校验报告与原始产物，再嵌入真实报告/TAP 副本，本机报告路径不入库。GitHub Actions 应在对应提交独立运行，保留 run/job/artifact 可查链接；复制 CI 字段或嵌入本地 TAP 不能产生独立信任。原始输出只使用合成数据，禁止真实凭据/SQL/结果入公开日志。
 
 产物存在保留期限，过期或不可访问时必须标证据不可核查。记录失效不等于业务代码自动失效，但不能继续声称本次证据可复验。
 
@@ -74,4 +75,16 @@ Actions 采用只读权限，不使用 pull_request_target 或把秘密注入 PR
 
 ## 8. 日常交付
 
-每次报告逐功能状态、实际命令/结果/版本、证据链接、失败或未执行及原因。CI 成功不抹掉实机/人工未执行；文档检查不当作数据库功能通过。按原 Git 约定更新 PR 后等待用户确认，不自动合并。
+每次报告逐功能状态、实际命令/结果/版本、证据链接、失败或未执行及原因。CI 成功不抹掉实机/人工未执行；文档检查不当作数据库功能通过。由 Antigravity 按 Git 约定更新 PR、核实真实 commit/PR/CI 并生成回传 prompt，等待用户确认，不自动合并；PI 不执行本仓库 Git 交付。
+
+## 9. 人工转交与机械交接验收
+
+规则与 details 模板见[协作规范](./COLLABORATION_WORKFLOW.md)，对应 G03/R17/TASK-GOV-004，并扩展 G01/G02。`governance/collaboration.json` 为策略，`governance/handoffs/<ID>.json` 为单任务事件链；机器产物不是角色越权入口。
+
+验收须覆盖 planning → implementation → documentation_delivery、documentation_delivery → rework → documentation_delivery、文档-only planning → documentation_delivery 及限定 bootstrap。发送方 finish 后 prompt 终端确定性输出，由用户手动转交，接收方核验并 accept 准确事件 ID/SHA256；拒绝/取消/阻塞保留历史且不自动推进。生成 prompt 不证明已转交，接受不证明独立人工验收。
+
+每阶段开始/结束绑定清单及摘要，结束检查阶段差异；链和最终 staged/ref/msg 候选一致。计划/标准/策略/授权变化使旧开发交接失效，不可用收尾文档掩盖代码变化。必要正反测试须包含角色越界、缺阶段、重复/乱序接收、版本/证据/提示不一致、暂存/推送旧对象、main squash/PR 准确 base/head；历史任务不补造交接，新任务不得援引历史宽泛授权绕过。
+
+details 的 ready 必须有实际结果、下一步、禁止事项、文档请求、限制/阻塞、构建状态及登记检查依据；无应用 package 时 build 为 not_applicable 并说明原因。documentation_delivery/ready 必须有 Antigravity Conventional Commits 信息；record-delivery 读取真实 Git/gh 结果，不能预填 PR/CI。
+
+bootstrap 只限 TASK-GOV-004、`chore/antigravity-pi-handoff`、base `ed631a2201e6b439bc79ca6d241176db68ddad82`，允许 PI 启动及更新明确限定规范/台账，绝不允许 PI 本仓库 commit/push/PR。角色变量不认证身份、不证明真人转交，也不强制抵御同机恶意改写；实际协作实现、独立 CI、用户审查和交付分别记录，不以文档契约声称已通过。
