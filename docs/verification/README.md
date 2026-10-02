@@ -15,6 +15,7 @@ GitHub Actions 在对应提交独立运行，上传报告及合成测试日志�
 - [功能状态](../FEATURE_STATUS.md)：结构化台账派生，不手动勾完成。
 - [协作交接规则](../COLLABORATION_WORKFLOW.md)：角色、手动转交、命令/details、限定 bootstrap 和信任限制。
 - [TASK-GOV-004 协作验证记录](./antigravity-pi-collaboration.md)：仅列实际执行、失败/未执行与限制；真实 Antigravity 接受、commit/push/PR、独立 CI 和用户验收未取得前不能预填成功。
+- [TASK-GOV-006 主干任务选择鲁棒性验证记录](./governance-main-task-selection-robustness.md)：记录 selectMainTask 候选任务集判定、只读元数据回填白名单、141 项测试通过及 PR #5 增量重放。
 
 历史[首次治理记录](./governance-bootstrap.md)保留失败与网络阻塞，并记载当时正常推送、独立 CI 54 项通过、main 保护 API 核实及用户验收确认，以及当时 PR 未合并状态；这些是历史证据语境，不用于推断 TASK-GOV-004 或当前版本已通过。历史状态本次不无依据改完成，业务功能不因此完成。
 

@@ -123,3 +123,31 @@ for(const mode of ['shared-feature','multiple-delta','out-of-scope']) test(`main
   if(mode==='shared-feature')assert.equal(selectMainTask(f.root,base,head).id,'NEW');
   else assert.throws(()=>selectMainTask(f.root,base,head),/exactly one associated task/);
 });
+for(const mode of ['pr-backfill','allowed_paths','base_commit','authorization','status','feature_ids','extra-field','new-noncandidate','multiple-candidates','no-changed-candidate']) test(`main historical metadata selection: ${mode}`,t=>{
+  const f=fixture(t);
+  f.data.tasks[0].allowed_paths=['governance/','docs/history/'];f.data.tasks[0].pr=null;
+  f.save();f.git('add','.');f.git('commit','-m','historical narrow task');const base=f.git('rev-parse','HEAD');
+  const current={...structuredClone(f.data.tasks[0]),id:'NEW',kind:'fix',branch:'fix/new',base_commit:base,allowed_paths:['governance/','docs/','scripts/','tests/']};
+  if(mode==='no-changed-candidate') {
+    f.data.tasks.push(current);f.save();f.git('add','.');f.git('commit','-m','existing current task');
+  }
+  const comparisonBase=f.git('rev-parse','HEAD');
+  if(mode!=='no-changed-candidate')f.data.tasks.push(current);
+  f.data.tasks[0].pr=4;
+  if(mode==='allowed_paths')f.data.tasks[0].allowed_paths.push('other/');
+  if(mode==='base_commit')f.data.tasks[0].base_commit=base;
+  if(mode==='authorization')f.data.tasks[0].authorization+=' changed';
+  if(mode==='status')f.data.tasks[0].status='completed';
+  if(mode==='feature_ids')f.data.tasks[0].feature_ids=[];
+  if(mode==='extra-field')f.data.tasks[0].unexpected=true;
+  if(mode==='new-noncandidate')f.data.tasks.push({...structuredClone(f.data.tasks[0]),id:'OTHER',branch:'fix/other'});
+  if(mode==='multiple-candidates')f.data.tasks.push({...structuredClone(current),id:'OTHER',branch:'fix/other'});
+  f.data.features[0].task_ids.push('NEW');f.data.features[0].behavior='current repair';
+  f.write('docs/current/change.md','current task change\n');
+  f.save();f.git('add','.');f.git('commit','-m','repair with historical metadata');const head=f.git('rev-parse','HEAD');
+  if(mode==='pr-backfill') {
+    assert.equal(selectMainTask(f.root,comparisonBase,head).id,'NEW');
+    const r=f.cli('run',['--base',comparisonBase,'--head',head,'--ci-main'],undefined,{GITHUB_ACTIONS:'true',GITHUB_EVENT_NAME:'push',GITHUB_REF:'refs/heads/main'});
+    assert.equal(r.status,0,r.stdout+r.stderr);
+  } else assert.throws(()=>selectMainTask(f.root,comparisonBase,head),/exactly one associated task|non-candidate task/);
+});

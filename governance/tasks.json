@@ -70,6 +70,29 @@
       ],
       "plan_path": "docs/plans/change-management.md",
       "mode": "docs",
+      "pr": 5,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-GOV-006",
+      "kind": "fix",
+      "status": "in_progress",
+      "feature_ids": ["G01"],
+      "branch": "fix/governance-main-task-selection-robustness",
+      "base_commit": "d3d4e2d999e23a75cdfb05328eee383cb5cc2e15",
+      "authorization": "PR #5 合并后的主干 CI 失败修复；优化 selectMainTask 在候选任务集内判定变动任务，允许历史任务只读元数据回填而不误报多任务歧义，增加回归测试，不降低门禁安全性，不自动合并修复 PR。",
+      "allowed_paths": [
+        "governance/",
+        "scripts/governance/lib/scope.mjs",
+        "tests/governance/governance.test.mjs",
+        "docs/FEATURE_STATUS.md",
+        "docs/verification/",
+        "docs/plans/",
+        "docs/changes/"
+      ],
+      "plan_path": "docs/plans/fix-main-task-selection.md",
+      "mode": "code",
       "pr": null,
       "scope_changes": [],
       "governance_change": true

@@ -38,11 +38,18 @@ export function selectMainTask(root, base, head) {
     const old = previous.find(o => o.id === t.id);
     return !old || JSON.stringify(old) !== JSON.stringify(t);
   });
-  // An unchanged historical task sharing the feature is not the merged task.
-  // Never fall back to a broad historical allowance when an explicit delta is ambiguous/out of scope.
+  // Only a changed candidate can identify the merged task. Historical non-candidates
+  // may receive PR metadata, but cannot acquire new authorization through that exception.
   if (changedTasks.length) {
-    if (changedTasks.length !== 1 || !candidates.some(t => t.id === changedTasks[0].id)) fail('main delta must identify exactly one associated task; ambiguous/multi-task merge requires explicit split review');
-    return changedTasks[0];
+    const changedCandidates = changedTasks.filter(t => candidates.some(c => c.id === t.id));
+    if (changedCandidates.length !== 1) fail('main delta must identify exactly one associated task; ambiguous/multi-task merge requires explicit split review');
+    for (const task of changedTasks.filter(t => !candidates.some(c => c.id === t.id))) {
+      const old = previous.find(t => t.id === task.id);
+      const { pr, ...definition } = task;
+      const { pr: oldPr, ...oldDefinition } = old || {};
+      if (!old || JSON.stringify(definition) !== JSON.stringify(oldDefinition)) fail(`main non-candidate task ${task.id} may only change existing PR metadata`);
+    }
+    return changedCandidates[0];
   }
   const associated = candidates.filter(t => changedFeatures.some(id => t.feature_ids.includes(id)) || paths.some(n => features.some(f => t.feature_ids.includes(f.id) && [...f.implementation_paths,...f.test_paths].some(p => n === p || (p.endsWith('/') && n.startsWith(p))))));
   if (associated.length !== 1) fail('main delta must identify exactly one associated task; ambiguous/multi-task merge requires explicit split review');
