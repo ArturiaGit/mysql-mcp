@@ -26,6 +26,19 @@
       "pr": 2,
       "scope_changes": [],
       "governance_change": true
+    },
+    {
+      "id": "TASK-GOV-003",
+      "kind": "fix",
+      "status": "in_progress",
+      "feature_ids": ["G01"],
+      "branch": "fix/governance-main-task-selection",
+      "base_commit": "c61f1579583c2a9b0399772d11bb74ad8a8b4834",
+      "authorization": "PR #2 合并后的必要 CI 失败修复；仅修正历史任务共享功能的任务选择歧义，保留多任务拒绝及证据要求，不自动合并修复 PR。",
+      "allowed_paths": ["governance/features.json", "governance/tasks.json", "governance/checks.json", "scripts/governance/lib/scope.mjs", "tests/governance/governance.test.mjs", "docs/FEATURE_STATUS.md", "docs/verification/"],
+      "pr": 3,
+      "scope_changes": [],
+      "governance_change": true
     }
   ]
 }

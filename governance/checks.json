@@ -8,7 +8,7 @@
       "timeout_ms": 120000,
       "parser": "tap",
       "feature_ids": ["G01", "G02"],
-      "acceptance_ids": ["G01-A1", "G01-A3", "G02-A1"]
+      "acceptance_ids": ["G01-A1", "G01-A3", "G01-A4", "G02-A1"]
     }
   ]
 }
