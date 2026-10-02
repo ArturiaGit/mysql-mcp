@@ -2,14 +2,14 @@
 
 ## 入口与范围
 
-开始前阅读[需求基线](docs/REQUIREMENTS.md)、[安全约束](docs/PROJECT_CONSTRAINTS.md)、[Git 工作流](docs/GIT_WORKFLOW.md)、[协作交接规范](docs/COLLABORATION_WORKFLOW.md)，再按任务阅读接口、模型和审查规范。事实、用户确认、建议和待验证事项必须区分。
+开始前阅读[需求基线](docs/REQUIREMENTS.md)、[安全约束](docs/PROJECT_CONSTRAINTS.md)、[Git 工作流](docs/GIT_WORKFLOW.md)、[协作交接规范](docs/COLLABORATION_WORKFLOW.md)，并通读[变更管理台账](docs/changes/README.md)下的所有活动未发版变更文档以掌握近期架构演进与避坑警示，再按任务阅读接口、模型和审查规范。事实、用户确认、建议和待验证事项必须区分。
 
 只执行用户已授权的任务。默认 Git 授权不等于可以自行开发新功能、连接数据库或修改客户端配置。
 
 ## 职责与人工转交
 
-- **Antigravity**：planning、需求/计划/规范/台账、documentation_delivery、提交信息、暂存、commit、push、创建/更新 PR 和查询 CI；可重跑已有检查，不自行修复产品源码或构建配置。
-- **PI-Desktop**：implementation/rework 中的授权代码、测试、依赖与构建配置、实际测试/构建/编译；可以阅读规范、提出文档同步请求，通常不得直接改规范/台账，绝不执行本仓库 commit、push 或 PR 操作。
+- **Antigravity**：planning、需求/计划/规范/台账/变更文档、documentation_delivery、提交信息、暂存、commit、push、创建/更新 PR 和查询 CI；负责日常变更文档汇总维护及发版时 Release Notes 聚合归档；可重跑已有检查，不自行修复产品源码或构建配置。
+- **PI-Desktop**：implementation/rework 中的授权代码、测试、依赖与构建配置、实际测试/构建/编译；可以阅读规范与未发版变更文档、在交接报告中提出文档同步请求与技术改动事实，通常不得直接改规范/台账，绝不执行本仓库 commit、push 或 PR 操作。
 - **用户**：在两端人工复制交接 prompt；无自动通信。生成 prompt 不等于已转交，接收方须显式核验并接受准确事件 ID 和 SHA256 摘要。
 - 正常阶段：planning → implementation → documentation_delivery；明确代码问题进入 rework，再回 documentation_delivery。文档-only：planning → documentation_delivery，不伪造 PI 开发或构建。
 
