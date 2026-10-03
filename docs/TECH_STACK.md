@@ -11,14 +11,14 @@
 | MCP | @modelcontextprotocol/sdk | 官方 TypeScript SDK | stdio、版本协商、elicitation 生命周期 |
 | MySQL | mysql2 | 原生协议驱动，不依赖 mysql 命令行 | 认证插件、TLS、类型精度、取消语义 |
 | 管理 HTTP | Fastify | 轻量路由与参数校验 | Cookie、CSRF、Host/Origin、防日志泄露 |
-| SQL 分类 | node-sql-parser + 明确策略 | AST 辅助对象及操作识别 | MySQL 子语法矩阵及绕过负面用例 |
-| 系统凭据 | @napi-rs/keyring | Windows 系统存储候选 | 原生模块加载、虚构凭据 CRUD/重启 |
+| SQL 分类 | node-sql-parser + [策略矩阵](./SQL_POLICY_MATRIX.md) | AST 辅助对象及操作识别，详见策略四级模型 | MySQL 子语法矩阵及绕过负面用例 |
+| 系统凭据 | @napi-rs/keyring + [多环境凭据抽象](./DATA_MODELS.md#7-凭据提供者接口与异常脱敏规范) | 生产 Windows 系统存储，CI/测试采用 In-Memory 桩 | 跨平台离线测试、虚构凭据 CRUD/重启 |
 | 本地 UI | HTML/CSS/TypeScript | 连接与审批页面较少，控制复杂度 | 构建、可访问性、XSS 防护 |
-| 测试 | 单元/模拟集成 + 浏览器测试工具待选 | 默认不触碰真实 MySQL | Windows 兼容及测试隔离 |
+| 测试 | [测试分层与沙箱规范](./TESTING_STRATEGY.md) | 纯内存单测 + Fake MySQL 连接桩，严禁直连库 | Windows 性能防超时及协议完整覆盖 |
 
-本机检查得到 Node.js v24.16.0、npm 11.13.0，仅证明命令可运行，不据此宣称最低兼容版本。依赖实际版本、最低 Node 版本须在安装和测试后记录，并固定锁文件；不写“永远使用最新版”。
+本机检查得到 Node.js v24.16.0、npm 11.13.0，仅证明命令可运行，不据此宣称最低兼容版本。依赖实际版本、最低 Node 版本须在安装和测试后记录，并固定锁文件；构建规范见[应用工程化脚手架](./ENGINEERING_TOOLCHAIN.md)。
 
-## 2. 工程布局（拟定）
+## 2. 工程布局（详见 [工程化规范](./ENGINEERING_TOOLCHAIN.md)）
 
 ```text
 工作区/

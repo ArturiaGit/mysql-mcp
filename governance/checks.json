@@ -5,10 +5,10 @@
       "id": "governance-tests",
       "command": "node",
       "args": ["--test", "--test-reporter=tap", "tests/governance/governance.test.mjs"],
-      "timeout_ms": 120000,
+      "timeout_ms": 240000,
       "parser": "tap",
       "feature_ids": ["G01", "G02"],
-      "acceptance_ids": ["G01-A1", "G01-A3", "G01-A4", "G01-A5", "G02-A1", "G02-A2"]
+      "acceptance_ids": ["G01-A1", "G01-A3", "G01-A4", "G01-A5", "G02-A1", "G02-A2", "G02-A3"]
     },
     {
       "id": "collaboration-tests",

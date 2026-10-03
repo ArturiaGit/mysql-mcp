@@ -93,3 +93,13 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 - [变更管理规范与 Agent 历史感知实施计划](./change-management.md)：TASK-GOV-005，功能 G02，需求 R18。用户批准建立 `docs/changes/` 专属变更库，确立 Agent 开启新任务前的强制通读规则，规范双重视角模板（发版说明与 Agent 工程上下文），并回溯补齐 PR #1 ~ #4 历史变更。
 - 任务分支 `docs/change-management-specification`，main 基线 `b80bab2f773cd4ce8bca1ae56f6385c4b76fc1e8`。模式为 `mode: "docs"`（文档-only），由 Antigravity 按 `planning → documentation_delivery` 推进，不伪造代码开发。
 
+## 10. 主干任务选择鲁棒性修复任务
+
+- [修复主干多任务识别歧义与元数据回填鲁棒性实施计划](./fix-main-task-selection.md)：TASK-GOV-006，功能 G01，需求 R16。修复 PR #5 合并后主干 CI 报多任务歧义的问题，限定在候选任务集内判定变动任务，允许历史任务安全回填 PR 元数据并增加白名单防御。已合并交付（PR #6）。
+
+## 11. 工程化工具链、SQL策略与测试规范增强任务
+
+- [工程化工具链、SQL策略与测试规范增强实施计划](./engineering-and-safety-specifications.md)：TASK-GOV-007，功能 G02，需求 R06、R07、R12、R13、R14、R16。用户批准方案 A，补齐从治理通向业务代码落地的四大规范盲区：新增应用工程与构建契约、SQL 语法风险分级矩阵、自动化测试分层与沙箱隔离规范，补充多环境凭据抽象与错误脱敏规范。
+- 任务分支 `docs/engineering-and-safety-specifications`，main 基线 `fa911793060028b96597805ce6a1ccddcf82aeef`。模式为 `mode: "docs"`（文档-only）。
+
+

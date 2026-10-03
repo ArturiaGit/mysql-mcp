@@ -129,3 +129,32 @@ rows 用数组保留同名列；BIGINT/DECIMAL 用字符串避免精度损失，
 ## 6. 演进规则
 
 schema_version 与应用版本独立。读到未知新版本拒绝写回，不能用默认值覆盖数据。迁移前明确备份边界；普通配置备份不包含系统凭据。具体文件格式、恢复流程及保留期在实现前完善，见[版本规范](./VERSIONING.md)。
+
+---
+
+## 7. 凭据提供者接口与异常脱敏规范
+
+### 7.1 跨平台凭据抽象接口 (`ICredentialProvider`)
+
+为消除对特定操作系统底层凭据服务（如 Windows Credential Manager）的强耦合，确保代码在 GitHub Actions（Ubuntu 容器且无 D-Bus/Secret Service 环境）中测试可复现且不崩溃，凭据层必须面向接口编程：
+
+```typescript
+export interface ICredentialProvider {
+  getCredential(ref: string): Promise<string | null>;
+  setCredential(ref: string, secret: string): Promise<void>;
+  deleteCredential(ref: string): Promise<void>;
+}
+```
+
+- **生产环境 (`WindowsKeyringProvider`)**：调用 `@napi-rs/keyring` 接入 Windows Credential Manager，密码不落磁盘文件。
+- **自动化测试与 CI 环境 (`InMemoryCredentialProvider`)**：基于内存加密散列结构实现凭据存取，生命周期与进程绑定，零外部系统调用依赖，确保 CI 100% 稳定通过。
+
+### 7.2 异常信息脱敏规范 (`maskErrorMessage`)
+
+MySQL 驱动或底层系统抛出的异常可能夹带敏感数据，直接回传给 AI 模型或客户端存在严重信息泄露风险。所有对外输出（API 响应、MCP isError 载荷、审计日志）的错误消息必须经脱敏过滤器处理：
+
+1. **连接与凭据遮蔽**：拦截并替换形如 `password=...` 或 `mysql://...` 的连接串信息为 `[CREDENTIAL_REDACTED]`。
+2. **唯一约束明文遮蔽**：对键冲突报错 `Duplicate entry '...' for key '...'`，将具体数据值遮蔽为 `Duplicate entry '[MASKED]' for key '...'`，仅保留键名以供排查。
+3. **本地物理路径遮蔽**：对堆栈或语法错误中包含的绝对路径（如 `D:\...\` 或 `/home/...`）统一替换为 `[LOCAL_PATH]`。
+4. **严重未知错误保护**：对未知驱动崩溃或网络断开异常，仅对外暴露安全错误码（如 `DATABASE_ERROR`），底层原始堆栈仅写入本地内存诊断记录。
+

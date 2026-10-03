@@ -28,6 +28,9 @@
 | [验收与拦截门禁](./ACCEPTANCE.md) | 需求追踪、实际执行、证据与信任边界 |
 | [逐功能状态](./FEATURE_STATUS.md) | 机器派生实现/验证/验收/交付状态 |
 | [可核查验证索引](./verification/README.md) | 本地记录、CI 与远程保护核实 |
+| [应用工程化脚手架](./ENGINEERING_TOOLCHAIN.md) | Node.js ESM、TypeScript strict 与 build_checks 构建门禁契约 |
+| [SQL 策略与风险矩阵](./SQL_POLICY_MATRIX.md) | L0~L3 四级风险分级、单目标库绑定与 AST 注入拦截矩阵 |
+| [测试分层与沙箱策略](./TESTING_STRATEGY.md) | 纯内存单测、驱动连接桩、Windows 超时预防与禁止直连库红线 |
 | [变更管理与发版台账](./changes/README.md) | 每次任务变更记录、Agent 必读避坑指南与发版说明聚合 |
 
 推荐阅读顺序：需求 → 约束 → 架构 → 数据模型 → 接口 → 其他专题；新任务开启前必通读未发版变更台账。接口字段以接口文档为准，模型与状态以数据模型为准，安全不变量以约束文档为准；发现冲突必须修订，不能自行选择宽松规则。

@@ -93,6 +93,25 @@
       ],
       "plan_path": "docs/plans/fix-main-task-selection.md",
       "mode": "code",
+      "pr": 6,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-GOV-007",
+      "kind": "maintenance",
+      "status": "in_progress",
+      "feature_ids": ["G02"],
+      "branch": "docs/engineering-and-safety-specifications",
+      "base_commit": "fa911793060028b96597805ce6a1ccddcf82aeef",
+      "authorization": "用户批准方案 A：补齐应用工程化工具链契约、SQL 语法风险分级矩阵、自动化测试分层与沙箱隔离规范，完善跨平台凭据与错误脱敏规范，打通从治理到应用代码落地的规范桥梁。",
+      "allowed_paths": [
+        "AGENTS.md",
+        "docs/",
+        "governance/"
+      ],
+      "plan_path": "docs/plans/engineering-and-safety-specifications.md",
+      "mode": "docs",
       "pr": null,
       "scope_changes": [],
       "governance_change": true
