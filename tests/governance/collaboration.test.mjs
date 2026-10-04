@@ -67,7 +67,13 @@ test('task authorization changes can be replanned but invalidate old delivery',t
   const planned=f.end('antigravity');f.accept(planned);f.start('pi-desktop','implementation');const code=f.end('pi-desktop',{report:f.run()});f.accept(code);f.start('antigravity','documentation_delivery');
   f.end('antigravity',{report:f.run(),commit_message:'chore: updated authorized scope'});assert(check(f,{delivery:true}).latestCode);
 });
-test('application package cannot silently declare build not applicable',t=>{const f=fixture(t);f.planning();f.start('pi-desktop','implementation');f.write('mysql-mcp/package.json','{}\n');assert.throws(()=>f.end('pi-desktop',{report:f.run()}),/requires registered build/);});
+test('application package cannot silently declare build not applicable',t=>{
+  const f=fixture(t);f.planning();f.start('pi-desktop','implementation');
+  f.write('mysql-mcp/package.json','{"name":"synthetic-scaffold","version":"1.0.0","private":true}\n');
+  f.write('mysql-mcp/package-lock.json','{"name":"synthetic-scaffold","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"synthetic-scaffold","version":"1.0.0"}}}\n');
+  const report=f.run();
+  assert.throws(()=>f.end('pi-desktop',{report}),/requires registered build/);
+});
 test('failed original tests cannot produce ready handoff',t=>{const f=fixture(t);f.planning();f.start('pi-desktop','implementation');f.write('tests/governance/example.test.mjs',"import test from 'node:test';test('bad',()=>{throw Error('synthetic failure');});\n");failed(f.cli('run'),/registered checks failed/);assert.throws(()=>f.end('pi-desktop',{report:path.join(f.root,'.governance-evidence/run.json')}),/overall local execution failed/);});
 test('missing declared plan cannot grant ready planning',t=>{const f=fixture(t);f.task.plan_path='docs/plans/missing.md';f.save();f.start('antigravity','planning');assert.throws(()=>f.end('antigravity'),/existing declared plan/);});
 test('finish and receive require actual active task branch',t=>{const f=fixture(t);f.start('antigravity','planning');f.git('switch','-c','chore/wrong');assert.throws(()=>f.end('antigravity'),/active task branch/);f.git('switch',f.task.branch);const h=f.end('antigravity');f.git('switch','chore/wrong');assert.throws(()=>f.accept(h),/active task branch/);});

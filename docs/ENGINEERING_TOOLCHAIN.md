@@ -98,22 +98,41 @@
 1. **纯 Node 入口**：必须能通过 `node mysql-mcp/scripts/xxx.mjs` 直接启动，禁止依赖全局环境命令（如全局 `tsc`），应调用本地 `node_modules/typescript/bin/tsc`。
 2. **严禁依赖 Shell 语法**：脚本参数不得包含管道符 `|`、分号 `;`、重定向 `>` 或复杂 shell 拼接。
 3. **确定性退出码**：检查成功返回退出码 0；任何语法、类型错误或构建失败必须返回非 0，并在 stderr 输出清晰诊断信息。
-4. **无副作用**：`compile` 脚本严禁向磁盘写入任何持久构建产物；`build` 脚本产物仅允许输出至 `mysql-mcp/dist/`，且必须在 `.gitignore` 规则保护范围内。
+4. **无副作用与失败清理**：
+   - `compile.mjs` 纯类型检查（`--noEmit`），严禁向磁盘写入任何持久构建产物；
+   - `build.mjs` 在构建开始前与构建失败时均清理 `mysql-mcp/dist/`，编译成功后立即调用 `node --test tests/smoke.test.mjs` 执行冒烟断言，产物仅允许输出至受 `.gitignore` 保护的 `mysql-mcp/dist/`。
 
 ---
 
-## 5. 依赖管理与可复现安装准则
+## 5. 依赖管理与隔离快照依赖准备契约
 
-1. **直接依赖最小化原则**：
-   - 核心依赖严格限定在 [`TECH_STACK.md`](./TECH_STACK.md) 锁定的技术选型矩阵范围内：
-     - `@modelcontextprotocol/sdk`：官方 MCP 协议支持
-     - `mysql2`：原生协议数据库驱动
-     - `fastify`：本地轻量 HTTP 管理服务
-     - `node-sql-parser`：SQL 语法树解析辅助
-     - `@napi-rs/keyring`：Windows 系统凭据支持（集成测试配合 In-Memory 桩）
-2. **锁定文件强制入库**：
-   - 安装依赖后必须提交 `mysql-mcp/package-lock.json`。
-   - 本地与 CI 流水线必须使用 `npm ci` 进行确定性、可复现安装，严禁使用非受控的 `npm install`。
-3. **敏感凭据与测试隔离**：
-   - `mysql-mcp/` 内部开发测试严禁硬编码任何真实账号密码。
-   - 所有运行时临时凭据仅存于内存或受控的系统存储中，严禁在 `mysql-mcp/` 下生成不受版本控制追踪的未命名配置文件。
+### 5.1 直接依赖最小化原则
+- 核心依赖严格限定在 [`TECH_STACK.md`](./TECH_STACK.md) 锁定的技术选型矩阵范围内：
+  - `@modelcontextprotocol/sdk`：官方 MCP 协议支持
+  - `mysql2`：原生协议数据库驱动
+  - `fastify`：本地轻量 HTTP 管理服务
+  - `node-sql-parser`：SQL 语法树解析辅助
+  - `@napi-rs/keyring`：Windows 系统凭据支持（集成测试配合 In-Memory 桩）
+  - 开发依赖：`typescript`（5.9.3 编译器）与 `@types/node`（22.20.5 类型声明）
+
+### 5.2 锁定文件强制入库与环境基线
+- 安装依赖后必须提交确定的 `mysql-mcp/package-lock.json`（lockfileVersion: 3，153 个包，0 漏洞）。
+- 本地与 CI 流水线必须使用 `npm ci` 进行确定性、可复现安装，严禁使用非受控的 `npm install`。
+
+### 5.3 治理隔离快照与 CI 依赖准备契约
+为满足测试与构建环境强隔离要求（杜绝污染宿主工作区，亦杜绝工作区临时文件污染验证）：
+1. **统一标准入口**：仓库根目录提供 `scripts/governance/prepare.mjs`，依赖核心逻辑收敛于 `scripts/governance/lib/dependencies.mjs`。
+2. **禁止复制工作区依赖**：治理快照执行器（`run.mjs`）在生成隔离快照目录后，**严禁从工作区复制 `node_modules`**；必须基于快照内的 `package.json` 与 `package-lock.json` 执行全新的依赖准备。
+3. **纯 Node 无 Shell 执行**：通过原生 `process.execPath` 直接调用系统 Node 解析出的 `npm-cli.js`（`shell: false`），跨 Windows 与 POSIX 运行，彻底杜绝 Shell 注入漏洞与命令行封装差异。
+4. **安全参数与生命周期脚本封禁**：
+   - 执行参数锁定为：`ci --ignore-scripts --include=dev --no-audit --no-fund --prefer-offline --global=false --workspaces=false`；
+   - 强制 `--ignore-scripts`，绝对封禁第三方包在安装过程中执行任意生命周期钩子（如 `postinstall`）。
+5. **强隔离与防篡改校验**：
+   - 超时强限制为 180s，异常超时触发 `SIGKILL` 终止；
+   - 过滤敏感环境变量（清理 `GIT_*`、`GOV_*`、`GITHUB_*`、`NODE_OPTIONS` 等）；
+   - 执行前后严格比对 `package.json` 与 `package-lock.json` 的 SHA256 哈希值，任何安装过程中的文件篡改均立即抛出异常并使门禁失败。
+6. **CI 对齐**：`.github/workflows/governance.yml` 在全量治理门禁运行前执行 `node scripts/governance/prepare.mjs`，确保 CI 与本地运行环境绝对一致。
+
+### 5.4 敏感凭据与测试隔离
+- `mysql-mcp/` 内部开发测试严禁硬编码任何真实账号密码。
+- 所有运行时临时凭据仅存于内存或受控的系统存储中，严禁在 `mysql-mcp/` 下生成不受版本控制追踪的未命名配置文件。

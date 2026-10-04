@@ -112,6 +112,44 @@
       ],
       "plan_path": "docs/plans/engineering-and-safety-specifications.md",
       "mode": "docs",
+      "pr": 7,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-APP-001",
+      "kind": "new",
+      "status": "in_progress",
+      "feature_ids": ["F28"],
+      "branch": "feat/app-scaffold-and-toolchain",
+      "base_commit": "edf957aa653b8037fd3db5a81d37eb51610c7d12",
+      "authorization": "用户批准建立 Phase 1 应用工程脚手架与构建检查契约，初始化 mysql-mcp/，配置 ESM、tsconfig、构建与编译脚本及应用冒烟测试；授权在 scripts/governance/、tests/governance/ 与 .github/workflows/ 中完善治理隔离快照与 CI 依赖准备契约。",
+      "allowed_paths": [
+        "mysql-mcp/",
+        "docs/",
+        "governance/",
+        "scripts/governance/",
+        "tests/governance/",
+        ".github/workflows/"
+      ],
+      "plan_path": "docs/plans/app-scaffold-and-toolchain.md",
+      "mode": "code",
+      "build_checks": [
+        {
+          "id": "app-build",
+          "kind": "build",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/build.mjs"],
+          "timeout_ms": 60000
+        },
+        {
+          "id": "app-compile",
+          "kind": "compile",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/compile.mjs"],
+          "timeout_ms": 60000
+        }
+      ],
       "pr": null,
       "scope_changes": [],
       "governance_change": true

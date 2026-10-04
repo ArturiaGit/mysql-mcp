@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Prepare locked application dependencies (lifecycle scripts disabled)
+        run: node scripts/governance/prepare.mjs
       - name: Validate responsibility, handoff chain and snapshot; execute registered tests
         env:
           GOV_ARTIFACT_DIR: ${{ runner.temp }}/governance-evidence

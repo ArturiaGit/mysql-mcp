@@ -120,7 +120,8 @@ flowchart TD
 | [TASK-GOV-004 双 Agent 人工协作与交付门禁](./2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md) | TASK-GOV-004 | [#4](https://github.com/ArturiaGit/mysql-mcp/pull/4) | [`b80bab2`](https://github.com/ArturiaGit/mysql-mcp/commit/b80bab2) | 建立 Antigravity × PI-Desktop 人工转交与机械交接闭环 |
 | [TASK-GOV-005 变更管理与发版说明集成规约](./2026-10-02-TASK-GOV-005-change-management-specification.md) | TASK-GOV-005 | [#5](https://github.com/ArturiaGit/mysql-mcp/pull/5) | [`d3d4e2d`](https://github.com/ArturiaGit/mysql-mcp/commit/d3d4e2d999e23a75cdfb05328eee383cb5cc2e15) | 建立 docs/changes/ 库，支持双重视角、必读入口与发版聚合 |
 | [TASK-GOV-006 主干任务选择鲁棒性与元数据回填修复](./2026-10-02-TASK-GOV-006-main-task-selection-robustness.md) | TASK-GOV-006 | [#6](https://github.com/ArturiaGit/mysql-mcp/pull/6) | [`fa91179`](https://github.com/ArturiaGit/mysql-mcp/commit/fa911793060028b96597805ce6a1ccddcf82aeef) | 优化候选集任务判定，允许安全回填 PR 元数据，增加白名单防御 |
-| [TASK-GOV-007 工程化工具链、SQL策略与测试规范增强](./2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md) | TASK-GOV-007 | 待交付 | 待交付 | 制定应用构建契约、SQL 风险分级矩阵、自动化测试沙箱隔离与凭据抽象 |
+| [TASK-GOV-007 工程化工具链、SQL策略与测试规范增强](./2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md) | TASK-GOV-007 | [#7](https://github.com/ArturiaGit/mysql-mcp/pull/7) | [`edf957a`](https://github.com/ArturiaGit/mysql-mcp/commit/edf957aa653b8037fd3db5a81d37eb51610c7d12) | 制定应用构建契约、SQL 风险分级矩阵、自动化测试沙箱隔离与凭据抽象 |
+| [TASK-APP-001 应用工程脚手架、构建门禁与依赖隔离准备](./2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md) | TASK-APP-001 | 待交付 | 待提交 | 建立 mysql-mcp/ ESM TS 脚手架、无 Shell 构建编译脚本、治理隔离快照与 CI 依赖准备契约 |
 
 ---
 

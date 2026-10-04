@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-03
 - 关联任务：TASK-GOV-007
-- 关联 PR：待回填（Git 交付后由 record-delivery 与后续台账同步）
-- 关联 Commit：待回填（Git 交付后由 record-delivery 与后续台账同步）
+- 关联 PR：[#7](https://github.com/ArturiaGit/mysql-mcp/pull/7)
+- 关联 Commit：[`edf957a`](https://github.com/ArturiaGit/mysql-mcp/commit/edf957aa653b8037fd3db5a81d37eb51610c7d12)
 - 责任执行方：Antigravity (Planning & Documentation Delivery)
 - 关联功能/需求：G02 (规范与 Git 交付基线), R06, R07, R12, R13, R14, R16
 

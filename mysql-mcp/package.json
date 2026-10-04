@@ -1,0 +1,35 @@
+{
+  "name": "mysql-mcp",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Local MySQL MCP application scaffold",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "compile": "node scripts/compile.mjs",
+    "typecheck": "node scripts/compile.mjs",
+    "test": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "@napi-rs/keyring": "2.1.0",
+    "fastify": "5.12.5",
+    "mysql2": "3.24.5",
+    "node-sql-parser": "5.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3"
+  }
+}
