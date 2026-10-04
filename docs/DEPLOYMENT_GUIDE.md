@@ -1,16 +1,26 @@
 # 部署与运维指南
 
-> 状态：运行方案草案，当前没有可启动应用或发行包。本文不能作为已可执行的安装教程。
+> 状态：Phase 1 应用工程脚手架与依赖安装契约已建立（F28），可执行离线依赖准备与冒烟构建；管理服务与业务运行时仍处于规划中，本文不能作为完整的应用启动与运维教程。
 
 ## 1. 环境与前提
 
-首期面向当前 Windows 用户环境。只读检查显示 Node.js v24.16.0、npm 11.13.0 可用；最低支持版本、CPU 架构和原生依赖兼容仍须验证。驱动拟用原生 MySQL 协议，不要求安装 mysql 命令行，也不读取 DataGrip 密码。
+首期面向当前 Windows 用户环境。运行时声明为 Node.js `>=22`，本机实测验证环境为 Node.js v24.16.0 与 npm 11.13.0（lockfile v3，153 个包，0 漏洞）。驱动拟用原生 MySQL 协议，不要求安装 mysql 命令行，也不读取 DataGrip 密码。
 
-运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。程序目录拟为工作区 `mysql-mcp/`，运行资料拟为 `%LOCALAPPDATA%/MySQLMCP/`。目录权限应限制其他用户访问。
+### 依赖准备契约与命令
+1. **治理快照与 CI 标准依赖入口**：
+   - 根目录执行：`node scripts/governance/prepare.mjs`
+   - 契约细节：调用 `scripts/governance/lib/dependencies.mjs`，通过原生 Node.js 直接定位 `npm-cli.js`（`shell: false`，杜绝 Shell 注入），在隔离环境中以 `--ignore-scripts --include=dev --no-audit --no-fund --prefer-offline` 执行 `npm ci`。
+   - 安全防线：全过程超时限制 180s，清理敏感环境变量，执行前后严格校验 `package.json` 与 `package-lock.json` 的 SHA256 哈希一致性，杜绝工作区直接复制 `node_modules` 带来的污染。
+2. **应用开发工作区命令**（在 `mysql-mcp/` 目录下）：
+   - 安装依赖：`npm ci --ignore-scripts`
+   - 类型检查：`npm run compile` 或 `npm run typecheck`（执行 `node scripts/compile.mjs`，`tsc --noEmit`，不落盘）
+   - 生产构建与冒烟测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行 6 项冒烟断言）
+
+运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。程序目录为工作区 `mysql-mcp/`，运行资料拟为 `%LOCALAPPDATA%/MySQLMCP/`。目录权限应限制其他用户访问。
 
 ## 2. 拟定启动顺序
 
-1. 获软件实施授权后创建代码和锁文件，完成依赖与模拟测试。
+1. 获软件实施授权后创建代码和锁文件，完成依赖与模拟测试（Phase 1 已建立脚手架与 6 项冒烟测试）。
 2. 用虚构凭据验证系统存储，失败则停止真实凭据保存。
 3. 启动单实例管理服务，校验绑定地址、认证配置和数据目录；只允许回环访问。
 4. 用户在本地获取一次性登录码、打开页面登录；密码仅在页面输入。
@@ -18,7 +28,7 @@
 6. 单独确认客户端配置修改，先备份原配置，再添加无数据库秘密的 MCP 入口。
 7. 用模拟或无副作用探针验证工具发现、确认通道；通过后再做授权范围内的实际验收。
 
-`npm run build`、`npm run start:server`、`npm run start:mcp` 是拟定脚本名称，当前不存在，不要直接执行。实际启动入口、管理端口、登录码交付方式需实现后补齐。
+`npm run build`、`npm run compile`、`npm test` 已在 `mysql-mcp/` 中落地；`npm run start:server`、`npm run start:mcp` 是拟定启动脚本名称，当前尚未实现，不要直接执行。实际启动入口、管理端口、登录码交付方式需后续实现后补齐。
 
 ## 3. 客户端兼容矩阵
 

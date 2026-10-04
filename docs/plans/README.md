@@ -99,7 +99,10 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 ## 11. 工程化工具链、SQL策略与测试规范增强任务
 
-- [工程化工具链、SQL策略与测试规范增强实施计划](./engineering-and-safety-specifications.md)：TASK-GOV-007，功能 G02，需求 R06、R07、R12、R13、R14、R16。用户批准方案 A，补齐从治理通向业务代码落地的四大规范盲区：新增应用工程与构建契约、SQL 语法风险分级矩阵、自动化测试分层与沙箱隔离规范，补充多环境凭据抽象与错误脱敏规范。
+- [工程化工具链、SQL策略与测试规范增强实施计划](./engineering-and-safety-specifications.md)：TASK-GOV-007，功能 G02，需求 R06、R07、R12、R13、R14、R16。用户批准方案 A，补齐从治理通向业务代码落地的四大规范盲区：新增应用工程与构建契约、SQL 语法风险分级矩阵、自动化测试分层与沙箱隔离规范，补充多环境凭据抽象与错误脱敏规范。已合并交付（PR #7）。
 - 任务分支 `docs/engineering-and-safety-specifications`，main 基线 `fa911793060028b96597805ce6a1ccddcf82aeef`。模式为 `mode: "docs"`（文档-only）。
 
+## 12. Phase 1 应用工程脚手架与构建检查契约任务
 
+- [Phase 1 应用工程脚手架与构建检查契约实施计划](./app-scaffold-and-toolchain.md)：TASK-APP-001，功能 F28，需求 R12、R13。用户批准初始化生产工程 `mysql-mcp/`，配置原生 ESM、TypeScript 严格编译配置、编写纯 Node 构建与编译脚本，建立 `task.build_checks` 契约及应用冒烟测试。
+- 任务分支 `feat/app-scaffold-and-toolchain`，main 基线 `edf957aa653b8037fd3db5a81d37eb51610c7d12`。模式为 `mode: "code"`。

@@ -7,6 +7,7 @@ import { git, snapshot, inputHash, main } from './lib/core.mjs';
 import { validate } from './lib/validate.mjs';
 import { execute } from './lib/execute.mjs';
 import { developmentHash, readPolicy, runBuilds } from './lib/collaboration.mjs';
+import { prepareDependencies } from './lib/dependencies.mjs';
 
 main(() => {
   const root = process.cwd(), args = process.argv.slice(2);
@@ -36,12 +37,14 @@ main(() => {
     report.input_sha256 = inputHash(root,names);
     report.development_sha256 = developmentHash(root,task,collaboration?.policy || readPolicy(root,false));
     if (!data.checks.length) throw new Error('no registered checks');
+    report.dependencies = prepareDependencies(root);
+    if (inputHash(root,names) !== report.input_sha256) throw new Error('dependency preparation mutated snapshot inputs');
     report.checks = data.checks.map(c => execute(root,c,output));
     if (task.build_checks?.length) report.builds = runBuilds(root,task);
     if (inputHash(root,names) !== report.input_sha256) throw new Error('execution mutated snapshot inputs');
     if (report.checks.some(c => c.local_result !== 'passed')) throw new Error('registered checks failed');
     report.local_result = 'passed';
-  } catch (e) { report.error = e.message; report.local_result = 'failed'; process.exitCode = 1; }
+  } catch (e) { report.error = e.message; if (e.dependencies) report.dependencies = e.dependencies; report.local_result = 'failed'; process.exitCode = 1; }
   report.ended_at = new Date().toISOString();
   fs.writeFileSync(path.join(output,'run.json'),JSON.stringify(report,null,2)+'\n');
   console.log(`local diagnostic ${report.local_result}: ${path.join(output,'run.json')}; acceptance unverified`);

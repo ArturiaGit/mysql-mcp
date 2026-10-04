@@ -32,7 +32,7 @@
 | F25 | 回环认证、CSRF 与脱敏 | planned | 未认证 | 未验收 | 未核实 |
 | F26 | SQL 策略与资源限制 | planned | 未认证 | 未验收 | 未核实 |
 | F27 | 界面反馈与可访问性 | planned | 未认证 | 未验收 | 未核实 |
-| F28 | Node.js/TypeScript 应用工程 | planned | 未认证 | 未验收 | 未核实 |
+| F28 | Node.js/TypeScript 应用工程 | in_progress | 未认证 | 未验收 | 未核实 |
 | G01 | 需求追踪与证据门禁 | in_progress | 未认证 | 未验收 | 未核实 |
 | G02 | 规范与 Git 交付基线 | in_progress | 未认证 | 未验收 | 未核实 |
 | G03 | 双 Agent 人工转交与机械协作门禁 | in_progress | 未认证 | 未验收 | 未核实 |

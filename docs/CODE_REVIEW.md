@@ -1,6 +1,6 @@
 # 代码审查与质量规范
 
-> 状态：应用尚未实现，应用测试脚本仍属拟建；治理检查与执行器独立使用 Node 内置测试，不需要应用 package.json。安全红线见[项目约束](./PROJECT_CONSTRAINTS.md)。
+> 状态：Phase 1 应用工程脚手架与构建检查契约（F28）已在 `mysql-mcp/` 落地，`build.mjs` 与 `compile.mjs` 作为构建门禁（`task.build_checks`）在隔离快照中通过验证；业务服务与集成测试处于规划中。安全红线见[项目约束](./PROJECT_CONSTRAINTS.md)。
 
 ## 1. 分层规则
 
@@ -8,16 +8,16 @@
 
 TypeScript strict 不能替代运行时校验。标识符不能通过值参数占位符处理，必须验证并正确引用；值采用驱动支持的安全参数方式。用户提交 SQL 仍需完整分类，不能将参数化当作任意 SQL 的安全许可。
 
-## 2. 拟建检查命令
+## 2. 工程与检查命令契约
 
-| 拟定命令 | 覆盖 | 当前状态 |
-|---|---|---|
-| npm run typecheck | 类型与模块边界 | 未实现 |
-| npm test | 单元与模拟集成 | 未实现 |
-| npm run build | 服务与页面构建 | 未实现 |
-| npm run test:e2e | 浏览器交互，默认模拟数据库 | 未实现 |
+| 命令 | 执行入口 | 覆盖范围 | 当前状态 |
+|---|---|---|---|
+| `npm run typecheck` / `npm run compile` | `node scripts/compile.mjs` | 类型与模块边界（严格 NodeNext，`tsc --noEmit`，不落盘） | 已实现（Phase 1 / F28，作为 `app-compile` 门禁） |
+| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行 6 项应用脚手架冒烟测试 | 已实现（Phase 1 / F28，作为 `app-build` 门禁） |
+| `node scripts/governance/prepare.mjs` | `scripts/governance/prepare.mjs` | 治理快照与 CI 依赖准备契约（无 Shell，`npm ci --ignore-scripts`） | 已实现（Phase 1 / F28） |
+| `npm run test:e2e` | 拟建 | 浏览器交互，默认模拟数据库 | 未实现（后续 Phase） |
 
-上述应用命令在应用实现后才运行；本轮治理命令为 node scripts/governance/check.mjs、node scripts/governance/run.mjs。两类结果不得混淆，默认检查不接触真实数据库。CI/Hook 实际部署结果见验证索引。
+本轮治理全量检查命令为 `node scripts/governance/check.mjs` 与 `node scripts/governance/run.mjs`。`run.mjs` 在创建隔离快照后，自动调用依赖准备模块安装 dev 依赖，随后执行 `app-build` 与 `app-compile`，两类结果与测试证据严格绑定，默认检查不接触真实数据库。CI/Hook 实际部署结果见验证索引。
 
 ## 3. 安全与行为测试矩阵
 
@@ -82,7 +82,7 @@ PI 先自查并执行相关检查，再按需进行有边界的复核，交接�
 - [ ] 用户转交后接收方核验并接受准确事件 ID/摘要；prompt 仅确定性终端输出，不自动发送或冒称人已转交。
 - [ ] 每阶段实际差异与开始/结束快照衔接；计划/标准/策略/授权改变后旧交接重新验证，不用文档收尾掩盖代码变化。
 - [ ] implementation/rework/bootstrap 的 ready 使用真实 run.json，经现有输出验证后嵌入报告与 TAP 副本；本机路径不入库，本地证据不当独立验收。
-- [ ] build passed 有实际登记检查支持；当前无应用 package，填 not_applicable 和原因，不声称编译 MySQL。
+- [ ] build passed 有实际登记检查支持（如 TASK-APP-001 登记的 app-build 与 app-compile）；无应用 package 时填 not_applicable 并说明原因，不虚假声称编译通过。
 - [ ] documentation_delivery/ready 提交信息与实际候选一致；Antigravity Git 操作用 GOV_ROLE=antigravity，Hook 校验 staged/ref/msg 及完整候选。
 - [ ] PR 创建前可为 null；创建后由 record-delivery 读取真实 Git/gh 核实 commit/PR/CI，记录 delivery event 并后续同步台账，不猜 PR 号。
 - [ ] 本次 bootstrap 仅 TASK-GOV-004、chore/antigravity-pi-handoff、base ed631a2201e6b439bc79ca6d241176db68ddad82 的限定文档/台账例外，PI 绝不 commit/push/PR。

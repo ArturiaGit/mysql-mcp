@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { statusMarkdown, inputHash } from '../../scripts/governance/lib/core.mjs';
 import { execute } from '../../scripts/governance/lib/execute.mjs';
 import { selectMainTask } from '../../scripts/governance/lib/scope.mjs';
+import './dependencies.test.mjs';
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const env = {...process.env};
 for (const k of Object.keys(env)) if (k.startsWith('GIT_') || k.startsWith('GOV_') || k.startsWith('NODE_TEST_') || k.startsWith('GITHUB_')) delete env[k];
