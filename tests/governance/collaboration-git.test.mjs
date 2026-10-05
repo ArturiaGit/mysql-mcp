@@ -47,3 +47,38 @@ test('Git mode-only change is subject to role and candidate snapshot',t=>{
   f.git('update-index','--chmod=-x','tests/governance/example.test.mjs');const h=f.end('antigravity');f.accept(h);f.start('pi-desktop','implementation');const result=f.end('pi-desktop',{report:f.run()});f.accept(result);f.start('antigravity','documentation_delivery');f.end('antigravity',{report:f.run(),commit_message:'chore: mode-bound candidate'});
   f.git('update-index','--chmod=+x','tests/governance/example.test.mjs');assert.throws(()=>check(f,{delivery:true}),/snapshot changed/);
 });
+test('Hook candidate evidence reuses staged and pushed objects without rerunning tests',t=>{
+  const f=fixture(t,'docs');f.candidate();f.git('add','.');
+  const start=performance.now(), staged=f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'});
+  assert.equal(staged.status,0,staged.stdout+staged.stderr);assert.match(staged.stdout,/candidate evidence reused/);assert.doesNotMatch(staged.stdout,/local diagnostic passed/);
+  t.diagnostic(`staged fast path: ${(performance.now()-start).toFixed(1)} ms`);
+  f.git('commit','-m','chore(collaboration): synthetic delivery');const head=f.git('rev-parse','HEAD');
+  const pushed=f.cli('check',['--pre-push'],`refs/heads/chore/test ${head} refs/heads/chore/test ${'0'.repeat(40)}\n`,{GOV_ROLE:'antigravity'});
+  assert.equal(pushed.status,0,pushed.stdout+pushed.stderr);assert.match(pushed.stdout,/candidate evidence reused/);
+});
+test('candidate with changed execution input digest falls back to registered checks',t=>{
+  const f=fixture(t,'docs');f.candidate();mutateLog(f,l=>{l.events.at(-1).evidence.report.input_sha256='0'.repeat(64);});f.git('add','.');
+  const r=f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'});assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/hook cold path/);assert.match(r.stdout,/local diagnostic passed/);
+});
+test('candidate original TAP tampering never enters fast path',t=>{
+  const f=fixture(t,'docs');f.candidate();mutateLog(f,l=>{l.events.at(-1).evidence.artifacts['unit.tap']='tampered';});f.git('add','.');
+  failed(f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'}),/artifact hash mismatch/);
+});
+test('candidate check definition drift never enters fast path',t=>{
+  const f=fixture(t,'docs');f.candidate();f.data.checks[0].timeout_ms+=1;f.save();f.git('add','.');
+  failed(f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'}),/snapshot changed|changed|drift|candidate/);
+});
+test('CI snapshot runner does not reuse local candidate execution',t=>{
+  const f=fixture(t,'docs');f.candidate();f.git('add','.');f.git('commit','-m','chore(collaboration): synthetic delivery');const head=f.git('rev-parse','HEAD');
+  const r=f.cli('run',['--base',f.base,'--head',head,'--branch',f.task.branch,'--delivery']);assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/local diagnostic passed/);assert.doesNotMatch(r.stdout,/candidate evidence reused/);
+});
+test('candidate execution from another Node runtime falls back to registered checks',t=>{
+  const f=fixture(t,'docs');f.candidate();mutateLog(f,l=>{l.events.at(-1).evidence.report.environment.node='v0.0.0';});f.git('add','.');
+  const r=f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'});assert.equal(r.status,0,r.stdout+r.stderr);assert.match(r.stdout,/hook cold path/);assert.match(r.stdout,/local diagnostic passed/);
+});
+test('cold path registered failure still blocks the Hook',t=>{
+  const f=fixture(t);f.planning();f.start('pi-desktop','implementation');f.write('tests/governance/example.test.mjs',"import test from 'node:test';test('conditional synthetic failure',()=>{if(process.env.SYNTHETIC_FAIL_CHECK)throw Error('cold path failure');});\n");
+  f.accept(f.end('pi-desktop',{report:f.run()}));f.start('antigravity','documentation_delivery');f.end('antigravity',{report:f.run(),commit_message:'chore(collaboration): synthetic delivery'});
+  mutateLog(f,l=>{l.events.at(-1).evidence.report.input_sha256='0'.repeat(64);});f.git('add','.');
+  const r=f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity',SYNTHETIC_FAIL_CHECK:'1'});failed(r,/registered checks failed/);assert.match(r.stdout,/hook cold path/);
+});

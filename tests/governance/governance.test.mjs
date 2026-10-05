@@ -1,26 +1,29 @@
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { statusMarkdown, inputHash } from '../../scripts/governance/lib/core.mjs';
+import { statusMarkdown, inputHash, snapshot } from '../../scripts/governance/lib/core.mjs';
 import { execute } from '../../scripts/governance/lib/execute.mjs';
 import { selectMainTask } from '../../scripts/governance/lib/scope.mjs';
 import './dependencies.test.mjs';
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const env = {...process.env};
 for (const k of Object.keys(env)) if (k.startsWith('GIT_') || k.startsWith('GOV_') || k.startsWith('NODE_TEST_') || k.startsWith('GITHUB_')) delete env[k];
-function fixture(t) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(),'gov-test-'));
-  t.after(() => fs.rmSync(root,{recursive:true,force:true}));
+let baseline;
+after(() => { if (baseline) fs.rmSync(baseline.root,{recursive:true,force:true}); });
+function baselineRepository() {
+  if (baseline) return baseline;
+  const root = fs.mkdtempSync(path.join(process.env.PI_SCRATCH_DIR || os.tmpdir(),'gov-baseline-'));
   const write = (p,s) => { fs.mkdirSync(path.dirname(path.join(root,p)),{recursive:true}); fs.writeFileSync(path.join(root,p),s); };
   const git = (...args) => { const r=spawnSync('git',['-C',root,...args],{env,encoding:'utf8'}); assert.equal(r.status,0,r.stderr); return r.stdout.trim(); };
-  git('init','-b','docs/test'); git('config','user.name','Fixture'); git('config','user.email','fixture@example.invalid'); git('config','core.autocrlf','false');
-  write('.gitignore','.governance-evidence/\n'); git('add','.'); git('commit','-m','baseline');
-  const base = git('rev-parse','HEAD');
-  fs.cpSync(path.join(source,'scripts/governance'),path.join(root,'scripts/governance'),{recursive:true});
+  try {
+    git('init','-b','docs/test'); git('config','user.name','Fixture'); git('config','user.email','fixture@example.invalid'); git('config','core.autocrlf','false');
+    write('.gitignore','.governance-evidence/\n'); git('add','.'); git('commit','-m','baseline');
+    const base = git('rev-parse','HEAD');
+    fs.cpSync(path.join(source,'scripts/governance'),path.join(root,'scripts/governance'),{recursive:true});
   write('docs/REQUIREMENTS.md','| R01 | fixture requirement |\n');
   write('tests/example.test.mjs',"import test from 'node:test'; test('real execution',()=>{});\n");
   const data = {
@@ -28,9 +31,21 @@ function fixture(t) {
     tasks:[{id:'TASK',kind:'maintenance',status:'in_progress',feature_ids:['G01'],branch:'docs/test',base_commit:base,authorization:'fixture authorization',allowed_paths:['scripts/','tests/','docs/','governance/'],pr:1,scope_changes:[],governance_change:true}],
     checks:[{id:'unit',command:'node',args:['--test','--test-reporter=tap','tests/example.test.mjs'],timeout_ms:10000,parser:'tap',feature_ids:['G01'],acceptance_ids:['G01-A1']}]
   };
+    for (const k of ['features','tasks','checks']) write(`governance/${k}.json`,JSON.stringify({schema_version:1,[k]:data[k]},null,2)+'\n');
+    write('docs/FEATURE_STATUS.md',statusMarkdown(data)); git('add','.');
+    baseline = {root,base,data}; return baseline;
+  } catch (e) { fs.rmSync(root,{recursive:true,force:true}); throw e; }
+}
+function fixture(t) {
+  const seed = baselineRepository(), root = fs.mkdtempSync(path.join(process.env.PI_SCRATCH_DIR || os.tmpdir(),'gov-test-'));
+  t.after(() => fs.rmSync(root,{recursive:true,force:true}));
+  // Copy immutable setup, including independent refs/index/config/objects, never run evidence.
+  fs.cpSync(seed.root,root,{recursive:true});
+  const base = seed.base, data = structuredClone(seed.data);
+  const write = (p,s) => { fs.mkdirSync(path.dirname(path.join(root,p)),{recursive:true}); fs.writeFileSync(path.join(root,p),s); };
+  const git = (...args) => { const r=spawnSync('git',['-C',root,...args],{env,encoding:'utf8'}); assert.equal(r.status,0,r.stderr); return r.stdout.trim(); };
   const save = () => { for (const k of ['features','tasks','checks']) write(`governance/${k}.json`,JSON.stringify({schema_version:1,[k]:data[k]},null,2)+'\n'); write('docs/FEATURE_STATUS.md',statusMarkdown(data)); };
   const cli = (script='check',args=[],input,extraEnv={}) => spawnSync(process.execPath,[path.join(root,`scripts/governance/${script}.mjs`),...args],{cwd:root,env:{...env,...extraEnv},encoding:'utf8',input,timeout:120000});
-  save(); git('add','.');
   return {root,write,git,base,data,save,cli};
 }
 const failure = (r,re) => { assert.notEqual(r.status,0); assert.match(r.stdout+r.stderr,re); };
@@ -151,4 +166,20 @@ for(const mode of ['pr-backfill','allowed_paths','base_commit','authorization','
     const r=f.cli('run',['--base',comparisonBase,'--head',head,'--ci-main'],undefined,{GITHUB_ACTIONS:'true',GITHUB_EVENT_NAME:'push',GITHUB_REF:'refs/heads/main'});
     assert.equal(r.status,0,r.stdout+r.stderr);
   } else assert.throws(()=>selectMainTask(f.root,comparisonBase,head),/exactly one associated task|non-candidate task/);
+});
+test('baseline fixture cache isolates files, index, refs, config and registry data',t=>{
+  const first=fixture(t); first.write('tests/example.test.mjs','mutated'); first.data.features[0].behavior='mutated'; first.save(); first.git('add','.'); first.git('commit','-m','isolated change'); first.git('config','user.name','Changed');
+  const second=fixture(t); assert.equal(second.git('rev-parse','HEAD'),second.base); assert.equal(second.git('config','user.name'),'Fixture'); assert.equal(second.data.features[0].behavior,'Enforce gates'); assert.match(fs.readFileSync(path.join(second.root,'tests/example.test.mjs'),'utf8'),/real execution/); assert.equal(second.cli().status,0);
+});
+for (const timeout of [600000,600001,0,1.5]) test(`registered check timeout boundary: ${timeout}`,t=>{
+  const f=fixture(t);f.data.checks[0].timeout_ms=timeout;f.save();const r=f.cli();if(timeout===600000)assert.equal(r.status,0,r.stdout+r.stderr);else failure(r,/invalid timeout/);
+});
+test('batch snapshot preserves binary, empty, quoted-path bytes and executable modes',t=>{
+  const f=fixture(t), binary=Buffer.from([0,255,10,13,0,42]), name='tests/quoted name-中文.bin';
+  f.write(name,binary);f.write('tests/empty.bin','');f.write('tests/executable.mjs','export {};\n');f.git('add','.');f.git('update-index','--chmod=+x','tests/executable.mjs');
+  const s=snapshot(f.root,f.git('write-tree'));try {assert.deepEqual(fs.readFileSync(path.join(s.dir,name)),binary);assert.equal(fs.readFileSync(path.join(s.dir,'tests/empty.bin')).length,0);assert.equal(fs.readFileSync(path.join(s.dir,'tests/executable.mjs'),'utf8'),'export {};\n');if(process.platform!=='win32')assert.ok(fs.statSync(path.join(s.dir,'tests/executable.mjs')).mode&0o111);}finally{s.cleanup();}
+});
+test('batch snapshot rejects non-regular Git tree entries',t=>{
+  const f=fixture(t), blob=f.git('hash-object','tests/example.test.mjs');f.git('update-index','--add','--cacheinfo','120000',blob,'tests/link');
+  assert.throws(()=>snapshot(f.root,f.git('write-tree')),/non-regular tracked input/);
 });

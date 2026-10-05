@@ -63,7 +63,7 @@ export function validate(root, { branch, base, head, checkReport = true, ciMain 
     assert(/^[A-Za-z0-9_-]+$/.test(c.id), `unsafe check ID: ${c.id}`);
     assert(c.command === 'node' && c.parser === 'tap', `command/parser not allowed: ${c.id}`);
     assert(Array.isArray(c.args) && c.args.length >= 3 && c.args[0] === '--test' && c.args[1] === '--test-reporter=tap' && c.args.slice(2).every(p => safePath(p) && /^tests\/.+\.test\.mjs$/.test(p) && fs.existsSync(path.join(root,p))), `check args not allowed: ${c.id}`);
-    assert(Number.isInteger(c.timeout_ms) && c.timeout_ms > 0 && c.timeout_ms <= 300000, `invalid timeout: ${c.id}`);
+    assert(Number.isInteger(c.timeout_ms) && c.timeout_ms > 0 && c.timeout_ms <= 600000, `invalid timeout: ${c.id}`);
     assert(list(c.feature_ids,'feature_ids').length && c.feature_ids.every(id => featureIds.has(id)), `unknown check feature: ${c.id}`);
     assert(list(c.acceptance_ids,'acceptance_ids').length && c.acceptance_ids.every(id => acceptanceIds.has(id)), `unknown check acceptance: ${c.id}`);
     for (const id of c.acceptance_ids) assert(features.some(f => c.feature_ids.includes(f.id) && f.acceptance.some(a => a.id === id && a.check_ids.includes(c.id))), `inconsistent reverse check mapping: ${c.id}`);
