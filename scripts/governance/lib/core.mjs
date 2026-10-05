@@ -40,16 +40,32 @@ export function snapshot(root, tree) {
   try {
     const names = tree ? git(root, ['ls-tree', '-r', '--name-only', '-z', tree]).split('\0').filter(Boolean) : files(root);
     const sourceModes = worktreeModes(root,names,tree);
+    const blobs = new Map();
+    if (tree) {
+      const entries = git(root,['ls-tree','-r','-z',tree]).split('\0').filter(Boolean).map(row => {
+        const split = row.indexOf('\t'), [mode,type,object] = row.slice(0,split).split(' '), name = row.slice(split+1);
+        if (!safePath(name) || type !== 'blob' || !['100644','100755'].includes(mode)) throw new Error(`non-regular tracked input: ${name}`);
+        return {name,object};
+      }).filter(e => !e.name.startsWith('.governance-evidence/'));
+      if (entries.length) {
+        const r = spawnSync('git',['-C',root,'cat-file','--batch'],{input:entries.map(e=>e.object).join('\n')+'\n',maxBuffer:64*1024*1024});
+        if (r.status !== 0) throw new Error('cannot export snapshot blobs');
+        let pos = 0;
+        for (const e of entries) {
+          const end = r.stdout.indexOf(10,pos), header = r.stdout.subarray(pos,end).toString().split(' '), length = Number(header[2]);
+          if (end < pos || header[0] !== e.object || header[1] !== 'blob' || !Number.isInteger(length) || length < 0 || end+1+length >= r.stdout.length || r.stdout[end+1+length] !== 10) throw new Error(`cannot export ${e.name}`);
+          blobs.set(e.name,r.stdout.subarray(end+1,end+1+length)); pos = end+2+length;
+        }
+        if (pos !== r.stdout.length) throw new Error('unexpected snapshot blob output');
+      }
+    }
     for (const p of new Set(names)) {
       if (!safePath(p)) throw new Error(`unsafe snapshot path: ${p}`);
       if (p.startsWith('.governance-evidence/')) continue;
       let data;
       if (tree) {
-        const mode = sourceModes[p];
-        if (!['100644', '100755'].includes(mode)) throw new Error(`non-regular tracked input: ${p}`);
-        const r = spawnSync('git', ['-C', root, 'show', `${tree}:${p}`], { maxBuffer: 32 * 1024 * 1024 });
-        if (r.status !== 0) throw new Error(`cannot export ${p}`);
-        data = r.stdout;
+        data = blobs.get(p);
+        if (!data) throw new Error(`cannot export ${p}`);
       } else {
         if (!fs.existsSync(path.join(root, p))) continue;
         if (!fs.lstatSync(path.join(root, p)).isFile()) throw new Error(`non-regular input: ${p}`);

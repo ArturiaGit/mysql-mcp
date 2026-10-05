@@ -106,3 +106,8 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 - [Phase 1 应用工程脚手架与构建检查契约实施计划](./app-scaffold-and-toolchain.md)：TASK-APP-001，功能 F28，需求 R12、R13。用户批准初始化生产工程 `mysql-mcp/`，配置原生 ESM、TypeScript 严格编译配置、编写纯 Node 构建与编译脚本，建立 `task.build_checks` 契约及应用冒烟测试。
 - 任务分支 `feat/app-scaffold-and-toolchain`，main 基线 `edf957aa653b8037fd3db5a81d37eb51610c7d12`。模式为 `mode: "code"`。
+
+## 13. 机械验证性能优化与 Hook 快速验签直通任务
+
+- [机械验证性能优化与 Hook 快速验签实施计划](./governance-verification-performance.md)：TASK-GOV-008，功能 G01、G03，需求 R15、R16、R17。针对交付流程耗时过长（超 2 小时）问题，优化 `check.mjs` 引入候选证据指纹直通，消除 Git Hook 中全量测试的重复冷启动；调整超时至 600s 消除 Windows 误报死循环；优化 `governance.test.mjs` 夹具缓存减少子进程派生。
+- 任务分支 `chore/governance-verification-performance`，main 基线 `967db371d78365f9643d96dabbf93ee471371e54`。模式为 `mode: "code"`。

@@ -18,12 +18,12 @@
 1. Antigravity 修改前检查工作区、分支、远程、未提交改动及基线。新任务先更新已确认 origin 引用并确认 main 基线，再创建 feat/、fix/、docs/ 或 chore/ 分支。PI 接收后核对任务分支/基线，不另起 Git 交付。禁止直接在 main 修改或提交。
 2. 同一任务续作复用原分支和 PR；前一任务未合并时，不把其变更隐式带入新任务。保留用户修改，不擅自 stash、reset 或 clean；无法安全隔离时报告阻塞。
 3. Antigravity 先登记标准和任务并完成 planning 交接；PI 验证接受后实现、测试，生成实际结果和文档同步请求。交接 JSON 是受约束机器产物，不是扩大角色权限的入口。
-4. Antigravity 接受结果、同步文档/台账，形成完整 documentation_delivery 候选及 Conventional Commits 提交信息。检查实际暂存差异和敏感信息，只暂存本任务明确文件；必要检查通过后由 Antigravity 自动 commit。
+4. Antigravity 接受结果、同步文档/台账，形成完整 documentation_delivery 候选及 Conventional Commits 提交信息。在最终文件确定后执行 `node scripts/governance/run.mjs` 生成匹配当前候选快照的真实证据。检查实际暂存差异和敏感信息，只暂存本任务明确文件；Hook 在指纹匹配时快速直通验签（代码漂移时安全降级全量），必要检查通过后由 Antigravity 自动 commit。
 5. 完成约定验收后由 Antigravity 自动 push 当前任务分支并创建/更新以 main 为 base 的 PR，无需逐次征求 commit/push/PR 许可。仅推送已确认 origin，不 force push。Git 交付操作使用 `GOV_ROLE=antigravity`；Hook 分别校验 staged/ref/msg 与完整交接候选，变量不是身份认证。
 6. Antigravity 查询现有 PR 避免重复，记录需求、范围、真实检查、未验证项、风险和限制；CI 无配置写“未配置”，不得称全绿。创建前任务 `pr` 可为 `null`，创建后真实 commit/PR/CI 由 delivery event 记录并后续同步任务台账，不猜 PR 号。
 7. Antigravity 用 `record-delivery` 核实实际 Git/gh 交付信息后生成回传 prompt；CI 代码问题明确交回 PI rework，成功则等待用户确认合并或下一项授权。不得自动合并、开启自动合并、删除分支、创建 Tag 或发布。
 
-必要检查失败先按职责交回修复重测；验收不能完成则报告，不冒充已完成。网络或权限失败保留本地提交，不改用未知账号/远程，不绕过检查。
+必要检查失败先按职责交回修复重测；验收不能完成则报告，不冒充已完成。快速失败与防死循环：当 `run.mjs` 因底层超时（如 ETIMEDOUT）或环境异常失败时，Agent 不得自行展开耗时超过 2 轮的发散性底层环境压测（如递归扫描宿主磁盘、修改系统 PATH、盲调线程池）；应在核实失败类型后向用户报告阻塞并请求指令。网络或权限失败保留本地提交，不改用未知账号/远程，不绕过检查。
 
 ## 安全与证据
 
