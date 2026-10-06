@@ -187,6 +187,41 @@
           "timeout_ms": 60000
         }
       ],
+      "pr": 9,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-APP-002",
+      "kind": "new",
+      "status": "in_progress",
+      "feature_ids": ["F06", "F26"],
+      "branch": "feat/feasibility-and-sql-policy",
+      "base_commit": "f2dfffcc45e03871efd33b9b62711d6f7b0cd0ca",
+      "authorization": "用户批准方案 A：开展 Phase 1-B 依赖可行性与核心安全原型验证，封装 Windows 系统凭据存储模块，实现基于 AST 的 SQL 风险分级与单语句策略引擎，验证 MCP Stdio 协议骨架，关闭 Q05/Q07，不连接外部生产数据库，不提权。",
+      "allowed_paths": [
+        "mysql-mcp/",
+        "docs/",
+        "governance/"
+      ],
+      "plan_path": "docs/plans/feasibility-and-sql-policy.md",
+      "mode": "code",
+      "build_checks": [
+        {
+          "id": "app-build",
+          "kind": "build",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/build.mjs"],
+          "timeout_ms": 60000
+        },
+        {
+          "id": "app-compile",
+          "kind": "compile",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/compile.mjs"],
+          "timeout_ms": 60000
+        }
+      ],
       "pr": null,
       "scope_changes": [],
       "governance_change": true

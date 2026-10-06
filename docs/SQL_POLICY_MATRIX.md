@@ -88,3 +88,33 @@ flowchart TD
 2. **审计日志与脱敏原则**：
    - 拦截或审批日志中严禁持久化明文敏感参数内容；
    - 记录要素仅限：`request_id`、`connection_id`、`database`、`risk_level`、`sql_fingerprint`、`decision`、`timestamp`、`error_code`。
+
+---
+
+## 6. `evaluateSql` 引擎实现契约与资源边界
+
+### 6.1 决策对象契约 (`SqlDecision`)
+```typescript
+export interface SqlDecision {
+  readonly risk_level: RiskLevel;          // 'L0' | 'L1' | 'L2'
+  readonly operation: string;              // 'SELECT' | 'INSERT' 等操作动词
+  readonly requires_approval: boolean;      // L0 为 false; L1/L2 为 true
+  readonly risk_codes: readonly string[];  // 风险编码列表 (如 ['HIGH_RISK'])
+  readonly sql_fingerprint: string;        // 规范化 AST 结构指纹 (SHA256)
+  readonly exact_sql_digest: string;       // 准确输入 SQL 文本哈希 (SHA256)
+  readonly max_rows: number;               // 默认预算 1000
+  readonly max_response_bytes: number;     // 默认预算 1048576 (1MiB)
+}
+```
+
+### 6.2 资源消耗与防 DoS 阈值
+- **输入字符上限 (`MAX_SQL_BYTES`)**：输入文本严格限制在 64KiB (65,536 字节) 以内；
+- **词法 Token 上限 (`MAX_SQL_TOKENS`)**：单次解析最多 4,096 个词法符号，括号嵌套深度不超过 32 层；
+- **AST 遍历深度与访问上限 (`MAX_SQL_DEPTH`)**：AST 递归遍历节点访问上限 12,000 次，递归深度不超过 64 层。超过任一阈值直接抛出 `SqlPolicyError` (`SQL_NOT_ALLOWED`)。
+
+### 6.3 词法与语法双重防御
+1. **分号与多语句拦截**：词法解析器严格区分单引号字面量、反引号标识符与普通注释，只有非引用文本中出现的分号才会作为多语句阻断；
+2. **拒绝方言歧义与隐藏通道**：坚决拦截可执行注释（`/*!50000 ... */`）、优化器 hint（`/*+ ... */`）、用户变量（`@var`、`@@global`）、双引号模式以及非 ASCII 反斜线转义；
+3. **严格库名一致性**：显式前缀必须与当前显式目标 `database` 完全一致（大小写严格匹配），硬性拦截任何系统库（`mysql`、`information_schema`、`performance_schema`、`sys`）前缀；
+4. **白名单函数与类型**：仅放行常见安全数学、字符串、聚合函数（`ABS`, `CONCAT`, `COUNT`, `SUM` 等），拒绝未知或自定义函数；
+5. **预算元数据说明**：返回的 `max_rows` 与 `max_response_bytes` 仅为预算元数据，本原型未做 SQL 文本改写或结果集截断。未验证真实 MySQL 版本与运行时影响。

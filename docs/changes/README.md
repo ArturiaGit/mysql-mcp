@@ -122,7 +122,8 @@ flowchart TD
 | [TASK-GOV-006 主干任务选择鲁棒性与元数据回填修复](./2026-10-02-TASK-GOV-006-main-task-selection-robustness.md) | TASK-GOV-006 | [#6](https://github.com/ArturiaGit/mysql-mcp/pull/6) | [`fa91179`](https://github.com/ArturiaGit/mysql-mcp/commit/fa911793060028b96597805ce6a1ccddcf82aeef) | 优化候选集任务判定，允许安全回填 PR 元数据，增加白名单防御 |
 | [TASK-GOV-007 工程化工具链、SQL策略与测试规范增强](./2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md) | TASK-GOV-007 | [#7](https://github.com/ArturiaGit/mysql-mcp/pull/7) | [`edf957a`](https://github.com/ArturiaGit/mysql-mcp/commit/edf957aa653b8037fd3db5a81d37eb51610c7d12) | 制定应用构建契约、SQL 风险分级矩阵、自动化测试沙箱隔离与凭据抽象 |
 | [TASK-APP-001 应用工程脚手架、构建门禁与依赖隔离准备](./2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md) | TASK-APP-001 | [#8](https://github.com/ArturiaGit/mysql-mcp/pull/8) | [`967db37`](https://github.com/ArturiaGit/mysql-mcp/commit/967db371d78365f9643d96dabbf93ee471371e54) | 建立 mysql-mcp/ ESM TS 脚手架、无 Shell 构建编译脚本、治理隔离快照与 CI 依赖准备契约 |
-| [TASK-GOV-008 机械验证性能优化、Hook 快速验签直通与单测夹具缓存](./2026-10-05-TASK-GOV-008-governance-verification-performance.md) | TASK-GOV-008 | 待交付 | 待提交 | 解决验证耗时过长瓶颈，Hook 候选验签快速直通（~1.6s），单测夹具缓存提速 30%，调高超时消除死循环 |
+| [TASK-GOV-008 机械验证性能优化、Hook 快速验签直通与单测夹具缓存](./2026-10-05-TASK-GOV-008-governance-verification-performance.md) | TASK-GOV-008 | [#9](https://github.com/ArturiaGit/mysql-mcp/pull/9) | [`f2dfffc`](https://github.com/ArturiaGit/mysql-mcp/commit/f2dfffcc45e03871efd33b9b62711d6f7b0cd0ca) | 解决验证耗时过长瓶颈，Hook 候选验签快速直通（~1.6s），单测夹具缓存提速 30%，调高超时消除死循环 |
+| [TASK-APP-002 Phase 1-B 关键依赖可行性与核心安全原型](./2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md) | TASK-APP-002 | 待交付 | 待提交 | 落地 Windows Keyring 异步凭据封装、AST SQL 四级风险策略引擎与 MCP Stdio 原型，应用测试扩充至 127 项 |
 
 ---
 

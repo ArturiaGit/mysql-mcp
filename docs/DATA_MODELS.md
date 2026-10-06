@@ -146,8 +146,14 @@ export interface ICredentialProvider {
 }
 ```
 
-- **生产环境 (`WindowsKeyringProvider`)**：调用 `@napi-rs/keyring` 接入 Windows Credential Manager，密码不落磁盘文件。
-- **自动化测试与 CI 环境 (`InMemoryCredentialProvider`)**：基于内存加密散列结构实现凭据存取，生命周期与进程绑定，零外部系统调用依赖，确保 CI 100% 稳定通过。
+- **生产环境 (`WindowsKeyringProvider`)**：
+  - 基于 `@napi-rs/keyring` 惰性按需加载底层原生动态链接库，提供强类型别名 `getPassword`、`setPassword`、`deletePassword`；
+  - **服务与账户契约**：系统凭据服务名为 `mysql-mcp:<connection-id>`，用户名统一固定为 `mysql-mcp`；
+  - **标识符约束**：`ref`（即 `connection-id`）长度限定为 1~128 个安全字符（`/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/`），禁止包含控制字符或换行符；
+  - **秘密约束**：`secret` 必须为非空合法 UTF-8 字符串，UTF-8 字节长度严格限制在 1024 字节以内，禁止包含空字符 `\0`；
+  - **安全异常统一屏蔽**：参数非法抛出 `CredentialArgumentError`（`INVALID_ARGUMENT`），系统服务不可用或访问失败抛出 `CredentialStoreError`（`CREDENTIAL_STORE_UNAVAILABLE`），底层原生异常与本地路径绝不外泄；
+  - **零明文后备**：生产环境下系统凭据存取失败坚决不降级为磁盘明文文件或进程内存后备。
+- **自动化测试环境**：测试套件内提供基于 AES-GCM 的测试专用内存 Provider 模拟无原生环境分支；生产环境不包含任何内存后备机制。零新增运行时依赖，`package-lock.json` 保持不变。
 
 ### 7.2 异常信息脱敏规范 (`maskErrorMessage`)
 
