@@ -4,26 +4,33 @@
 
 ## 1. 职责与授权
 
+详见[全栈分工与前后端物理隔离协作规范](./FULLSTACK_DIVISION_SPECIFICATION.md)。
+
 | 执行方 | 职责 | 禁止事项 |
 |---|---|---|
-| Antigravity（`antigravity`） | planning、需求/计划/验收标准/规范/台账；documentation_delivery、提交信息、暂存、commit、push、创建/更新 PR、查询 CI；可只读验证和重跑已有检查 | 自行修复产品源码或构建配置；把文档或 Git 授权扩展为新功能/数据库授权 |
-| PI-Desktop（`pi-desktop`） | implementation/rework 的授权源码、测试、依赖/锁文件与构建配置、实际测试/构建/编译；阅读规范并记录文档同步请求 | 通常直接修改规范/台账；本仓库 commit、push、创建/更新 PR |
+| Antigravity（`antigravity`） | planning、需求/计划/验收标准/规范/台账；**授权前端界面（`mysql-mcp/web/`）开发、样式与 UI 测试**；documentation_delivery、提交信息、暂存、commit、push、创建/更新 PR、查询 CI；可只读验证和重跑已有检查 | 自行修复后端核心源码（`mysql-mcp/src/`）或构建配置；把前端或 Git 授权扩展为后端/数据库授权 |
+| PI-Desktop（`pi-desktop`） | implementation/rework 的授权**后端核心源码（`mysql-mcp/src/`）**、后端测试、依赖/锁文件与构建配置、实际测试/构建/编译；阅读规范并记录文档同步请求 | 修改前端界面资产（`mysql-mcp/web/`）；通常直接修改规范/台账；本仓库 commit、push、创建/更新 PR |
 | 用户 | 在两端人工复制完整 prompt，明确任务范围与合并授权 | 用整体开发授权替代每次数据库写入/DDL 确认 |
 
-Antigravity 管理根 `AGENTS.md`、`docs/`、规范 Markdown、功能/任务/检查登记、协作策略和阶段授权。PI 管理 `mysql-mcp/` 技术实现，以及明确登记 `governance_change` 的 `scripts/governance/`、治理测试、Hook、CI 技术实现。任务 `allowed_paths` 是上限，不替代角色约束。
+Antigravity 管理根 `AGENTS.md`、`docs/`、规范 Markdown、功能/任务/检查登记、协作策略以及 `mysql-mcp/web/` 前端界面资产。PI 管理 `mysql-mcp/src/` 后端系统实现、`mysql-mcp/tests/` 后端测试，以及明确登记 `governance_change` 的 `scripts/governance/`、治理测试、Hook、CI 技术实现。任务 `allowed_paths` 是上限，不替代角色与领域约束。
 
 `governance/collaboration.json` 定义策略；`governance/handoffs/<ID>.json` 为单任务交接链，没有可跨任务随意改写的全局“当前阶段”。交接 JSON、prompt、执行报告是受约束机器产物，双方仅按阶段操作生成，不能借机器产物越权。未分类、交叉归属、路径穿越、非普通文件、任务外路径须拒绝；删除/重命名同样校验。
 
-安全规则沿用[项目约束](./PROJECT_CONSTRAINTS.md)、[Git 工作流](./GIT_WORKFLOW.md)、[验收规范](./ACCEPTANCE.md)。交接不授予数据库连接、客户端配置、新功能、发布或合并权限。
+安全规则沿用[项目约束](./PROJECT_CONSTRAINTS.md)、[Git 工作流](./GIT_WORKFLOW.md)、[验收规范](./ACCEPTANCE.md)。交接不授予数据库连接、客户端配置、新功能、发布或合并权限。前后端交互必须严格遵循[接口契约](./API_AND_PROTOCOLS.md)，接口先行。
 
 ## 2. 阶段与停止点
 
-1. **planning / Antigravity**：核实仓库/分支/main 基线和既有功能/PR，通读 `docs/changes/` 下所有活动未发版变更文档以掌握近期架构演进与警示，准备任务分支；先登记可观察验收、范围和禁止事项，再生成给 PI 的交接（文档-only 任务直接推进至 documentation_delivery）。
-2. **implementation / PI**：用户转交后核验并接受准确 ID/摘要；开始阶段，执行授权技术变更和真实检查，结束时列实际结果、文档同步请求和限制。
+1. **planning / Antigravity**：核实仓库/分支/main 基线和既有功能/PR，通读 `docs/changes/` 下所有活动未发版变更文档以掌握近期架构演进与警示，准备任务分支；先登记可观察验收、范围和禁止事项，冻结接口契约，再生成给 PI 的交接（文档任务直接推进至 documentation_delivery；前端任务由 Antigravity 实施）。
+2. **implementation / PI (后端) 或 Antigravity (前端)**：
+   - 后端任务（`mode: code`）：用户转交后核验并接受准确 ID/摘要；由 PI 开始阶段，执行授权后端技术变更和真实检查，结束时列实际结果、文档同步请求和限制。
+   - 前端任务（`mode: frontend`）：由 Antigravity 依据已锁定接口实现 `mysql-mcp/web/` 页面与交互，执行浏览器预览自测。
 3. **documentation_delivery / Antigravity**：接受实现结果、同步文档/台账，并在 `docs/changes/` 撰写本次任务变更文档（含发版说明板块与 Agent 避坑指南，维护未发版索引），检查结果与代码一致，生成准确交付候选、暂存摘要和 Conventional Commits 提交信息。必要门禁通过后仅由 Antigravity 完成 Git 交付。
-4. **rework / PI**：明确代码缺陷/CI 失败交回 PI，核验接受后只修复授权问题并重测；新交接再回 documentation_delivery，旧结果不再授权交付。
+4. **rework / PI**：明确后端代码缺陷/CI 失败交回 PI，核验接受后只修复授权问题并重测；新交接再回 documentation_delivery，旧结果不再授权交付。
 
-正常路径为 `planning → implementation → documentation_delivery`；返工为 `documentation_delivery → rework → documentation_delivery`。文档-only 由 Antigravity 走 `planning → documentation_delivery`，不伪造 PI 开发或构建阶段。
+正常路径：
+- 后端开发：`planning → implementation (PI) → documentation_delivery (Antigravity)`；返工为 `documentation_delivery → rework → documentation_delivery`。
+- 文档任务：由 Antigravity 走 `planning → documentation_delivery`，不伪造 PI 开发或构建阶段。
+- 前端任务：由 Antigravity 走 `planning → implementation (Antigravity) → documentation_delivery (Antigravity)`。
 
 阶段结束或终端生成 prompt 都不证明用户已转交；接收方必须显式接受。blocked、reject、cancel 保留事件，不自动推进。无下一项授权时回传“等待用户授权，不开始开发”；PR 成功后等待用户确认合并，不自动合并、开启自动合并、删除分支、创建 Tag 或发布。
 

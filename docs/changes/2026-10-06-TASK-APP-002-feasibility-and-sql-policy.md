@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-06
 - 关联任务：TASK-APP-002
-- 关联 PR：待交付
-- 关联 Commit：待提交
+- 关联 PR：[#10](https://github.com/ArturiaGit/mysql-mcp/pull/10)
+- 关联 Commit：[`be20795`](https://github.com/ArturiaGit/mysql-mcp/commit/be2079577e664e29437bb5a603e03a08b0a1b117)
 - 责任执行方：Antigravity (Planning & Documentation Delivery) × PI-Desktop (Implementation)
 - 关联功能/需求：F06, F26, F28 / R03, R06, R07, R08, R12, R14, R16
 

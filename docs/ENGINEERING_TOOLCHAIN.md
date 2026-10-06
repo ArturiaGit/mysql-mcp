@@ -25,7 +25,8 @@
     ├── scripts/
     │   ├── build.mjs           纯 Node 生产构建入口（无 Shell）
     │   └── compile.mjs         纯 Node 类型编译检查入口（无 Shell）
-    ├── src/                    应用源码（ESM TypeScript）
+    ├── src/                    后端应用源码（ESM TypeScript，PI-Desktop 专职）
+    ├── web/                    前端界面资产（HTML/CSS/TS，Antigravity 专职，详见全栈分工规范）
     └── tests/                  应用单元测试与集成测试（Fake沙箱）
 ```
 

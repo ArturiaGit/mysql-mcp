@@ -1,0 +1,1327 @@
+{
+  "schema_version": 1,
+  "task_id": "TASK-GOV-009",
+  "events": [
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-009-E1",
+      "sequence": 1,
+      "previous": null,
+      "at": "2026-10-06T07:55:31.221Z",
+      "type": "begin",
+      "role": "antigravity",
+      "phase": "planning",
+      "task_definition": {
+        "id": "TASK-GOV-009",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G02",
+          "G03"
+        ],
+        "branch": "docs/fullstack-division-specification",
+        "base_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+        "authorization": "用户批准添加全栈分工与前后端物理隔离协作规范：确立前端界面由 Antigravity 专职负责（mysql-mcp/web/）、PI-Desktop 专职负责后端系统（mysql-mcp/src/ 等）的强制性约束，确立双向禁止红线、接口先行原则、目录边界与任务模式扩展，不修改已实现后端源码。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/",
+          "governance/"
+        ],
+        "plan_path": "docs/plans/fullstack-division-specification.md",
+        "mode": "docs",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+      "branch": "docs/fullstack-division-specification",
+      "base_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+      "feature_ids": [
+        "G02",
+        "G03"
+      ],
+      "source_head": "be2079577e664e29437bb5a603e03a08b0a1b117",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:a8f86445e3d25335b86daf31fb4224e8f5d0b2ee103afb6de68a383682797ce8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:9365d84ea261a6fe5915c861b4121555fd0a43c9153d3fb4bf6ae273be3ee2d7",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:75c75adee15bef92db8b18d1393f0cdf15471db7de58657ffce061c428900681",
+        "docs/ARCHITECTURE.md": "100644:4b7dfd68a73988c11538717808bee16976f629908a6d4d5127684ee707baed85",
+        "docs/changes/2026-10-02-TASK-GOV-001-baseline-and-pr-flow.md": "100644:e1c0155317a346e6cf5b9878c6b2600b188e9116a8a715d5baf16642a4047a35",
+        "docs/changes/2026-10-02-TASK-GOV-002-ci-environment-isolation.md": "100644:ebdc13ae993a233db660bf6f54430d2efdff0e5824710a4f93373addf7160b1b",
+        "docs/changes/2026-10-02-TASK-GOV-003-main-task-selection-fix.md": "100644:0dd70c0c5c5dbe3d06c3ec42d559ff13aaacbb16ff1acc3f8fcd1bb5fe5f9ad4",
+        "docs/changes/2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md": "100644:905bc62544558ea317aeb80e8f7f15f779785aad6fa3cda02dc8d9220a71b90f",
+        "docs/changes/2026-10-02-TASK-GOV-005-change-management-specification.md": "100644:682af8fcdf2a41b7ed4206d9e0284fa2cda871e5572864ba254ebb55475d2b3a",
+        "docs/changes/2026-10-02-TASK-GOV-006-main-task-selection-robustness.md": "100644:0cea8a1bd6d5d7203ca92f5338e445a8cd86b04e27c3f7e997a8270b9d895469",
+        "docs/changes/2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md": "100644:1977b8d112bd032d1063ac50d2a7a653866b5e4a396dd339c7b408bd4cfa598f",
+        "docs/changes/2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md": "100644:188d5b41c72021964cb388e16bf34e4bb7c517e21ecfdcd49249a839c4ac70d2",
+        "docs/changes/2026-10-05-TASK-GOV-008-governance-verification-performance.md": "100644:353b9d482216cfc1a8ffc4350492be632f0f4a80746b65f796365e2dcfbe1514",
+        "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md": "100644:b58ae4dc0f35752e111017e473436f2a24817a958eb4a1cdf63472a6aa2d5983",
+        "docs/changes/README.md": "100644:cb467d01a585857ca9b72bbcfff9e96b633216dad9bcf8df24ccae460765d6bb",
+        "docs/CODE_REVIEW.md": "100644:e3a00116fd6c2e943500a326da69a946fce9bb5ef2735597987c6ee262ef1bab",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:66c867226292e99152c6fc53db931caaa56c457f6bcb473ca2aab10849aa1474",
+        "docs/DATA_MODELS.md": "100644:dd5bafd89671c610340f4badb728efc67ec5e0186a24720b3fe1065db17f8945",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:387c9849f9707a21b9bd6d7e0f99a25a16b722999a71d82fce3fc2522003aaa8",
+        "docs/ENGINEERING_TOOLCHAIN.md": "100644:3bddc33f29385c4923d79c931b15a156fe0ff201580d8a8f23e605a6b24264c9",
+        "docs/FEATURE_STATUS.md": "100644:f7bbd119912d448e12d392e1fac5480851f72176aca1fee3796a0746580675e2",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/app-scaffold-and-toolchain.md": "100644:700a7b211cfdab1755077f74d2ffe92fef0028d79cdfe68cbb6943fe57c09169",
+        "docs/plans/change-management.md": "100644:d43b94c09b6cf38ac437631c9096c343d1bca8e98f620cac4ca418f667ba4b9a",
+        "docs/plans/engineering-and-safety-specifications.md": "100644:a2861116e85311eb070eec746990e24b70c249870555e591198e6129b4481d59",
+        "docs/plans/feasibility-and-sql-policy.md": "100644:ed812cc2d1026c96dfe2db9a2a61ffba5fffe63deda3e4e101b985909afafff4",
+        "docs/plans/fix-main-task-selection.md": "100644:561315245e187bda7f8833800e1ea96f7e655214a1983e88f9bdebb4672d4b53",
+        "docs/plans/governance-verification-performance.md": "100644:934d2166e0fef0d888d13af8000f8d715beaed5f31a6e1303e86d6e6899c6050",
+        "docs/plans/README.md": "100644:a309a4bb10d54158e84f05f8c77742d600e5be6d7be61ec6f897a9f17feed916",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:083d409e2c932dd8449557b638e8b2d72416ff5cd4dd61fcd846dab8c9bb98eb",
+        "docs/README.md": "100644:a77f6715e3ee9105e42859428129f51af7804bcaeb127251af1280330d7b5dcc",
+        "docs/REQUIREMENTS.md": "100644:040728c1d313f71867518fc99d37afba49145fab046c9525e2bbc63a33ba8a96",
+        "docs/ROADMAP.md": "100644:505fc5e14e115edbf49dbddb367f607c44bbd2314222334858371609a150a5ae",
+        "docs/SQL_POLICY_MATRIX.md": "100644:5b6dff6a829789c969cc86f3fdadf4713c2f7d88770c1776cecc14c77b3d878a",
+        "docs/TECH_STACK.md": "100644:c003c1cc3b889d8ce5c8ec2b3f1927413a682d859c51e089cfb85a4cc0227515",
+        "docs/TESTING_STRATEGY.md": "100644:cde632f61b44cf409c64a08ed0f1f7c288c10e696682e915017e40ad31e6ff30",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection-robustness.md": "100644:59c2e18e051175374c8ad5be330dea133524a97584546776888cc85e4bcd1728",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:d23aa2d6323b4117edc7769a6e09bcff5e9ab36178ec58da205a67d0e75669d7",
+        "docs/VERSIONING.md": "100644:b13661d31cb8a30a3a93edb420cc47c3755c0002ed923a55303e694f50931e59",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:85939f97995c9e5cf5d0ad3b3b102b97ccbde3d3a23138db6ffc95c9aed88caa",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:38461767430fb62fee24a40e5c38e91703e9137ebed94f9b93620e2f7ccc9834",
+        "governance/tasks.json": "100644:729203e9260f8f410652c10cf2621195fc7ed5d81edbceeb3a7187dd19bb2348",
+        "mysql-mcp/package-lock.json": "100644:f5bb254c4c3f1aa037d0c980f4bf0500624af31f0b808fa142a2765cf630e87a",
+        "mysql-mcp/package.json": "100644:c1eb1acc2e7ffaa610026a5f1ea369e154bb72e35bc16dea8af737bd126b1364",
+        "mysql-mcp/scripts/build.mjs": "100644:6ad4a17f9db3b428851c64e86b73e700f3234040f38836056bd13a1ab5dbd166",
+        "mysql-mcp/scripts/compile.mjs": "100644:a6bdbc8bf752a0f7d04937c6ca05d45e869906a81af1e6a1dfb3278b72324042",
+        "mysql-mcp/src/index.ts": "100644:1b10bc99343531080799251141cf8791b6c40fdecb678989f24dc7ab9093d440",
+        "mysql-mcp/src/mcp/server.ts": "100644:c464bd9bec4a92403e9ba7ac0b6233efe4bde2c5b68e4bc59ab5647c6a0c65c4",
+        "mysql-mcp/src/security/keyring.ts": "100644:afa529d96e2631eb56a2609e295071dea15203215bd6b5843801ca0323ec548e",
+        "mysql-mcp/src/sql/ast.ts": "100644:18345b9a9d692b6d58932a7e7ef427917bc2f7c10e744d1285db2524912794fb",
+        "mysql-mcp/src/sql/policy.ts": "100644:81ddc55e37ef0017a34672f6f4e8d1bc3a2817a90bb617896b29bc19ed838687",
+        "mysql-mcp/tests/keyring.test.mjs": "100644:64eb4006f73c7276463d2bb0afc276abdbbd2806724216fba21608e5b0a4e9b1",
+        "mysql-mcp/tests/mcp.test.mjs": "100644:945418efae06b180721dc097382536ab785dd3d0ad33ac36897c24f760a92b1a",
+        "mysql-mcp/tests/smoke.test.mjs": "100644:189cc104917b8b27c5333119c0cd0cdbf64bf69bae1dc5853b69864afb16bdbc",
+        "mysql-mcp/tests/sql-policy.test.mjs": "100644:22ef7ee2c35a2fe19ec65a2c8cbbc7fb0453aa6f484b79457f11d8bc5e2c1d26",
+        "mysql-mcp/tsconfig.json": "100644:5c8649b8b9a95ecbe57008be42d1880fbbc2de9cd39685c63d074ab126571826",
+        "scripts/governance/check.mjs": "100644:e99c33db02575ef2da0fc991752d16adc2c32a5111593b806577dc276826e635",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:bc90f6835a239d3b80cfba87087d793ad2c7c2b05a3d54a445b0046d847696ae",
+        "scripts/governance/lib/dependencies.mjs": "100644:2ab6b35ea701ced7e8ae0e7c96f1ed3127f5248d6db2b675e235910f6c301a0e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:063efafa7755654473a2fc3b817ca62a741fb87bd5eefd1ea6687f163b6f4d21",
+        "scripts/governance/lib/validate.mjs": "100644:a0887fddf1af29224ed604dfd1d740887db6e88c99dfc314f172db57c744cbd6",
+        "scripts/governance/prepare.mjs": "100644:51ddde6b6e7337a7826f77b78360cd2180d517b679984c9d23d8105ad35a3046",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:cce9c80569efe7dd8f90d0e37a4b4b3aacc4f008a9a1b60cf04f12358de37f11",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:72978561d5cbfebc7a021222e6138ad85901bd560a8e217c7fe04fc7edd9aff8",
+        "tests/governance/collaboration.test.mjs": "100644:8862091399814732416098b1ed4eec152ae5edcfa5854c663c4c7ee6f2b69048",
+        "tests/governance/dependencies.test.mjs": "100644:f7e2fc34099ceaea1793f6ce75004531ffaf011e8540cdb02236cdaa55be9906",
+        "tests/governance/governance.test.mjs": "100644:bd72dfb6f4e58eb267a6e944f215a1faac2205ef667f0a118c6f7ccae2824255"
+      },
+      "contract_sha256": "4f2b32ee73f2de42cb1345d96295bf3a0c5a4b82243d65663d76a132fb57af31",
+      "digest": "ab94b2cd49e2d94185d0664cec216fb5fd6ece9ada69079cb769a8730d7b401c"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-009-E2",
+      "sequence": 2,
+      "previous": "ab94b2cd49e2d94185d0664cec216fb5fd6ece9ada69079cb769a8730d7b401c",
+      "at": "2026-10-06T07:56:00.953Z",
+      "type": "handoff",
+      "role": "antigravity",
+      "phase": "planning",
+      "task_definition": {
+        "id": "TASK-GOV-009",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G02",
+          "G03"
+        ],
+        "branch": "docs/fullstack-division-specification",
+        "base_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+        "authorization": "用户批准添加全栈分工与前后端物理隔离协作规范：确立前端界面由 Antigravity 专职负责（mysql-mcp/web/）、PI-Desktop 专职负责后端系统（mysql-mcp/src/ 等）的强制性约束，确立双向禁止红线、接口先行原则、目录边界与任务模式扩展，不修改已实现后端源码。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/",
+          "governance/"
+        ],
+        "plan_path": "docs/plans/fullstack-division-specification.md",
+        "mode": "docs",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "begin": "TASK-GOV-009-E1",
+      "source_head": "be2079577e664e29437bb5a603e03a08b0a1b117",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:a8f86445e3d25335b86daf31fb4224e8f5d0b2ee103afb6de68a383682797ce8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:9365d84ea261a6fe5915c861b4121555fd0a43c9153d3fb4bf6ae273be3ee2d7",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:75c75adee15bef92db8b18d1393f0cdf15471db7de58657ffce061c428900681",
+        "docs/ARCHITECTURE.md": "100644:4b7dfd68a73988c11538717808bee16976f629908a6d4d5127684ee707baed85",
+        "docs/changes/2026-10-02-TASK-GOV-001-baseline-and-pr-flow.md": "100644:e1c0155317a346e6cf5b9878c6b2600b188e9116a8a715d5baf16642a4047a35",
+        "docs/changes/2026-10-02-TASK-GOV-002-ci-environment-isolation.md": "100644:ebdc13ae993a233db660bf6f54430d2efdff0e5824710a4f93373addf7160b1b",
+        "docs/changes/2026-10-02-TASK-GOV-003-main-task-selection-fix.md": "100644:0dd70c0c5c5dbe3d06c3ec42d559ff13aaacbb16ff1acc3f8fcd1bb5fe5f9ad4",
+        "docs/changes/2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md": "100644:905bc62544558ea317aeb80e8f7f15f779785aad6fa3cda02dc8d9220a71b90f",
+        "docs/changes/2026-10-02-TASK-GOV-005-change-management-specification.md": "100644:682af8fcdf2a41b7ed4206d9e0284fa2cda871e5572864ba254ebb55475d2b3a",
+        "docs/changes/2026-10-02-TASK-GOV-006-main-task-selection-robustness.md": "100644:0cea8a1bd6d5d7203ca92f5338e445a8cd86b04e27c3f7e997a8270b9d895469",
+        "docs/changes/2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md": "100644:1977b8d112bd032d1063ac50d2a7a653866b5e4a396dd339c7b408bd4cfa598f",
+        "docs/changes/2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md": "100644:188d5b41c72021964cb388e16bf34e4bb7c517e21ecfdcd49249a839c4ac70d2",
+        "docs/changes/2026-10-05-TASK-GOV-008-governance-verification-performance.md": "100644:353b9d482216cfc1a8ffc4350492be632f0f4a80746b65f796365e2dcfbe1514",
+        "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md": "100644:b58ae4dc0f35752e111017e473436f2a24817a958eb4a1cdf63472a6aa2d5983",
+        "docs/changes/README.md": "100644:cb467d01a585857ca9b72bbcfff9e96b633216dad9bcf8df24ccae460765d6bb",
+        "docs/CODE_REVIEW.md": "100644:e3a00116fd6c2e943500a326da69a946fce9bb5ef2735597987c6ee262ef1bab",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:66c867226292e99152c6fc53db931caaa56c457f6bcb473ca2aab10849aa1474",
+        "docs/DATA_MODELS.md": "100644:dd5bafd89671c610340f4badb728efc67ec5e0186a24720b3fe1065db17f8945",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:387c9849f9707a21b9bd6d7e0f99a25a16b722999a71d82fce3fc2522003aaa8",
+        "docs/ENGINEERING_TOOLCHAIN.md": "100644:3bddc33f29385c4923d79c931b15a156fe0ff201580d8a8f23e605a6b24264c9",
+        "docs/FEATURE_STATUS.md": "100644:f7bbd119912d448e12d392e1fac5480851f72176aca1fee3796a0746580675e2",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/app-scaffold-and-toolchain.md": "100644:700a7b211cfdab1755077f74d2ffe92fef0028d79cdfe68cbb6943fe57c09169",
+        "docs/plans/change-management.md": "100644:d43b94c09b6cf38ac437631c9096c343d1bca8e98f620cac4ca418f667ba4b9a",
+        "docs/plans/engineering-and-safety-specifications.md": "100644:a2861116e85311eb070eec746990e24b70c249870555e591198e6129b4481d59",
+        "docs/plans/feasibility-and-sql-policy.md": "100644:ed812cc2d1026c96dfe2db9a2a61ffba5fffe63deda3e4e101b985909afafff4",
+        "docs/plans/fix-main-task-selection.md": "100644:561315245e187bda7f8833800e1ea96f7e655214a1983e88f9bdebb4672d4b53",
+        "docs/plans/governance-verification-performance.md": "100644:934d2166e0fef0d888d13af8000f8d715beaed5f31a6e1303e86d6e6899c6050",
+        "docs/plans/README.md": "100644:a309a4bb10d54158e84f05f8c77742d600e5be6d7be61ec6f897a9f17feed916",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:083d409e2c932dd8449557b638e8b2d72416ff5cd4dd61fcd846dab8c9bb98eb",
+        "docs/README.md": "100644:a77f6715e3ee9105e42859428129f51af7804bcaeb127251af1280330d7b5dcc",
+        "docs/REQUIREMENTS.md": "100644:040728c1d313f71867518fc99d37afba49145fab046c9525e2bbc63a33ba8a96",
+        "docs/ROADMAP.md": "100644:505fc5e14e115edbf49dbddb367f607c44bbd2314222334858371609a150a5ae",
+        "docs/SQL_POLICY_MATRIX.md": "100644:5b6dff6a829789c969cc86f3fdadf4713c2f7d88770c1776cecc14c77b3d878a",
+        "docs/TECH_STACK.md": "100644:c003c1cc3b889d8ce5c8ec2b3f1927413a682d859c51e089cfb85a4cc0227515",
+        "docs/TESTING_STRATEGY.md": "100644:cde632f61b44cf409c64a08ed0f1f7c288c10e696682e915017e40ad31e6ff30",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection-robustness.md": "100644:59c2e18e051175374c8ad5be330dea133524a97584546776888cc85e4bcd1728",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:d23aa2d6323b4117edc7769a6e09bcff5e9ab36178ec58da205a67d0e75669d7",
+        "docs/VERSIONING.md": "100644:b13661d31cb8a30a3a93edb420cc47c3755c0002ed923a55303e694f50931e59",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:85939f97995c9e5cf5d0ad3b3b102b97ccbde3d3a23138db6ffc95c9aed88caa",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:38461767430fb62fee24a40e5c38e91703e9137ebed94f9b93620e2f7ccc9834",
+        "governance/tasks.json": "100644:729203e9260f8f410652c10cf2621195fc7ed5d81edbceeb3a7187dd19bb2348",
+        "mysql-mcp/package-lock.json": "100644:f5bb254c4c3f1aa037d0c980f4bf0500624af31f0b808fa142a2765cf630e87a",
+        "mysql-mcp/package.json": "100644:c1eb1acc2e7ffaa610026a5f1ea369e154bb72e35bc16dea8af737bd126b1364",
+        "mysql-mcp/scripts/build.mjs": "100644:6ad4a17f9db3b428851c64e86b73e700f3234040f38836056bd13a1ab5dbd166",
+        "mysql-mcp/scripts/compile.mjs": "100644:a6bdbc8bf752a0f7d04937c6ca05d45e869906a81af1e6a1dfb3278b72324042",
+        "mysql-mcp/src/index.ts": "100644:1b10bc99343531080799251141cf8791b6c40fdecb678989f24dc7ab9093d440",
+        "mysql-mcp/src/mcp/server.ts": "100644:c464bd9bec4a92403e9ba7ac0b6233efe4bde2c5b68e4bc59ab5647c6a0c65c4",
+        "mysql-mcp/src/security/keyring.ts": "100644:afa529d96e2631eb56a2609e295071dea15203215bd6b5843801ca0323ec548e",
+        "mysql-mcp/src/sql/ast.ts": "100644:18345b9a9d692b6d58932a7e7ef427917bc2f7c10e744d1285db2524912794fb",
+        "mysql-mcp/src/sql/policy.ts": "100644:81ddc55e37ef0017a34672f6f4e8d1bc3a2817a90bb617896b29bc19ed838687",
+        "mysql-mcp/tests/keyring.test.mjs": "100644:64eb4006f73c7276463d2bb0afc276abdbbd2806724216fba21608e5b0a4e9b1",
+        "mysql-mcp/tests/mcp.test.mjs": "100644:945418efae06b180721dc097382536ab785dd3d0ad33ac36897c24f760a92b1a",
+        "mysql-mcp/tests/smoke.test.mjs": "100644:189cc104917b8b27c5333119c0cd0cdbf64bf69bae1dc5853b69864afb16bdbc",
+        "mysql-mcp/tests/sql-policy.test.mjs": "100644:22ef7ee2c35a2fe19ec65a2c8cbbc7fb0453aa6f484b79457f11d8bc5e2c1d26",
+        "mysql-mcp/tsconfig.json": "100644:5c8649b8b9a95ecbe57008be42d1880fbbc2de9cd39685c63d074ab126571826",
+        "scripts/governance/check.mjs": "100644:e99c33db02575ef2da0fc991752d16adc2c32a5111593b806577dc276826e635",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:bc90f6835a239d3b80cfba87087d793ad2c7c2b05a3d54a445b0046d847696ae",
+        "scripts/governance/lib/dependencies.mjs": "100644:2ab6b35ea701ced7e8ae0e7c96f1ed3127f5248d6db2b675e235910f6c301a0e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:063efafa7755654473a2fc3b817ca62a741fb87bd5eefd1ea6687f163b6f4d21",
+        "scripts/governance/lib/validate.mjs": "100644:a0887fddf1af29224ed604dfd1d740887db6e88c99dfc314f172db57c744cbd6",
+        "scripts/governance/prepare.mjs": "100644:51ddde6b6e7337a7826f77b78360cd2180d517b679984c9d23d8105ad35a3046",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:cce9c80569efe7dd8f90d0e37a4b4b3aacc4f008a9a1b60cf04f12358de37f11",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:72978561d5cbfebc7a021222e6138ad85901bd560a8e217c7fe04fc7edd9aff8",
+        "tests/governance/collaboration.test.mjs": "100644:8862091399814732416098b1ed4eec152ae5edcfa5854c663c4c7ee6f2b69048",
+        "tests/governance/dependencies.test.mjs": "100644:f7e2fc34099ceaea1793f6ce75004531ffaf011e8540cdb02236cdaa55be9906",
+        "tests/governance/governance.test.mjs": "100644:bd72dfb6f4e58eb267a6e944f215a1faac2205ef667f0a118c6f7ccae2824255"
+      },
+      "after": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:a8f86445e3d25335b86daf31fb4224e8f5d0b2ee103afb6de68a383682797ce8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:a3c4526eb8470c6a396af1e3bfdb27b86b88668d24598ef56ac8eebc26898c86",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:75c75adee15bef92db8b18d1393f0cdf15471db7de58657ffce061c428900681",
+        "docs/ARCHITECTURE.md": "100644:f96caf02900b33c833d8b33696990855558b2300a0e029d4772d6f5887875558",
+        "docs/changes/2026-10-02-TASK-GOV-001-baseline-and-pr-flow.md": "100644:e1c0155317a346e6cf5b9878c6b2600b188e9116a8a715d5baf16642a4047a35",
+        "docs/changes/2026-10-02-TASK-GOV-002-ci-environment-isolation.md": "100644:ebdc13ae993a233db660bf6f54430d2efdff0e5824710a4f93373addf7160b1b",
+        "docs/changes/2026-10-02-TASK-GOV-003-main-task-selection-fix.md": "100644:0dd70c0c5c5dbe3d06c3ec42d559ff13aaacbb16ff1acc3f8fcd1bb5fe5f9ad4",
+        "docs/changes/2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md": "100644:905bc62544558ea317aeb80e8f7f15f779785aad6fa3cda02dc8d9220a71b90f",
+        "docs/changes/2026-10-02-TASK-GOV-005-change-management-specification.md": "100644:682af8fcdf2a41b7ed4206d9e0284fa2cda871e5572864ba254ebb55475d2b3a",
+        "docs/changes/2026-10-02-TASK-GOV-006-main-task-selection-robustness.md": "100644:0cea8a1bd6d5d7203ca92f5338e445a8cd86b04e27c3f7e997a8270b9d895469",
+        "docs/changes/2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md": "100644:1977b8d112bd032d1063ac50d2a7a653866b5e4a396dd339c7b408bd4cfa598f",
+        "docs/changes/2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md": "100644:188d5b41c72021964cb388e16bf34e4bb7c517e21ecfdcd49249a839c4ac70d2",
+        "docs/changes/2026-10-05-TASK-GOV-008-governance-verification-performance.md": "100644:353b9d482216cfc1a8ffc4350492be632f0f4a80746b65f796365e2dcfbe1514",
+        "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md": "100644:def56a3c11cd74083231e1c706b4fc1f5eba891b6076fbf7143bc586bd177264",
+        "docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md": "100644:4d9989550f4bf74c6726d400274fe17fc3f93ee8b8480723cb225aec689fcde8",
+        "docs/changes/README.md": "100644:cc33299a3af861f1f50de97315dbef012a143da51e93813ee3ede26afdc30849",
+        "docs/CODE_REVIEW.md": "100644:e3a00116fd6c2e943500a326da69a946fce9bb5ef2735597987c6ee262ef1bab",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:bd7a3dfb501eb60a7e5aeb325fb9b7db2a25536cd281aa1e237537830d0dbef1",
+        "docs/DATA_MODELS.md": "100644:dd5bafd89671c610340f4badb728efc67ec5e0186a24720b3fe1065db17f8945",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:387c9849f9707a21b9bd6d7e0f99a25a16b722999a71d82fce3fc2522003aaa8",
+        "docs/ENGINEERING_TOOLCHAIN.md": "100644:1aa1a230dd6e05392ec1a20bfc9609299337820e1e80d905b3946d3cac29eab1",
+        "docs/FEATURE_STATUS.md": "100644:f7bbd119912d448e12d392e1fac5480851f72176aca1fee3796a0746580675e2",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:6c3219de1541410a9f594e7ac1de790a310833bbfbff113904b82f5e6a9b5ff2",
+        "docs/FULLSTACK_DIVISION_SPECIFICATION.md": "100644:27422e1f903f45c33b1420d1a50209894db625769f671293055461c79d26de1a",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/app-scaffold-and-toolchain.md": "100644:700a7b211cfdab1755077f74d2ffe92fef0028d79cdfe68cbb6943fe57c09169",
+        "docs/plans/change-management.md": "100644:d43b94c09b6cf38ac437631c9096c343d1bca8e98f620cac4ca418f667ba4b9a",
+        "docs/plans/engineering-and-safety-specifications.md": "100644:a2861116e85311eb070eec746990e24b70c249870555e591198e6129b4481d59",
+        "docs/plans/feasibility-and-sql-policy.md": "100644:ed812cc2d1026c96dfe2db9a2a61ffba5fffe63deda3e4e101b985909afafff4",
+        "docs/plans/fix-main-task-selection.md": "100644:561315245e187bda7f8833800e1ea96f7e655214a1983e88f9bdebb4672d4b53",
+        "docs/plans/fullstack-division-specification.md": "100644:634749714fb1bfcadf6d430b8a952e73250222630c04e54a6a34e1a19e58580e",
+        "docs/plans/governance-verification-performance.md": "100644:934d2166e0fef0d888d13af8000f8d715beaed5f31a6e1303e86d6e6899c6050",
+        "docs/plans/README.md": "100644:bb514a9db2b9c4c869d5f4a936056d5cace0e5306d82cf692453c28a0be97236",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:7913e475f3a7eee2b2bf52ea354aa7ffeaacabce71e78bcef31698f3a1d2753a",
+        "docs/README.md": "100644:8be9218f2ba4c04e2fc35ad1ce587b853af75906dd5db68d966fe2e326d474b6",
+        "docs/REQUIREMENTS.md": "100644:040728c1d313f71867518fc99d37afba49145fab046c9525e2bbc63a33ba8a96",
+        "docs/ROADMAP.md": "100644:505fc5e14e115edbf49dbddb367f607c44bbd2314222334858371609a150a5ae",
+        "docs/SQL_POLICY_MATRIX.md": "100644:5b6dff6a829789c969cc86f3fdadf4713c2f7d88770c1776cecc14c77b3d878a",
+        "docs/TECH_STACK.md": "100644:c003c1cc3b889d8ce5c8ec2b3f1927413a682d859c51e089cfb85a4cc0227515",
+        "docs/TESTING_STRATEGY.md": "100644:cde632f61b44cf409c64a08ed0f1f7c288c10e696682e915017e40ad31e6ff30",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection-robustness.md": "100644:59c2e18e051175374c8ad5be330dea133524a97584546776888cc85e4bcd1728",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:d23aa2d6323b4117edc7769a6e09bcff5e9ab36178ec58da205a67d0e75669d7",
+        "docs/VERSIONING.md": "100644:b13661d31cb8a30a3a93edb420cc47c3755c0002ed923a55303e694f50931e59",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:12a5781337ffe47a44a4e8373423efbd3184da1ac12d6c0a3d73c84257143f7b",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:7824ad2b12c426f2f657af23a45da815cfb3a44f9a32e3d490c82e1390ecb785",
+        "governance/tasks.json": "100644:de9b1160a79bcaf920744d3a64a54dfd90deb336f129d261d2b7bed0585e42c1",
+        "mysql-mcp/package-lock.json": "100644:f5bb254c4c3f1aa037d0c980f4bf0500624af31f0b808fa142a2765cf630e87a",
+        "mysql-mcp/package.json": "100644:c1eb1acc2e7ffaa610026a5f1ea369e154bb72e35bc16dea8af737bd126b1364",
+        "mysql-mcp/scripts/build.mjs": "100644:6ad4a17f9db3b428851c64e86b73e700f3234040f38836056bd13a1ab5dbd166",
+        "mysql-mcp/scripts/compile.mjs": "100644:a6bdbc8bf752a0f7d04937c6ca05d45e869906a81af1e6a1dfb3278b72324042",
+        "mysql-mcp/src/index.ts": "100644:1b10bc99343531080799251141cf8791b6c40fdecb678989f24dc7ab9093d440",
+        "mysql-mcp/src/mcp/server.ts": "100644:c464bd9bec4a92403e9ba7ac0b6233efe4bde2c5b68e4bc59ab5647c6a0c65c4",
+        "mysql-mcp/src/security/keyring.ts": "100644:afa529d96e2631eb56a2609e295071dea15203215bd6b5843801ca0323ec548e",
+        "mysql-mcp/src/sql/ast.ts": "100644:18345b9a9d692b6d58932a7e7ef427917bc2f7c10e744d1285db2524912794fb",
+        "mysql-mcp/src/sql/policy.ts": "100644:81ddc55e37ef0017a34672f6f4e8d1bc3a2817a90bb617896b29bc19ed838687",
+        "mysql-mcp/tests/keyring.test.mjs": "100644:64eb4006f73c7276463d2bb0afc276abdbbd2806724216fba21608e5b0a4e9b1",
+        "mysql-mcp/tests/mcp.test.mjs": "100644:945418efae06b180721dc097382536ab785dd3d0ad33ac36897c24f760a92b1a",
+        "mysql-mcp/tests/smoke.test.mjs": "100644:189cc104917b8b27c5333119c0cd0cdbf64bf69bae1dc5853b69864afb16bdbc",
+        "mysql-mcp/tests/sql-policy.test.mjs": "100644:22ef7ee2c35a2fe19ec65a2c8cbbc7fb0453aa6f484b79457f11d8bc5e2c1d26",
+        "mysql-mcp/tsconfig.json": "100644:5c8649b8b9a95ecbe57008be42d1880fbbc2de9cd39685c63d074ab126571826",
+        "scripts/governance/check.mjs": "100644:e99c33db02575ef2da0fc991752d16adc2c32a5111593b806577dc276826e635",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:bc90f6835a239d3b80cfba87087d793ad2c7c2b05a3d54a445b0046d847696ae",
+        "scripts/governance/lib/dependencies.mjs": "100644:2ab6b35ea701ced7e8ae0e7c96f1ed3127f5248d6db2b675e235910f6c301a0e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:063efafa7755654473a2fc3b817ca62a741fb87bd5eefd1ea6687f163b6f4d21",
+        "scripts/governance/lib/validate.mjs": "100644:a0887fddf1af29224ed604dfd1d740887db6e88c99dfc314f172db57c744cbd6",
+        "scripts/governance/prepare.mjs": "100644:51ddde6b6e7337a7826f77b78360cd2180d517b679984c9d23d8105ad35a3046",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:cce9c80569efe7dd8f90d0e37a4b4b3aacc4f008a9a1b60cf04f12358de37f11",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:72978561d5cbfebc7a021222e6138ad85901bd560a8e217c7fe04fc7edd9aff8",
+        "tests/governance/collaboration.test.mjs": "100644:8862091399814732416098b1ed4eec152ae5edcfa5854c663c4c7ee6f2b69048",
+        "tests/governance/dependencies.test.mjs": "100644:f7e2fc34099ceaea1793f6ce75004531ffaf011e8540cdb02236cdaa55be9906",
+        "tests/governance/governance.test.mjs": "100644:bd72dfb6f4e58eb267a6e944f215a1faac2205ef667f0a118c6f7ccae2824255"
+      },
+      "changes": [
+        {
+          "path": "AGENTS.md",
+          "before": "100644:9365d84ea261a6fe5915c861b4121555fd0a43c9153d3fb4bf6ae273be3ee2d7",
+          "after": "100644:a3c4526eb8470c6a396af1e3bfdb27b86b88668d24598ef56ac8eebc26898c86",
+          "action": "modify"
+        },
+        {
+          "path": "docs/ARCHITECTURE.md",
+          "before": "100644:4b7dfd68a73988c11538717808bee16976f629908a6d4d5127684ee707baed85",
+          "after": "100644:f96caf02900b33c833d8b33696990855558b2300a0e029d4772d6f5887875558",
+          "action": "modify"
+        },
+        {
+          "path": "docs/COLLABORATION_WORKFLOW.md",
+          "before": "100644:66c867226292e99152c6fc53db931caaa56c457f6bcb473ca2aab10849aa1474",
+          "after": "100644:bd7a3dfb501eb60a7e5aeb325fb9b7db2a25536cd281aa1e237537830d0dbef1",
+          "action": "modify"
+        },
+        {
+          "path": "docs/ENGINEERING_TOOLCHAIN.md",
+          "before": "100644:3bddc33f29385c4923d79c931b15a156fe0ff201580d8a8f23e605a6b24264c9",
+          "after": "100644:1aa1a230dd6e05392ec1a20bfc9609299337820e1e80d905b3946d3cac29eab1",
+          "action": "modify"
+        },
+        {
+          "path": "docs/FRONTEND_UI_GUIDELINES.md",
+          "before": "100644:637074bace5109ee5d88f7088b926c4ba409dfcfc92985cee67e43f8ccbccd88",
+          "after": "100644:6c3219de1541410a9f594e7ac1de790a310833bbfbff113904b82f5e6a9b5ff2",
+          "action": "modify"
+        },
+        {
+          "path": "docs/FULLSTACK_DIVISION_SPECIFICATION.md",
+          "before": null,
+          "after": "100644:27422e1f903f45c33b1420d1a50209894db625769f671293055461c79d26de1a",
+          "action": "add"
+        },
+        {
+          "path": "docs/PROJECT_CONSTRAINTS.md",
+          "before": "100644:083d409e2c932dd8449557b638e8b2d72416ff5cd4dd61fcd846dab8c9bb98eb",
+          "after": "100644:7913e475f3a7eee2b2bf52ea354aa7ffeaacabce71e78bcef31698f3a1d2753a",
+          "action": "modify"
+        },
+        {
+          "path": "docs/README.md",
+          "before": "100644:a77f6715e3ee9105e42859428129f51af7804bcaeb127251af1280330d7b5dcc",
+          "after": "100644:8be9218f2ba4c04e2fc35ad1ce587b853af75906dd5db68d966fe2e326d474b6",
+          "action": "modify"
+        },
+        {
+          "path": "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md",
+          "before": "100644:b58ae4dc0f35752e111017e473436f2a24817a958eb4a1cdf63472a6aa2d5983",
+          "after": "100644:def56a3c11cd74083231e1c706b4fc1f5eba891b6076fbf7143bc586bd177264",
+          "action": "modify"
+        },
+        {
+          "path": "docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md",
+          "before": null,
+          "after": "100644:4d9989550f4bf74c6726d400274fe17fc3f93ee8b8480723cb225aec689fcde8",
+          "action": "add"
+        },
+        {
+          "path": "docs/changes/README.md",
+          "before": "100644:cb467d01a585857ca9b72bbcfff9e96b633216dad9bcf8df24ccae460765d6bb",
+          "after": "100644:cc33299a3af861f1f50de97315dbef012a143da51e93813ee3ede26afdc30849",
+          "action": "modify"
+        },
+        {
+          "path": "docs/plans/README.md",
+          "before": "100644:a309a4bb10d54158e84f05f8c77742d600e5be6d7be61ec6f897a9f17feed916",
+          "after": "100644:bb514a9db2b9c4c869d5f4a936056d5cace0e5306d82cf692453c28a0be97236",
+          "action": "modify"
+        },
+        {
+          "path": "docs/plans/fullstack-division-specification.md",
+          "before": null,
+          "after": "100644:634749714fb1bfcadf6d430b8a952e73250222630c04e54a6a34e1a19e58580e",
+          "action": "add"
+        },
+        {
+          "path": "governance/checks.json",
+          "before": "100644:85939f97995c9e5cf5d0ad3b3b102b97ccbde3d3a23138db6ffc95c9aed88caa",
+          "after": "100644:12a5781337ffe47a44a4e8373423efbd3184da1ac12d6c0a3d73c84257143f7b",
+          "action": "modify"
+        },
+        {
+          "path": "governance/features.json",
+          "before": "100644:38461767430fb62fee24a40e5c38e91703e9137ebed94f9b93620e2f7ccc9834",
+          "after": "100644:7824ad2b12c426f2f657af23a45da815cfb3a44f9a32e3d490c82e1390ecb785",
+          "action": "modify"
+        },
+        {
+          "path": "governance/tasks.json",
+          "before": "100644:729203e9260f8f410652c10cf2621195fc7ed5d81edbceeb3a7187dd19bb2348",
+          "after": "100644:de9b1160a79bcaf920744d3a64a54dfd90deb336f129d261d2b7bed0585e42c1",
+          "action": "modify"
+        }
+      ],
+      "contract_sha256": "55bd5f99b03959148b488815aec26e72653ab8b7b867a7f8e845febbe7979c67",
+      "acceptance_ids": [
+        "G02-A1",
+        "G02-A2",
+        "G02-A3",
+        "G02-A4",
+        "G03-A1",
+        "G03-A2",
+        "G03-A3",
+        "G03-A4"
+      ],
+      "acceptance_definitions": [
+        {
+          "id": "G02-A1",
+          "description": "文档、台账、跟踪文件检查及真实分支/提交/PR 记录，用户确认合并",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A2",
+          "description": "建立变更管理规范与 docs/changes/ 库，支持双重视角（发版说明与 Agent 工程上下文），回溯 PR #1~#4 变更记录，由治理检查与人工核验",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A3",
+          "description": "建立应用工程构建契约、SQL 语法风险分级矩阵与测试虚拟沙箱隔离规范，由治理检查与人工核验",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A4",
+          "description": "建立全栈分工与前后端物理隔离协作规范，明确 Antigravity 专职前端界面（mysql-mcp/web/）与 PI-Desktop 专职后端的强制性约束及接口先行原则，由治理检查与人工核验",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G03-A1",
+          "description": "合法规划、开发、返工、文档-only 与限定 bootstrap 可执行；错误角色、阶段、任务、摘要、基线及越界增删改拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A2",
+          "description": "交接包含目标、实际结果、文件与原始执行证据、构建/编译或不适用理由、限制和下一步；双向 prompt 确定性完整，生成不自动接收",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A3",
+          "description": "暂存、消息、实际推送对象和 PR/main 快照校验交接；漂移、伪通过、旧证据、改写及 PI 提交拒绝，原治理回归保留",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A4",
+          "description": "真实 Antigravity 接收并负责提交/push/PR/CI，生成下一步 prompt；用户审查治理并确认合并",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        }
+      ],
+      "next_phase": "documentation_delivery",
+      "receiver": "antigravity",
+      "details": {
+        "goal": "建立全栈分工与前后端物理隔离协作规范，确立前端界面由 Antigravity 专职负责（mysql-mcp/web/）、PI-Desktop 专职负责后端系统（mysql-mcp/src/ 等）的强制性约束，确立双向禁止红线、接口先行原则、目录边界与任务模式扩展。",
+        "outcome": "已完成 G02-A4 验收标准与 TASK-GOV-009 任务登记，制定实施计划 docs/plans/fullstack-division-specification.md，编写完成 docs/FULLSTACK_DIVISION_SPECIFICATION.md，全面更新 AGENTS.md、COLLABORATION_WORKFLOW.md、PROJECT_CONSTRAINTS.md、ARCHITECTURE.md、ENGINEERING_TOOLCHAIN.md、FRONTEND_UI_GUIDELINES.md、README.md，完成文档模式推进规划。",
+        "next_actions": [
+          "Antigravity 显式核验接收 planning 产物，开启 documentation_delivery 阶段。",
+          "撰写本次任务活动变更台账 docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md 并更新 docs/changes/README.md。",
+          "运行全量治理测试生成 documentation_delivery 交付候选并完成 Git 提交与 PR 交付。"
+        ],
+        "forbidden": [
+          "不得修改已实现的后端业务源码或驱动代码",
+          "不得修改 package.json 依赖与锁文件",
+          "不得发起真实数据库网络连接",
+          "PI-Desktop 严禁参与或伪造本阶段"
+        ],
+        "documentation_requests": [],
+        "limitations": [
+          "本地 run 报告及 TAP 仅为诊断声明，CI 必须独立重跑核验",
+          "本次仅限全栈分工与协作规范制定，不包含前端界面具体代码实现"
+        ],
+        "blockers": [],
+        "result": "ready",
+        "build": {
+          "status": "not_applicable",
+          "reason": "文档与治理规范变更，无应用代码或构建配置变动",
+          "check_ids": []
+        },
+        "verification": []
+      },
+      "check_definitions": [
+        {
+          "id": "governance-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/governance.test.mjs"
+          ],
+          "timeout_ms": 240000,
+          "parser": "tap",
+          "feature_ids": [
+            "G01",
+            "G02"
+          ],
+          "acceptance_ids": [
+            "G01-A1",
+            "G01-A3",
+            "G01-A4",
+            "G01-A5",
+            "G02-A1",
+            "G02-A2",
+            "G02-A3",
+            "G02-A4"
+          ]
+        },
+        {
+          "id": "collaboration-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/collaboration.test.mjs",
+            "tests/governance/collaboration-git.test.mjs"
+          ],
+          "timeout_ms": 600000,
+          "parser": "tap",
+          "feature_ids": [
+            "G03"
+          ],
+          "acceptance_ids": [
+            "G03-A1",
+            "G03-A2",
+            "G03-A3"
+          ]
+        }
+      ],
+      "evidence": null,
+      "build_evidence": null,
+      "digest": "184d2bd58d7110f1a7bbe39bb15721b382ecdbecad19181533105664935b5740"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-009-E3",
+      "sequence": 3,
+      "previous": "184d2bd58d7110f1a7bbe39bb15721b382ecdbecad19181533105664935b5740",
+      "at": "2026-10-06T07:56:07.828Z",
+      "type": "receipt",
+      "role": "antigravity",
+      "handoff": "TASK-GOV-009-E2",
+      "handoff_digest": "184d2bd58d7110f1a7bbe39bb15721b382ecdbecad19181533105664935b5740",
+      "decision": "accept",
+      "reason": "用户转交后显式核验准确交接 ID、摘要和当前快照。",
+      "snapshot_sha256": "c13e7258fe9e10c75d253744f93551c1d193843d56d5167ae61fec8d2d37bbba",
+      "digest": "fceb97904e69d7c452232277a08d92d130aa5fa5b0e166505ebca1d803e23c36"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-009-E4",
+      "sequence": 4,
+      "previous": "fceb97904e69d7c452232277a08d92d130aa5fa5b0e166505ebca1d803e23c36",
+      "at": "2026-10-06T07:56:14.165Z",
+      "type": "begin",
+      "role": "antigravity",
+      "phase": "documentation_delivery",
+      "task_definition": {
+        "id": "TASK-GOV-009",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G02",
+          "G03"
+        ],
+        "branch": "docs/fullstack-division-specification",
+        "base_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+        "authorization": "用户批准添加全栈分工与前后端物理隔离协作规范：确立前端界面由 Antigravity 专职负责（mysql-mcp/web/）、PI-Desktop 专职负责后端系统（mysql-mcp/src/ 等）的强制性约束，确立双向禁止红线、接口先行原则、目录边界与任务模式扩展，不修改已实现后端源码。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/",
+          "governance/"
+        ],
+        "plan_path": "docs/plans/fullstack-division-specification.md",
+        "mode": "docs",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "repository": "https://github.com/ArturiaGit/mysql-mcp.git",
+      "branch": "docs/fullstack-division-specification",
+      "base_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+      "feature_ids": [
+        "G02",
+        "G03"
+      ],
+      "source_head": "be2079577e664e29437bb5a603e03a08b0a1b117",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:a8f86445e3d25335b86daf31fb4224e8f5d0b2ee103afb6de68a383682797ce8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:a3c4526eb8470c6a396af1e3bfdb27b86b88668d24598ef56ac8eebc26898c86",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:75c75adee15bef92db8b18d1393f0cdf15471db7de58657ffce061c428900681",
+        "docs/ARCHITECTURE.md": "100644:f96caf02900b33c833d8b33696990855558b2300a0e029d4772d6f5887875558",
+        "docs/changes/2026-10-02-TASK-GOV-001-baseline-and-pr-flow.md": "100644:e1c0155317a346e6cf5b9878c6b2600b188e9116a8a715d5baf16642a4047a35",
+        "docs/changes/2026-10-02-TASK-GOV-002-ci-environment-isolation.md": "100644:ebdc13ae993a233db660bf6f54430d2efdff0e5824710a4f93373addf7160b1b",
+        "docs/changes/2026-10-02-TASK-GOV-003-main-task-selection-fix.md": "100644:0dd70c0c5c5dbe3d06c3ec42d559ff13aaacbb16ff1acc3f8fcd1bb5fe5f9ad4",
+        "docs/changes/2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md": "100644:905bc62544558ea317aeb80e8f7f15f779785aad6fa3cda02dc8d9220a71b90f",
+        "docs/changes/2026-10-02-TASK-GOV-005-change-management-specification.md": "100644:682af8fcdf2a41b7ed4206d9e0284fa2cda871e5572864ba254ebb55475d2b3a",
+        "docs/changes/2026-10-02-TASK-GOV-006-main-task-selection-robustness.md": "100644:0cea8a1bd6d5d7203ca92f5338e445a8cd86b04e27c3f7e997a8270b9d895469",
+        "docs/changes/2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md": "100644:1977b8d112bd032d1063ac50d2a7a653866b5e4a396dd339c7b408bd4cfa598f",
+        "docs/changes/2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md": "100644:188d5b41c72021964cb388e16bf34e4bb7c517e21ecfdcd49249a839c4ac70d2",
+        "docs/changes/2026-10-05-TASK-GOV-008-governance-verification-performance.md": "100644:353b9d482216cfc1a8ffc4350492be632f0f4a80746b65f796365e2dcfbe1514",
+        "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md": "100644:def56a3c11cd74083231e1c706b4fc1f5eba891b6076fbf7143bc586bd177264",
+        "docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md": "100644:4d9989550f4bf74c6726d400274fe17fc3f93ee8b8480723cb225aec689fcde8",
+        "docs/changes/README.md": "100644:cc33299a3af861f1f50de97315dbef012a143da51e93813ee3ede26afdc30849",
+        "docs/CODE_REVIEW.md": "100644:e3a00116fd6c2e943500a326da69a946fce9bb5ef2735597987c6ee262ef1bab",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:bd7a3dfb501eb60a7e5aeb325fb9b7db2a25536cd281aa1e237537830d0dbef1",
+        "docs/DATA_MODELS.md": "100644:dd5bafd89671c610340f4badb728efc67ec5e0186a24720b3fe1065db17f8945",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:387c9849f9707a21b9bd6d7e0f99a25a16b722999a71d82fce3fc2522003aaa8",
+        "docs/ENGINEERING_TOOLCHAIN.md": "100644:1aa1a230dd6e05392ec1a20bfc9609299337820e1e80d905b3946d3cac29eab1",
+        "docs/FEATURE_STATUS.md": "100644:f7bbd119912d448e12d392e1fac5480851f72176aca1fee3796a0746580675e2",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:6c3219de1541410a9f594e7ac1de790a310833bbfbff113904b82f5e6a9b5ff2",
+        "docs/FULLSTACK_DIVISION_SPECIFICATION.md": "100644:27422e1f903f45c33b1420d1a50209894db625769f671293055461c79d26de1a",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/app-scaffold-and-toolchain.md": "100644:700a7b211cfdab1755077f74d2ffe92fef0028d79cdfe68cbb6943fe57c09169",
+        "docs/plans/change-management.md": "100644:d43b94c09b6cf38ac437631c9096c343d1bca8e98f620cac4ca418f667ba4b9a",
+        "docs/plans/engineering-and-safety-specifications.md": "100644:a2861116e85311eb070eec746990e24b70c249870555e591198e6129b4481d59",
+        "docs/plans/feasibility-and-sql-policy.md": "100644:ed812cc2d1026c96dfe2db9a2a61ffba5fffe63deda3e4e101b985909afafff4",
+        "docs/plans/fix-main-task-selection.md": "100644:561315245e187bda7f8833800e1ea96f7e655214a1983e88f9bdebb4672d4b53",
+        "docs/plans/fullstack-division-specification.md": "100644:634749714fb1bfcadf6d430b8a952e73250222630c04e54a6a34e1a19e58580e",
+        "docs/plans/governance-verification-performance.md": "100644:934d2166e0fef0d888d13af8000f8d715beaed5f31a6e1303e86d6e6899c6050",
+        "docs/plans/README.md": "100644:bb514a9db2b9c4c869d5f4a936056d5cace0e5306d82cf692453c28a0be97236",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:7913e475f3a7eee2b2bf52ea354aa7ffeaacabce71e78bcef31698f3a1d2753a",
+        "docs/README.md": "100644:8be9218f2ba4c04e2fc35ad1ce587b853af75906dd5db68d966fe2e326d474b6",
+        "docs/REQUIREMENTS.md": "100644:040728c1d313f71867518fc99d37afba49145fab046c9525e2bbc63a33ba8a96",
+        "docs/ROADMAP.md": "100644:505fc5e14e115edbf49dbddb367f607c44bbd2314222334858371609a150a5ae",
+        "docs/SQL_POLICY_MATRIX.md": "100644:5b6dff6a829789c969cc86f3fdadf4713c2f7d88770c1776cecc14c77b3d878a",
+        "docs/TECH_STACK.md": "100644:c003c1cc3b889d8ce5c8ec2b3f1927413a682d859c51e089cfb85a4cc0227515",
+        "docs/TESTING_STRATEGY.md": "100644:cde632f61b44cf409c64a08ed0f1f7c288c10e696682e915017e40ad31e6ff30",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection-robustness.md": "100644:59c2e18e051175374c8ad5be330dea133524a97584546776888cc85e4bcd1728",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:d23aa2d6323b4117edc7769a6e09bcff5e9ab36178ec58da205a67d0e75669d7",
+        "docs/VERSIONING.md": "100644:b13661d31cb8a30a3a93edb420cc47c3755c0002ed923a55303e694f50931e59",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:12a5781337ffe47a44a4e8373423efbd3184da1ac12d6c0a3d73c84257143f7b",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:7824ad2b12c426f2f657af23a45da815cfb3a44f9a32e3d490c82e1390ecb785",
+        "governance/tasks.json": "100644:de9b1160a79bcaf920744d3a64a54dfd90deb336f129d261d2b7bed0585e42c1",
+        "mysql-mcp/package-lock.json": "100644:f5bb254c4c3f1aa037d0c980f4bf0500624af31f0b808fa142a2765cf630e87a",
+        "mysql-mcp/package.json": "100644:c1eb1acc2e7ffaa610026a5f1ea369e154bb72e35bc16dea8af737bd126b1364",
+        "mysql-mcp/scripts/build.mjs": "100644:6ad4a17f9db3b428851c64e86b73e700f3234040f38836056bd13a1ab5dbd166",
+        "mysql-mcp/scripts/compile.mjs": "100644:a6bdbc8bf752a0f7d04937c6ca05d45e869906a81af1e6a1dfb3278b72324042",
+        "mysql-mcp/src/index.ts": "100644:1b10bc99343531080799251141cf8791b6c40fdecb678989f24dc7ab9093d440",
+        "mysql-mcp/src/mcp/server.ts": "100644:c464bd9bec4a92403e9ba7ac0b6233efe4bde2c5b68e4bc59ab5647c6a0c65c4",
+        "mysql-mcp/src/security/keyring.ts": "100644:afa529d96e2631eb56a2609e295071dea15203215bd6b5843801ca0323ec548e",
+        "mysql-mcp/src/sql/ast.ts": "100644:18345b9a9d692b6d58932a7e7ef427917bc2f7c10e744d1285db2524912794fb",
+        "mysql-mcp/src/sql/policy.ts": "100644:81ddc55e37ef0017a34672f6f4e8d1bc3a2817a90bb617896b29bc19ed838687",
+        "mysql-mcp/tests/keyring.test.mjs": "100644:64eb4006f73c7276463d2bb0afc276abdbbd2806724216fba21608e5b0a4e9b1",
+        "mysql-mcp/tests/mcp.test.mjs": "100644:945418efae06b180721dc097382536ab785dd3d0ad33ac36897c24f760a92b1a",
+        "mysql-mcp/tests/smoke.test.mjs": "100644:189cc104917b8b27c5333119c0cd0cdbf64bf69bae1dc5853b69864afb16bdbc",
+        "mysql-mcp/tests/sql-policy.test.mjs": "100644:22ef7ee2c35a2fe19ec65a2c8cbbc7fb0453aa6f484b79457f11d8bc5e2c1d26",
+        "mysql-mcp/tsconfig.json": "100644:5c8649b8b9a95ecbe57008be42d1880fbbc2de9cd39685c63d074ab126571826",
+        "scripts/governance/check.mjs": "100644:e99c33db02575ef2da0fc991752d16adc2c32a5111593b806577dc276826e635",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:bc90f6835a239d3b80cfba87087d793ad2c7c2b05a3d54a445b0046d847696ae",
+        "scripts/governance/lib/dependencies.mjs": "100644:2ab6b35ea701ced7e8ae0e7c96f1ed3127f5248d6db2b675e235910f6c301a0e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:063efafa7755654473a2fc3b817ca62a741fb87bd5eefd1ea6687f163b6f4d21",
+        "scripts/governance/lib/validate.mjs": "100644:a0887fddf1af29224ed604dfd1d740887db6e88c99dfc314f172db57c744cbd6",
+        "scripts/governance/prepare.mjs": "100644:51ddde6b6e7337a7826f77b78360cd2180d517b679984c9d23d8105ad35a3046",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:cce9c80569efe7dd8f90d0e37a4b4b3aacc4f008a9a1b60cf04f12358de37f11",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:72978561d5cbfebc7a021222e6138ad85901bd560a8e217c7fe04fc7edd9aff8",
+        "tests/governance/collaboration.test.mjs": "100644:8862091399814732416098b1ed4eec152ae5edcfa5854c663c4c7ee6f2b69048",
+        "tests/governance/dependencies.test.mjs": "100644:f7e2fc34099ceaea1793f6ce75004531ffaf011e8540cdb02236cdaa55be9906",
+        "tests/governance/governance.test.mjs": "100644:bd72dfb6f4e58eb267a6e944f215a1faac2205ef667f0a118c6f7ccae2824255"
+      },
+      "contract_sha256": "55bd5f99b03959148b488815aec26e72653ab8b7b867a7f8e845febbe7979c67",
+      "digest": "c7e25ce7a561e7113e737c9713da3e9aa5d172a087b19def969c0cae5076023f"
+    },
+    {
+      "schema_version": 1,
+      "id": "TASK-GOV-009-E5",
+      "sequence": 5,
+      "previous": "c7e25ce7a561e7113e737c9713da3e9aa5d172a087b19def969c0cae5076023f",
+      "at": "2026-10-06T08:05:26.750Z",
+      "type": "handoff",
+      "role": "antigravity",
+      "phase": "documentation_delivery",
+      "task_definition": {
+        "id": "TASK-GOV-009",
+        "kind": "maintenance",
+        "status": "in_progress",
+        "feature_ids": [
+          "G02",
+          "G03"
+        ],
+        "branch": "docs/fullstack-division-specification",
+        "base_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+        "authorization": "用户批准添加全栈分工与前后端物理隔离协作规范：确立前端界面由 Antigravity 专职负责（mysql-mcp/web/）、PI-Desktop 专职负责后端系统（mysql-mcp/src/ 等）的强制性约束，确立双向禁止红线、接口先行原则、目录边界与任务模式扩展，不修改已实现后端源码。",
+        "allowed_paths": [
+          "AGENTS.md",
+          "docs/",
+          "governance/"
+        ],
+        "plan_path": "docs/plans/fullstack-division-specification.md",
+        "mode": "docs",
+        "pr": null,
+        "scope_changes": [],
+        "governance_change": true
+      },
+      "begin": "TASK-GOV-009-E4",
+      "source_head": "be2079577e664e29437bb5a603e03a08b0a1b117",
+      "before": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:a8f86445e3d25335b86daf31fb4224e8f5d0b2ee103afb6de68a383682797ce8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:a3c4526eb8470c6a396af1e3bfdb27b86b88668d24598ef56ac8eebc26898c86",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:75c75adee15bef92db8b18d1393f0cdf15471db7de58657ffce061c428900681",
+        "docs/ARCHITECTURE.md": "100644:f96caf02900b33c833d8b33696990855558b2300a0e029d4772d6f5887875558",
+        "docs/changes/2026-10-02-TASK-GOV-001-baseline-and-pr-flow.md": "100644:e1c0155317a346e6cf5b9878c6b2600b188e9116a8a715d5baf16642a4047a35",
+        "docs/changes/2026-10-02-TASK-GOV-002-ci-environment-isolation.md": "100644:ebdc13ae993a233db660bf6f54430d2efdff0e5824710a4f93373addf7160b1b",
+        "docs/changes/2026-10-02-TASK-GOV-003-main-task-selection-fix.md": "100644:0dd70c0c5c5dbe3d06c3ec42d559ff13aaacbb16ff1acc3f8fcd1bb5fe5f9ad4",
+        "docs/changes/2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md": "100644:905bc62544558ea317aeb80e8f7f15f779785aad6fa3cda02dc8d9220a71b90f",
+        "docs/changes/2026-10-02-TASK-GOV-005-change-management-specification.md": "100644:682af8fcdf2a41b7ed4206d9e0284fa2cda871e5572864ba254ebb55475d2b3a",
+        "docs/changes/2026-10-02-TASK-GOV-006-main-task-selection-robustness.md": "100644:0cea8a1bd6d5d7203ca92f5338e445a8cd86b04e27c3f7e997a8270b9d895469",
+        "docs/changes/2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md": "100644:1977b8d112bd032d1063ac50d2a7a653866b5e4a396dd339c7b408bd4cfa598f",
+        "docs/changes/2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md": "100644:188d5b41c72021964cb388e16bf34e4bb7c517e21ecfdcd49249a839c4ac70d2",
+        "docs/changes/2026-10-05-TASK-GOV-008-governance-verification-performance.md": "100644:353b9d482216cfc1a8ffc4350492be632f0f4a80746b65f796365e2dcfbe1514",
+        "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md": "100644:def56a3c11cd74083231e1c706b4fc1f5eba891b6076fbf7143bc586bd177264",
+        "docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md": "100644:4d9989550f4bf74c6726d400274fe17fc3f93ee8b8480723cb225aec689fcde8",
+        "docs/changes/README.md": "100644:cc33299a3af861f1f50de97315dbef012a143da51e93813ee3ede26afdc30849",
+        "docs/CODE_REVIEW.md": "100644:e3a00116fd6c2e943500a326da69a946fce9bb5ef2735597987c6ee262ef1bab",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:bd7a3dfb501eb60a7e5aeb325fb9b7db2a25536cd281aa1e237537830d0dbef1",
+        "docs/DATA_MODELS.md": "100644:dd5bafd89671c610340f4badb728efc67ec5e0186a24720b3fe1065db17f8945",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:387c9849f9707a21b9bd6d7e0f99a25a16b722999a71d82fce3fc2522003aaa8",
+        "docs/ENGINEERING_TOOLCHAIN.md": "100644:1aa1a230dd6e05392ec1a20bfc9609299337820e1e80d905b3946d3cac29eab1",
+        "docs/FEATURE_STATUS.md": "100644:f7bbd119912d448e12d392e1fac5480851f72176aca1fee3796a0746580675e2",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:6c3219de1541410a9f594e7ac1de790a310833bbfbff113904b82f5e6a9b5ff2",
+        "docs/FULLSTACK_DIVISION_SPECIFICATION.md": "100644:27422e1f903f45c33b1420d1a50209894db625769f671293055461c79d26de1a",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/app-scaffold-and-toolchain.md": "100644:700a7b211cfdab1755077f74d2ffe92fef0028d79cdfe68cbb6943fe57c09169",
+        "docs/plans/change-management.md": "100644:d43b94c09b6cf38ac437631c9096c343d1bca8e98f620cac4ca418f667ba4b9a",
+        "docs/plans/engineering-and-safety-specifications.md": "100644:a2861116e85311eb070eec746990e24b70c249870555e591198e6129b4481d59",
+        "docs/plans/feasibility-and-sql-policy.md": "100644:ed812cc2d1026c96dfe2db9a2a61ffba5fffe63deda3e4e101b985909afafff4",
+        "docs/plans/fix-main-task-selection.md": "100644:561315245e187bda7f8833800e1ea96f7e655214a1983e88f9bdebb4672d4b53",
+        "docs/plans/fullstack-division-specification.md": "100644:634749714fb1bfcadf6d430b8a952e73250222630c04e54a6a34e1a19e58580e",
+        "docs/plans/governance-verification-performance.md": "100644:934d2166e0fef0d888d13af8000f8d715beaed5f31a6e1303e86d6e6899c6050",
+        "docs/plans/README.md": "100644:bb514a9db2b9c4c869d5f4a936056d5cace0e5306d82cf692453c28a0be97236",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:7913e475f3a7eee2b2bf52ea354aa7ffeaacabce71e78bcef31698f3a1d2753a",
+        "docs/README.md": "100644:8be9218f2ba4c04e2fc35ad1ce587b853af75906dd5db68d966fe2e326d474b6",
+        "docs/REQUIREMENTS.md": "100644:040728c1d313f71867518fc99d37afba49145fab046c9525e2bbc63a33ba8a96",
+        "docs/ROADMAP.md": "100644:505fc5e14e115edbf49dbddb367f607c44bbd2314222334858371609a150a5ae",
+        "docs/SQL_POLICY_MATRIX.md": "100644:5b6dff6a829789c969cc86f3fdadf4713c2f7d88770c1776cecc14c77b3d878a",
+        "docs/TECH_STACK.md": "100644:c003c1cc3b889d8ce5c8ec2b3f1927413a682d859c51e089cfb85a4cc0227515",
+        "docs/TESTING_STRATEGY.md": "100644:cde632f61b44cf409c64a08ed0f1f7c288c10e696682e915017e40ad31e6ff30",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection-robustness.md": "100644:59c2e18e051175374c8ad5be330dea133524a97584546776888cc85e4bcd1728",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:d23aa2d6323b4117edc7769a6e09bcff5e9ab36178ec58da205a67d0e75669d7",
+        "docs/VERSIONING.md": "100644:b13661d31cb8a30a3a93edb420cc47c3755c0002ed923a55303e694f50931e59",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:12a5781337ffe47a44a4e8373423efbd3184da1ac12d6c0a3d73c84257143f7b",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:7824ad2b12c426f2f657af23a45da815cfb3a44f9a32e3d490c82e1390ecb785",
+        "governance/tasks.json": "100644:de9b1160a79bcaf920744d3a64a54dfd90deb336f129d261d2b7bed0585e42c1",
+        "mysql-mcp/package-lock.json": "100644:f5bb254c4c3f1aa037d0c980f4bf0500624af31f0b808fa142a2765cf630e87a",
+        "mysql-mcp/package.json": "100644:c1eb1acc2e7ffaa610026a5f1ea369e154bb72e35bc16dea8af737bd126b1364",
+        "mysql-mcp/scripts/build.mjs": "100644:6ad4a17f9db3b428851c64e86b73e700f3234040f38836056bd13a1ab5dbd166",
+        "mysql-mcp/scripts/compile.mjs": "100644:a6bdbc8bf752a0f7d04937c6ca05d45e869906a81af1e6a1dfb3278b72324042",
+        "mysql-mcp/src/index.ts": "100644:1b10bc99343531080799251141cf8791b6c40fdecb678989f24dc7ab9093d440",
+        "mysql-mcp/src/mcp/server.ts": "100644:c464bd9bec4a92403e9ba7ac0b6233efe4bde2c5b68e4bc59ab5647c6a0c65c4",
+        "mysql-mcp/src/security/keyring.ts": "100644:afa529d96e2631eb56a2609e295071dea15203215bd6b5843801ca0323ec548e",
+        "mysql-mcp/src/sql/ast.ts": "100644:18345b9a9d692b6d58932a7e7ef427917bc2f7c10e744d1285db2524912794fb",
+        "mysql-mcp/src/sql/policy.ts": "100644:81ddc55e37ef0017a34672f6f4e8d1bc3a2817a90bb617896b29bc19ed838687",
+        "mysql-mcp/tests/keyring.test.mjs": "100644:64eb4006f73c7276463d2bb0afc276abdbbd2806724216fba21608e5b0a4e9b1",
+        "mysql-mcp/tests/mcp.test.mjs": "100644:945418efae06b180721dc097382536ab785dd3d0ad33ac36897c24f760a92b1a",
+        "mysql-mcp/tests/smoke.test.mjs": "100644:189cc104917b8b27c5333119c0cd0cdbf64bf69bae1dc5853b69864afb16bdbc",
+        "mysql-mcp/tests/sql-policy.test.mjs": "100644:22ef7ee2c35a2fe19ec65a2c8cbbc7fb0453aa6f484b79457f11d8bc5e2c1d26",
+        "mysql-mcp/tsconfig.json": "100644:5c8649b8b9a95ecbe57008be42d1880fbbc2de9cd39685c63d074ab126571826",
+        "scripts/governance/check.mjs": "100644:e99c33db02575ef2da0fc991752d16adc2c32a5111593b806577dc276826e635",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:bc90f6835a239d3b80cfba87087d793ad2c7c2b05a3d54a445b0046d847696ae",
+        "scripts/governance/lib/dependencies.mjs": "100644:2ab6b35ea701ced7e8ae0e7c96f1ed3127f5248d6db2b675e235910f6c301a0e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:063efafa7755654473a2fc3b817ca62a741fb87bd5eefd1ea6687f163b6f4d21",
+        "scripts/governance/lib/validate.mjs": "100644:a0887fddf1af29224ed604dfd1d740887db6e88c99dfc314f172db57c744cbd6",
+        "scripts/governance/prepare.mjs": "100644:51ddde6b6e7337a7826f77b78360cd2180d517b679984c9d23d8105ad35a3046",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:cce9c80569efe7dd8f90d0e37a4b4b3aacc4f008a9a1b60cf04f12358de37f11",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:72978561d5cbfebc7a021222e6138ad85901bd560a8e217c7fe04fc7edd9aff8",
+        "tests/governance/collaboration.test.mjs": "100644:8862091399814732416098b1ed4eec152ae5edcfa5854c663c4c7ee6f2b69048",
+        "tests/governance/dependencies.test.mjs": "100644:f7e2fc34099ceaea1793f6ce75004531ffaf011e8540cdb02236cdaa55be9906",
+        "tests/governance/governance.test.mjs": "100644:bd72dfb6f4e58eb267a6e944f215a1faac2205ef667f0a118c6f7ccae2824255"
+      },
+      "after": {
+        ".githooks/commit-msg": "100755:e1d12d997dc24bbe1a5a5584144ca96ff002d6930a27715eafd6600d3bf1ca63",
+        ".githooks/pre-commit": "100755:779e3927bfec50207c88f95e54b72bf42ad77043685ca81e446eeca2f1e1a8d4",
+        ".githooks/pre-push": "100755:92814eee96725b41cce3d6871921f4f8677abf1b1b324995531df6a23786c971",
+        ".github/workflows/governance.yml": "100644:a8f86445e3d25335b86daf31fb4224e8f5d0b2ee103afb6de68a383682797ce8",
+        ".gitignore": "100644:a2fd74d00715009278d3be97a759176fd0d8773ca9037baf88d5e6385478b270",
+        "AGENTS.md": "100644:a3c4526eb8470c6a396af1e3bfdb27b86b88668d24598ef56ac8eebc26898c86",
+        "docs/ACCEPTANCE.md": "100644:5c409be9a3c85c36cbef9735ff7dab2f84e3fd87bb41ce930d00cd1f29314c13",
+        "docs/API_AND_PROTOCOLS.md": "100644:75c75adee15bef92db8b18d1393f0cdf15471db7de58657ffce061c428900681",
+        "docs/ARCHITECTURE.md": "100644:f96caf02900b33c833d8b33696990855558b2300a0e029d4772d6f5887875558",
+        "docs/changes/2026-10-02-TASK-GOV-001-baseline-and-pr-flow.md": "100644:e1c0155317a346e6cf5b9878c6b2600b188e9116a8a715d5baf16642a4047a35",
+        "docs/changes/2026-10-02-TASK-GOV-002-ci-environment-isolation.md": "100644:ebdc13ae993a233db660bf6f54430d2efdff0e5824710a4f93373addf7160b1b",
+        "docs/changes/2026-10-02-TASK-GOV-003-main-task-selection-fix.md": "100644:0dd70c0c5c5dbe3d06c3ec42d559ff13aaacbb16ff1acc3f8fcd1bb5fe5f9ad4",
+        "docs/changes/2026-10-02-TASK-GOV-004-antigravity-pi-handoff.md": "100644:905bc62544558ea317aeb80e8f7f15f779785aad6fa3cda02dc8d9220a71b90f",
+        "docs/changes/2026-10-02-TASK-GOV-005-change-management-specification.md": "100644:682af8fcdf2a41b7ed4206d9e0284fa2cda871e5572864ba254ebb55475d2b3a",
+        "docs/changes/2026-10-02-TASK-GOV-006-main-task-selection-robustness.md": "100644:0cea8a1bd6d5d7203ca92f5338e445a8cd86b04e27c3f7e997a8270b9d895469",
+        "docs/changes/2026-10-03-TASK-GOV-007-engineering-and-safety-specifications.md": "100644:1977b8d112bd032d1063ac50d2a7a653866b5e4a396dd339c7b408bd4cfa598f",
+        "docs/changes/2026-10-04-TASK-APP-001-app-scaffold-and-toolchain.md": "100644:188d5b41c72021964cb388e16bf34e4bb7c517e21ecfdcd49249a839c4ac70d2",
+        "docs/changes/2026-10-05-TASK-GOV-008-governance-verification-performance.md": "100644:353b9d482216cfc1a8ffc4350492be632f0f4a80746b65f796365e2dcfbe1514",
+        "docs/changes/2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md": "100644:def56a3c11cd74083231e1c706b4fc1f5eba891b6076fbf7143bc586bd177264",
+        "docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md": "100644:4d9989550f4bf74c6726d400274fe17fc3f93ee8b8480723cb225aec689fcde8",
+        "docs/changes/README.md": "100644:cc33299a3af861f1f50de97315dbef012a143da51e93813ee3ede26afdc30849",
+        "docs/CODE_REVIEW.md": "100644:e3a00116fd6c2e943500a326da69a946fce9bb5ef2735597987c6ee262ef1bab",
+        "docs/COLLABORATION_WORKFLOW.md": "100644:bd7a3dfb501eb60a7e5aeb325fb9b7db2a25536cd281aa1e237537830d0dbef1",
+        "docs/DATA_MODELS.md": "100644:dd5bafd89671c610340f4badb728efc67ec5e0186a24720b3fe1065db17f8945",
+        "docs/DEPLOYMENT_GUIDE.md": "100644:387c9849f9707a21b9bd6d7e0f99a25a16b722999a71d82fce3fc2522003aaa8",
+        "docs/ENGINEERING_TOOLCHAIN.md": "100644:1aa1a230dd6e05392ec1a20bfc9609299337820e1e80d905b3946d3cac29eab1",
+        "docs/FEATURE_STATUS.md": "100644:f7bbd119912d448e12d392e1fac5480851f72176aca1fee3796a0746580675e2",
+        "docs/FRONTEND_UI_GUIDELINES.md": "100644:6c3219de1541410a9f594e7ac1de790a310833bbfbff113904b82f5e6a9b5ff2",
+        "docs/FULLSTACK_DIVISION_SPECIFICATION.md": "100644:27422e1f903f45c33b1420d1a50209894db625769f671293055461c79d26de1a",
+        "docs/GIT_WORKFLOW.md": "100644:029014467b8c1cf5d7097a07f3733c6fb46ec9240f5912108283538245577aa5",
+        "docs/plans/antigravity-pi-collaboration.md": "100644:499002d9b50a9811381e601d1718759edab19721a88e522af405240a261048be",
+        "docs/plans/app-scaffold-and-toolchain.md": "100644:700a7b211cfdab1755077f74d2ffe92fef0028d79cdfe68cbb6943fe57c09169",
+        "docs/plans/change-management.md": "100644:d43b94c09b6cf38ac437631c9096c343d1bca8e98f620cac4ca418f667ba4b9a",
+        "docs/plans/engineering-and-safety-specifications.md": "100644:a2861116e85311eb070eec746990e24b70c249870555e591198e6129b4481d59",
+        "docs/plans/feasibility-and-sql-policy.md": "100644:ed812cc2d1026c96dfe2db9a2a61ffba5fffe63deda3e4e101b985909afafff4",
+        "docs/plans/fix-main-task-selection.md": "100644:561315245e187bda7f8833800e1ea96f7e655214a1983e88f9bdebb4672d4b53",
+        "docs/plans/fullstack-division-specification.md": "100644:634749714fb1bfcadf6d430b8a952e73250222630c04e54a6a34e1a19e58580e",
+        "docs/plans/governance-verification-performance.md": "100644:934d2166e0fef0d888d13af8000f8d715beaed5f31a6e1303e86d6e6899c6050",
+        "docs/plans/README.md": "100644:bb514a9db2b9c4c869d5f4a936056d5cace0e5306d82cf692453c28a0be97236",
+        "docs/PROJECT_CONSTRAINTS.md": "100644:7913e475f3a7eee2b2bf52ea354aa7ffeaacabce71e78bcef31698f3a1d2753a",
+        "docs/README.md": "100644:8be9218f2ba4c04e2fc35ad1ce587b853af75906dd5db68d966fe2e326d474b6",
+        "docs/REQUIREMENTS.md": "100644:040728c1d313f71867518fc99d37afba49145fab046c9525e2bbc63a33ba8a96",
+        "docs/ROADMAP.md": "100644:505fc5e14e115edbf49dbddb367f607c44bbd2314222334858371609a150a5ae",
+        "docs/SQL_POLICY_MATRIX.md": "100644:5b6dff6a829789c969cc86f3fdadf4713c2f7d88770c1776cecc14c77b3d878a",
+        "docs/TECH_STACK.md": "100644:c003c1cc3b889d8ce5c8ec2b3f1927413a682d859c51e089cfb85a4cc0227515",
+        "docs/TESTING_STRATEGY.md": "100644:cde632f61b44cf409c64a08ed0f1f7c288c10e696682e915017e40ad31e6ff30",
+        "docs/verification/antigravity-pi-collaboration.md": "100644:552cdcb7e9c883a0ee777b3605e035959f32212b94f6078271706b3cd75895fe",
+        "docs/verification/governance-bootstrap.md": "100644:f903ddfe7a07d09fbaf950a9a952698abc5166c89ec815296663114f02eee91a",
+        "docs/verification/governance-ci-context.md": "100644:9bd90c7de886357e1150c0283c53a4da640546b5c1acee68e2b1135e3060b11c",
+        "docs/verification/governance-main-task-selection-robustness.md": "100644:59c2e18e051175374c8ad5be330dea133524a97584546776888cc85e4bcd1728",
+        "docs/verification/governance-main-task-selection.md": "100644:9afe76e5bf07d93a7cec6078e3346abe91549e47c34a004cb515713870177b86",
+        "docs/verification/README.md": "100644:d23aa2d6323b4117edc7769a6e09bcff5e9ab36178ec58da205a67d0e75669d7",
+        "docs/VERSIONING.md": "100644:b13661d31cb8a30a3a93edb420cc47c3755c0002ed923a55303e694f50931e59",
+        "docs/VISUAL_VERIFICATION.md": "100644:dfd687a3bd91c85fcdd700482f4748750df5ff394da20a1bcdd77fc6f7656dce",
+        "governance/checks.json": "100644:12a5781337ffe47a44a4e8373423efbd3184da1ac12d6c0a3d73c84257143f7b",
+        "governance/collaboration.json": "100644:6f0472230d40d2abfd7deb698dc9a5ef88bb183513a05dca971306e5ece43ae3",
+        "governance/features.json": "100644:7824ad2b12c426f2f657af23a45da815cfb3a44f9a32e3d490c82e1390ecb785",
+        "governance/tasks.json": "100644:de9b1160a79bcaf920744d3a64a54dfd90deb336f129d261d2b7bed0585e42c1",
+        "mysql-mcp/package-lock.json": "100644:f5bb254c4c3f1aa037d0c980f4bf0500624af31f0b808fa142a2765cf630e87a",
+        "mysql-mcp/package.json": "100644:c1eb1acc2e7ffaa610026a5f1ea369e154bb72e35bc16dea8af737bd126b1364",
+        "mysql-mcp/scripts/build.mjs": "100644:6ad4a17f9db3b428851c64e86b73e700f3234040f38836056bd13a1ab5dbd166",
+        "mysql-mcp/scripts/compile.mjs": "100644:a6bdbc8bf752a0f7d04937c6ca05d45e869906a81af1e6a1dfb3278b72324042",
+        "mysql-mcp/src/index.ts": "100644:1b10bc99343531080799251141cf8791b6c40fdecb678989f24dc7ab9093d440",
+        "mysql-mcp/src/mcp/server.ts": "100644:c464bd9bec4a92403e9ba7ac0b6233efe4bde2c5b68e4bc59ab5647c6a0c65c4",
+        "mysql-mcp/src/security/keyring.ts": "100644:afa529d96e2631eb56a2609e295071dea15203215bd6b5843801ca0323ec548e",
+        "mysql-mcp/src/sql/ast.ts": "100644:18345b9a9d692b6d58932a7e7ef427917bc2f7c10e744d1285db2524912794fb",
+        "mysql-mcp/src/sql/policy.ts": "100644:81ddc55e37ef0017a34672f6f4e8d1bc3a2817a90bb617896b29bc19ed838687",
+        "mysql-mcp/tests/keyring.test.mjs": "100644:64eb4006f73c7276463d2bb0afc276abdbbd2806724216fba21608e5b0a4e9b1",
+        "mysql-mcp/tests/mcp.test.mjs": "100644:945418efae06b180721dc097382536ab785dd3d0ad33ac36897c24f760a92b1a",
+        "mysql-mcp/tests/smoke.test.mjs": "100644:189cc104917b8b27c5333119c0cd0cdbf64bf69bae1dc5853b69864afb16bdbc",
+        "mysql-mcp/tests/sql-policy.test.mjs": "100644:22ef7ee2c35a2fe19ec65a2c8cbbc7fb0453aa6f484b79457f11d8bc5e2c1d26",
+        "mysql-mcp/tsconfig.json": "100644:5c8649b8b9a95ecbe57008be42d1880fbbc2de9cd39685c63d074ab126571826",
+        "scripts/governance/check.mjs": "100644:e99c33db02575ef2da0fc991752d16adc2c32a5111593b806577dc276826e635",
+        "scripts/governance/handoff.mjs": "100644:305ab0f224a321898f02e6a8616c9286198c40e649a8f3fca840215e44c81d38",
+        "scripts/governance/install-hooks.mjs": "100644:6cd130c0a274a5fd64c4759b3bbbabf530b5f348d041b269eb47cb571148d739",
+        "scripts/governance/lib/collaboration.mjs": "100644:96109352d775a41d0a4e514eaa49c813c8e5d3302249316628ef9f7da8aa0f62",
+        "scripts/governance/lib/core.mjs": "100644:bc90f6835a239d3b80cfba87087d793ad2c7c2b05a3d54a445b0046d847696ae",
+        "scripts/governance/lib/dependencies.mjs": "100644:2ab6b35ea701ced7e8ae0e7c96f1ed3127f5248d6db2b675e235910f6c301a0e",
+        "scripts/governance/lib/evidence.mjs": "100644:4cc9357139b87d7c21fbfead892554b240aa4ba15823ec029ae0b11c9f2467d5",
+        "scripts/governance/lib/execute.mjs": "100644:782f724425bea0cd47661a013d6d9e765b6becd452b877a6197a92bb57f9a04c",
+        "scripts/governance/lib/scope.mjs": "100644:063efafa7755654473a2fc3b817ca62a741fb87bd5eefd1ea6687f163b6f4d21",
+        "scripts/governance/lib/validate.mjs": "100644:a0887fddf1af29224ed604dfd1d740887db6e88c99dfc314f172db57c744cbd6",
+        "scripts/governance/prepare.mjs": "100644:51ddde6b6e7337a7826f77b78360cd2180d517b679984c9d23d8105ad35a3046",
+        "scripts/governance/report.mjs": "100644:bc1ad2a63631cc5dc17dadf63de2fb305b35954af15e24e7ea229ea431051aa2",
+        "scripts/governance/run.mjs": "100644:cce9c80569efe7dd8f90d0e37a4b4b3aacc4f008a9a1b60cf04f12358de37f11",
+        "tests/governance/collaboration-fixture.mjs": "100644:1ea042bbfa07d90a2e36200285438257ab5a67810a4d64453ba9c58e51891bac",
+        "tests/governance/collaboration-git.test.mjs": "100644:72978561d5cbfebc7a021222e6138ad85901bd560a8e217c7fe04fc7edd9aff8",
+        "tests/governance/collaboration.test.mjs": "100644:8862091399814732416098b1ed4eec152ae5edcfa5854c663c4c7ee6f2b69048",
+        "tests/governance/dependencies.test.mjs": "100644:f7e2fc34099ceaea1793f6ce75004531ffaf011e8540cdb02236cdaa55be9906",
+        "tests/governance/governance.test.mjs": "100644:bd72dfb6f4e58eb267a6e944f215a1faac2205ef667f0a118c6f7ccae2824255"
+      },
+      "changes": [],
+      "contract_sha256": "55bd5f99b03959148b488815aec26e72653ab8b7b867a7f8e845febbe7979c67",
+      "acceptance_ids": [
+        "G02-A1",
+        "G02-A2",
+        "G02-A3",
+        "G02-A4",
+        "G03-A1",
+        "G03-A2",
+        "G03-A3",
+        "G03-A4"
+      ],
+      "acceptance_definitions": [
+        {
+          "id": "G02-A1",
+          "description": "文档、台账、跟踪文件检查及真实分支/提交/PR 记录，用户确认合并",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A2",
+          "description": "建立变更管理规范与 docs/changes/ 库，支持双重视角（发版说明与 Agent 工程上下文），回溯 PR #1~#4 变更记录，由治理检查与人工核验",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A3",
+          "description": "建立应用工程构建契约、SQL 语法风险分级矩阵与测试虚拟沙箱隔离规范，由治理检查与人工核验",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G02-A4",
+          "description": "建立全栈分工与前后端物理隔离协作规范，明确 Antigravity 专职前端界面（mysql-mcp/web/）与 PI-Desktop 专职后端的强制性约束及接口先行原则，由治理检查与人工核验",
+          "evidence_types": [
+            "automated",
+            "manual"
+          ],
+          "check_ids": [
+            "governance-tests"
+          ]
+        },
+        {
+          "id": "G03-A1",
+          "description": "合法规划、开发、返工、文档-only 与限定 bootstrap 可执行；错误角色、阶段、任务、摘要、基线及越界增删改拒绝",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A2",
+          "description": "交接包含目标、实际结果、文件与原始执行证据、构建/编译或不适用理由、限制和下一步；双向 prompt 确定性完整，生成不自动接收",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A3",
+          "description": "暂存、消息、实际推送对象和 PR/main 快照校验交接；漂移、伪通过、旧证据、改写及 PI 提交拒绝，原治理回归保留",
+          "evidence_types": [
+            "automated"
+          ],
+          "check_ids": [
+            "collaboration-tests"
+          ]
+        },
+        {
+          "id": "G03-A4",
+          "description": "真实 Antigravity 接收并负责提交/push/PR/CI，生成下一步 prompt；用户审查治理并确认合并",
+          "evidence_types": [
+            "manual"
+          ],
+          "check_ids": []
+        }
+      ],
+      "next_phase": "wait",
+      "receiver": "pi-desktop",
+      "details": {
+        "goal": "建立全栈分工与前后端物理隔离协作规范，确立前端界面由 Antigravity 专职负责（mysql-mcp/web/）、PI-Desktop 专职负责后端系统（mysql-mcp/src/ 等）的强制性约束，确立双向禁止红线、接口先行原则、目录边界与任务模式扩展。",
+        "outcome": "已完成全栈分工规范 docs/FULLSTACK_DIVISION_SPECIFICATION.md，全面更新 AGENTS.md、COLLABORATION_WORKFLOW.md、PROJECT_CONSTRAINTS.md、ARCHITECTURE.md、ENGINEERING_TOOLCHAIN.md、FRONTEND_UI_GUIDELINES.md、README.md，回填 TASK-APP-002 的 PR 10，登记并完成 TASK-GOV-009 与 G02-A4，生成变更台账 docs/changes/2026-10-06-TASK-GOV-009-fullstack-division-specification.md 并更新未发版索引。全部 127 项应用测试与治理门禁测试离线全绿通过。",
+        "next_actions": [
+          "由 Antigravity 执行本地 Git 暂存与代码提交（GOV_ROLE=antigravity）",
+          "推送当前任务分支 docs/fullstack-division-specification 至已确认 origin 远程",
+          "创建以 main 为基准的 Pull Request 并查询 GitHub CI 状态",
+          "核实实际交付信息后执行 record-delivery 固化交付记录并生成回传 prompt，等待用户审查与确认合并"
+        ],
+        "forbidden": [
+          "不得在未经用户确认下自动合并 PR 或开启自动合并",
+          "不得删除远程分支或创建 Git Tag",
+          "PI-Desktop 严禁执行 commit、push 或创建 PR 操作",
+          "不得发起真实数据库连接或擅自修改已实现后端源码"
+        ],
+        "documentation_requests": [],
+        "limitations": [
+          "本地 run.json 与 TAP 仅为诊断声明，需由 GitHub Actions CI 独立重跑验证",
+          "本次仅限全栈分工规约制定，不包含前端界面具体代码实现"
+        ],
+        "blockers": [],
+        "result": "ready",
+        "build": {
+          "status": "not_applicable",
+          "reason": "文档与治理规范变更，无应用代码或构建配置变动",
+          "check_ids": []
+        },
+        "verification": [
+          {
+            "check_id": "governance-tests",
+            "reason": "运行治理检查测试套件，验证全栈分工规范、路径隔离、门禁断言与文档状态派生全部通过"
+          },
+          {
+            "check_id": "collaboration-tests",
+            "reason": "运行双 Agent 协作门禁与 Git 快照流测试套件，验证交接状态机与角色边界全部通过"
+          }
+        ],
+        "commit_message": "docs(spec): add fullstack division specification and frontend backend isolation"
+      },
+      "check_definitions": [
+        {
+          "id": "governance-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/governance.test.mjs"
+          ],
+          "timeout_ms": 240000,
+          "parser": "tap",
+          "feature_ids": [
+            "G01",
+            "G02"
+          ],
+          "acceptance_ids": [
+            "G01-A1",
+            "G01-A3",
+            "G01-A4",
+            "G01-A5",
+            "G02-A1",
+            "G02-A2",
+            "G02-A3",
+            "G02-A4"
+          ]
+        },
+        {
+          "id": "collaboration-tests",
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "tests/governance/collaboration.test.mjs",
+            "tests/governance/collaboration-git.test.mjs"
+          ],
+          "timeout_ms": 600000,
+          "parser": "tap",
+          "feature_ids": [
+            "G03"
+          ],
+          "acceptance_ids": [
+            "G03-A1",
+            "G03-A2",
+            "G03-A3"
+          ]
+        }
+      ],
+      "evidence": {
+        "report": {
+          "schema_version": 1,
+          "trust": "local-diagnostic-only",
+          "started_at": "2026-10-06T07:57:09.527Z",
+          "environment": {
+            "node": "v24.16.0",
+            "platform": "win32",
+            "arch": "x64"
+          },
+          "checks": [
+            {
+              "check_id": "governance-tests",
+              "feature_ids": [
+                "G01",
+                "G02"
+              ],
+              "acceptance_ids": [
+                "G01-A1",
+                "G01-A3",
+                "G01-A4",
+                "G01-A5",
+                "G02-A1",
+                "G02-A2",
+                "G02-A3",
+                "G02-A4"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/governance.test.mjs"
+              ],
+              "check_definition_sha256": "b03611028d445f3c72aa59675292bca13f5c3932bb13137fbf142d55479b72ec",
+              "started_at": "2026-10-06T07:57:15.051Z",
+              "ended_at": "2026-10-06T07:58:52.017Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 89,
+                "pass": 89,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "governance-tests.tap",
+                  "sha256": "75bc7fe6d144af103bc2b2dba78825f540e93035a5ab23fff9cd49bdbf75b5ea"
+                },
+                {
+                  "path": "governance-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            },
+            {
+              "check_id": "collaboration-tests",
+              "feature_ids": [
+                "G03"
+              ],
+              "acceptance_ids": [
+                "G03-A1",
+                "G03-A2",
+                "G03-A3"
+              ],
+              "command": "node",
+              "args": [
+                "--test",
+                "--test-reporter=tap",
+                "tests/governance/collaboration.test.mjs",
+                "tests/governance/collaboration-git.test.mjs"
+              ],
+              "check_definition_sha256": "b5f54adadd1c5152e2b6bdea5a1227f65cbefb645281db20c001b1cbf07951d8",
+              "started_at": "2026-10-06T07:58:52.017Z",
+              "ended_at": "2026-10-06T08:04:29.877Z",
+              "exit_code": 0,
+              "signal": null,
+              "timed_out": false,
+              "counts": {
+                "tests": 80,
+                "pass": 80,
+                "fail": 0,
+                "skipped": 0,
+                "cancelled": 0,
+                "todo": 0
+              },
+              "artifacts": [
+                {
+                  "path": "collaboration-tests.tap",
+                  "sha256": "35320a923fb8330d1a4f8a9eae38e53916330eea2ba005929ad06bf571cf2224"
+                },
+                {
+                  "path": "collaboration-tests.stderr.log",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ],
+              "error": null,
+              "local_result": "passed"
+            }
+          ],
+          "acceptance": "unverified",
+          "task_id": "TASK-GOV-009",
+          "feature_ids": [
+            "G02",
+            "G03"
+          ],
+          "task_status_claim": "in_progress",
+          "task_completion": "unauthenticated",
+          "source_commit": "be2079577e664e29437bb5a603e03a08b0a1b117",
+          "snapshot_tree": null,
+          "input_sha256": "812e7eb3af3e45687a371b0ad7071b26188d04a090064bfff58cb451097e425e",
+          "development_sha256": "f67f537c9f4fa1a454b550de15ced0b4890b128ef13006fd5a10680468ba6112",
+          "dependencies": {
+            "status": "passed",
+            "command": "npm",
+            "args": [
+              "ci",
+              "--ignore-scripts",
+              "--include=dev",
+              "--no-audit",
+              "--no-fund",
+              "--prefer-offline",
+              "--global=false",
+              "--workspaces=false"
+            ],
+            "package_sha256": "83cd11c215fc4e264f979b528de12dea860b02ee192a305089cd8a664d2cc7b7",
+            "lockfile_sha256": "f77ebb88f566b9b9c3162a3cedceca96a5a427233f0c0374e4a48cc10167965a",
+            "started_at": "2026-10-06T07:57:11.691Z",
+            "ended_at": "2026-10-06T07:57:15.023Z",
+            "exit_code": 0,
+            "signal": null,
+            "timed_out": false,
+            "error": null
+          },
+          "local_result": "passed",
+          "ended_at": "2026-10-06T08:04:29.906Z"
+        },
+        "artifacts": {
+          "governance-tests.tap": "TAP version 13\n# Subtest: dependency preparation skips governance-only repositories without invoking npm\nok 1 - dependency preparation skips governance-only repositories without invoking npm\n  ---\n  duration_ms: 1.5679\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects missing package.json\nok 2 - dependency preparation rejects missing package.json\n  ---\n  duration_ms: 7.0119\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects missing package-lock.json\nok 3 - dependency preparation rejects missing package-lock.json\n  ---\n  duration_ms: 5.4354\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects a directory masquerading as a lockfile\nok 4 - dependency preparation rejects a directory masquerading as a lockfile\n  ---\n  duration_ms: 6.4054\n  type: 'test'\n  ...\n# Subtest: dependency preparation is local, shell-free, dev-inclusive and strips snapshot context\nok 5 - dependency preparation is local, shell-free, dev-inclusive and strips snapshot context\n  ---\n  duration_ms: 8.9707\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects nonzero exit with failed execution metadata\nok 6 - dependency preparation rejects nonzero exit with failed execution metadata\n  ---\n  duration_ms: 6.5536\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects timeout with failed execution metadata\nok 7 - dependency preparation rejects timeout with failed execution metadata\n  ---\n  duration_ms: 6.2201\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects signal with failed execution metadata\nok 8 - dependency preparation rejects signal with failed execution metadata\n  ---\n  duration_ms: 6.1449\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects spawn failure with failed execution metadata\nok 9 - dependency preparation rejects spawn failure with failed execution metadata\n  ---\n  duration_ms: 5.4912\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects mutations of package.json\nok 10 - dependency preparation rejects mutations of package.json\n  ---\n  duration_ms: 7.4824\n  type: 'test'\n  ...\n# Subtest: dependency preparation rejects mutations of package-lock.json\nok 11 - dependency preparation rejects mutations of package-lock.json\n  ---\n  duration_ms: 6.7662\n  type: 'test'\n  ...\n# Subtest: real offline npm ci in an isolated application disables lifecycle scripts and leaves inputs unchanged\nok 12 - real offline npm ci in an isolated application disables lifecycle scripts and leaves inputs unchanged\n  ---\n  duration_ms: 737.8676\n  type: 'test'\n  ...\n# Subtest: full snapshot run installs offline dev dependencies rather than copying stale worktree modules\nok 13 - full snapshot run installs offline dev dependencies rather than copying stale worktree modules\n  ---\n  duration_ms: 8651.8734\n  type: 'test'\n  ...\n# Subtest: full snapshot run rejects mismatched lockfiles before executing tests or builds\nok 14 - full snapshot run rejects mismatched lockfiles before executing tests or builds\n  ---\n  duration_ms: 7148.2972\n  type: 'test'\n  ...\n# Subtest: valid planned feature and deterministic report\nok 15 - valid planned feature and deterministic report\n  ---\n  duration_ms: 2142.5656\n  type: 'test'\n  ...\n# Subtest: duplicate feature ID\nok 16 - duplicate feature ID\n  ---\n  duration_ms: 190.5986\n  type: 'test'\n  ...\n# Subtest: duplicate normalized key\nok 17 - duplicate normalized key\n  ---\n  duration_ms: 191.7914\n  type: 'test'\n  ...\n# Subtest: duplicate acceptance ID\nok 18 - duplicate acceptance ID\n  ---\n  duration_ms: 190.5156\n  type: 'test'\n  ...\n# Subtest: duplicate task ID\nok 19 - duplicate task ID\n  ---\n  duration_ms: 190.9065\n  type: 'test'\n  ...\n# Subtest: undefined requirement\nok 20 - undefined requirement\n  ---\n  duration_ms: 318.3432\n  type: 'test'\n  ...\n# Subtest: missing dependency\nok 21 - missing dependency\n  ---\n  duration_ms: 323.6022\n  type: 'test'\n  ...\n# Subtest: dependency cycle\nok 22 - dependency cycle\n  ---\n  duration_ms: 322.6378\n  type: 'test'\n  ...\n# Subtest: unknown status\nok 23 - unknown status\n  ---\n  duration_ms: 323.1589\n  type: 'test'\n  ...\n# Subtest: path traversal\nok 24 - path traversal\n  ---\n  duration_ms: 326.7606\n  type: 'test'\n  ...\n# Subtest: missing implementation\nok 25 - missing implementation\n  ---\n  duration_ms: 317.7109\n  type: 'test'\n  ...\n# Subtest: forged passed evidence\nok 26 - forged passed evidence\n  ---\n  duration_ms: 317.492\n  type: 'test'\n  ...\n# Subtest: mock masquerading as real mysql\nok 27 - mock masquerading as real mysql\n  ---\n  duration_ms: 328.6943\n  type: 'test'\n  ...\n# Subtest: manual acceptance claim\nok 28 - manual acceptance claim\n  ---\n  duration_ms: 325.4742\n  type: 'test'\n  ...\n# Subtest: feature completion claim\nok 29 - feature completion claim\n  ---\n  duration_ms: 323.194\n  type: 'test'\n  ...\n# Subtest: unapproved governance modification\nok 30 - unapproved governance modification\n  ---\n  duration_ms: 1085.8203\n  type: 'test'\n  ...\n# Subtest: scope violation\nok 31 - scope violation\n  ---\n  duration_ms: 1082.8819\n  type: 'test'\n  ...\n# Subtest: shell command\nok 32 - shell command\n  ---\n  duration_ms: 346.7294\n  type: 'test'\n  ...\n# Subtest: node eval injection\nok 33 - node eval injection\n  ---\n  duration_ms: 322.8298\n  type: 'test'\n  ...\n# Subtest: task collision\nok 34 - task collision\n  ---\n  duration_ms: 324.907\n  type: 'test'\n  ...\n# Subtest: uncovered confirmed requirement\nok 35 - uncovered confirmed requirement\n  ---\n  duration_ms: 325.5659\n  type: 'test'\n  ...\n# Subtest: checked roadmap cannot grant completion\nok 36 - checked roadmap cannot grant completion\n  ---\n  duration_ms: 345.1406\n  type: 'test'\n  ...\n# Subtest: tracked confidential path\nok 37 - tracked confidential path\n  ---\n  duration_ms: 386.0449\n  type: 'test'\n  ...\n# Subtest: staged invalid record cannot be masked by unstaged repair\nok 38 - staged invalid record cannot be masked by unstaged repair\n  ---\n  duration_ms: 2302.0443\n  type: 'test'\n  ...\n# Subtest: staged checker, not unstaged checker, is executed\nok 39 - staged checker, not unstaged checker, is executed\n  ---\n  duration_ms: 828.1143\n  type: 'test'\n  ...\n# Subtest: valid staged snapshot executes registered tests\nok 40 - valid staged snapshot executes registered tests\n  ---\n  duration_ms: 3539.4596\n  type: 'test'\n  ...\n# Subtest: main staged commit rejected\nok 41 - main staged commit rejected\n  ---\n  duration_ms: 324.9111\n  type: 'test'\n  ...\n# Subtest: remote branch mismatch\nok 42 - remote branch mismatch\n  ---\n  duration_ms: 394.055\n  type: 'test'\n  ...\n# Subtest: main push\nok 43 - main push\n  ---\n  duration_ms: 401.76\n  type: 'test'\n  ...\n# Subtest: delete push\nok 44 - delete push\n  ---\n  duration_ms: 401.6798\n  type: 'test'\n  ...\n# Subtest: oid mismatch\nok 45 - oid mismatch\n  ---\n  duration_ms: 556.9461\n  type: 'test'\n  ...\n# Subtest: unknown commit\nok 46 - unknown commit\n  ---\n  duration_ms: 471.3841\n  type: 'test'\n  ...\n# Subtest: push validates object rather than repaired worktree\nok 47 - push validates object rather than repaired worktree\n  ---\n  duration_ms: 1189.434\n  type: 'test'\n  ...\n# Subtest: valid actual push object\nok 48 - valid actual push object\n  ---\n  duration_ms: 3860.0962\n  type: 'test'\n  ...\n# Subtest: actual execution rejects failure\nok 49 - actual execution rejects failure\n  ---\n  duration_ms: 296.7648\n  type: 'test'\n  ...\n# Subtest: actual execution rejects skipped\nok 50 - actual execution rejects skipped\n  ---\n  duration_ms: 287.1226\n  type: 'test'\n  ...\n# Subtest: actual execution rejects zero tests\nok 51 - actual execution rejects zero tests\n  ---\n  duration_ms: 276.2095\n  type: 'test'\n  ...\n# Subtest: actual execution rejects timeout\nok 52 - actual execution rejects timeout\n  ---\n  duration_ms: 207.4824\n  type: 'test'\n  ...\n# Subtest: run report verifies artifacts, detects tampering and stale inputs\nok 53 - run report verifies artifacts, detects tampering and stale inputs\n  ---\n  duration_ms: 5441.0877\n  type: 'test'\n  ...\n# Subtest: input digest changes with source content\nok 54 - input digest changes with source content\n  ---\n  duration_ms: 228.2607\n  type: 'test'\n  ...\n# Subtest: deleted criterion requires explicit authorized scope record\nok 55 - deleted criterion requires explicit authorized scope record\n  ---\n  duration_ms: 2760.5284\n  type: 'test'\n  ...\n# Subtest: hook installer refuses existing hooksPath without modification\nok 56 - hook installer refuses existing hooksPath without modification\n  ---\n  duration_ms: 365.8747\n  type: 'test'\n  ...\n# Subtest: CI compares actual base/head scope despite clean checkout\nok 57 - CI compares actual base/head scope despite clean checkout\n  ---\n  duration_ms: 1557.4239\n  type: 'test'\n  ...\n# Subtest: push wrong task branch rejected even with matching refs\nok 58 - push wrong task branch rejected even with matching refs\n  ---\n  duration_ms: 1196.807\n  type: 'test'\n  ...\n# Subtest: implemented feature paths must exist and be tracked\nok 59 - implemented feature paths must exist and be tracked\n  ---\n  duration_ms: 1061.4598\n  type: 'test'\n  ...\n# Subtest: mutable base cannot hide committed out-of-scope path from origin main\nok 60 - mutable base cannot hide committed out-of-scope path from origin main\n  ---\n  duration_ms: 2117.9412\n  type: 'test'\n  ...\n# Subtest: HEAD task baseline cannot be advanced without remote\nok 61 - HEAD task baseline cannot be advanced without remote\n  ---\n  duration_ms: 960.6485\n  type: 'test'\n  ...\n# Subtest: nonancestor task base rejected\nok 62 - nonancestor task base rejected\n  ---\n  duration_ms: 1433.3712\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: local\nok 63 - existing feature scope checked against trusted registry: local\n  ---\n  duration_ms: 1223.3637\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: staged\nok 64 - existing feature scope checked against trusted registry: staged\n  ---\n  duration_ms: 1770.044\n  type: 'test'\n  ...\n# Subtest: existing feature scope checked against trusted registry: CI\nok 65 - existing feature scope checked against trusted registry: CI\n  ---\n  duration_ms: 1858.687\n  type: 'test'\n  ...\n# Subtest: explicit feature scope authorization permits reviewed change\nok 66 - explicit feature scope authorization permits reviewed change\n  ---\n  duration_ms: 1596.2078\n  type: 'test'\n  ...\n# Subtest: main CI selects completed delta task despite unrelated active branches; no push permission\nok 67 - main CI selects completed delta task despite unrelated active branches; no push permission\n  ---\n  duration_ms: 4670.6539\n  type: 'test'\n  ...\n# Subtest: report requires exact artifacts and execution metadata, never just passed\nok 68 - report requires exact artifacts and execution metadata, never just passed\n  ---\n  duration_ms: 4426.49\n  type: 'test'\n  ...\n# Subtest: registered tests do not inherit parent GitHub CI context\nok 69 - registered tests do not inherit parent GitHub CI context\n  ---\n  duration_ms: 293.3537\n  type: 'test'\n  ...\n# Subtest: main task delta selection: shared-feature\nok 70 - main task delta selection: shared-feature\n  ---\n  duration_ms: 873.8097\n  type: 'test'\n  ...\n# Subtest: main task delta selection: multiple-delta\nok 71 - main task delta selection: multiple-delta\n  ---\n  duration_ms: 886.8895\n  type: 'test'\n  ...\n# Subtest: main task delta selection: out-of-scope\nok 72 - main task delta selection: out-of-scope\n  ---\n  duration_ms: 894.4434\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: pr-backfill\nok 73 - main historical metadata selection: pr-backfill\n  ---\n  duration_ms: 3482.3512\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: allowed_paths\nok 74 - main historical metadata selection: allowed_paths\n  ---\n  duration_ms: 1067.6339\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: base_commit\nok 75 - main historical metadata selection: base_commit\n  ---\n  duration_ms: 1050.387\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: authorization\nok 76 - main historical metadata selection: authorization\n  ---\n  duration_ms: 1128.4368\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: status\nok 77 - main historical metadata selection: status\n  ---\n  duration_ms: 1023.8998\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: feature_ids\nok 78 - main historical metadata selection: feature_ids\n  ---\n  duration_ms: 1039.699\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: extra-field\nok 79 - main historical metadata selection: extra-field\n  ---\n  duration_ms: 1017.222\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: new-noncandidate\nok 80 - main historical metadata selection: new-noncandidate\n  ---\n  duration_ms: 1097.1223\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: multiple-candidates\nok 81 - main historical metadata selection: multiple-candidates\n  ---\n  duration_ms: 1059.9124\n  type: 'test'\n  ...\n# Subtest: main historical metadata selection: no-changed-candidate\nok 82 - main historical metadata selection: no-changed-candidate\n  ---\n  duration_ms: 1210.5229\n  type: 'test'\n  ...\n# Subtest: baseline fixture cache isolates files, index, refs, config and registry data\nok 83 - baseline fixture cache isolates files, index, refs, config and registry data\n  ---\n  duration_ms: 1933.1081\n  type: 'test'\n  ...\n# Subtest: registered check timeout boundary: 600000\nok 84 - registered check timeout boundary: 600000\n  ---\n  duration_ms: 1512.811\n  type: 'test'\n  ...\n# Subtest: registered check timeout boundary: 600001\nok 85 - registered check timeout boundary: 600001\n  ---\n  duration_ms: 321.6773\n  type: 'test'\n  ...\n# Subtest: registered check timeout boundary: 0\nok 86 - registered check timeout boundary: 0\n  ---\n  duration_ms: 325.5269\n  type: 'test'\n  ...\n# Subtest: registered check timeout boundary: 1.5\nok 87 - registered check timeout boundary: 1.5\n  ---\n  duration_ms: 319.353\n  type: 'test'\n  ...\n# Subtest: batch snapshot preserves binary, empty, quoted-path bytes and executable modes\nok 88 - batch snapshot preserves binary, empty, quoted-path bytes and executable modes\n  ---\n  duration_ms: 662.3088\n  type: 'test'\n  ...\n# Subtest: batch snapshot rejects non-regular Git tree entries\nok 89 - batch snapshot rejects non-regular Git tree entries\n  ---\n  duration_ms: 510.3184\n  type: 'test'\n  ...\n1..89\n# tests 89\n# suites 0\n# pass 89\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 96876.0457\n",
+          "governance-tests.stderr.log": "",
+          "collaboration-tests.tap": "TAP version 13\n# Subtest: history rewrite detected against committed prefix\nok 1 - history rewrite detected against committed prefix\n  ---\n  duration_ms: 15576.737\n  type: 'test'\n  ...\n# Subtest: policy cannot be removed after deployment\nok 2 - policy cannot be removed after deployment\n  ---\n  duration_ms: 14483.3804\n  type: 'test'\n  ...\n# Subtest: actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\nok 3 - actual Hooks reject PI commit, wrong message and actual push; allow Antigravity\n  ---\n  duration_ms: 27742.761\n  type: 'test'\n  ...\n# Subtest: staged bad snapshot cannot be masked by unstaged repair\nok 4 - staged bad snapshot cannot be masked by unstaged repair\n  ---\n  duration_ms: 16732.8456\n  type: 'test'\n  ...\n# Subtest: old committed object cannot be masked by repaired working copy\nok 5 - old committed object cannot be masked by repaired working copy\n  ---\n  duration_ms: 16916.5839\n  type: 'test'\n  ...\n# Subtest: PR exact base/head and squash main independent context both pass\nok 6 - PR exact base/head and squash main independent context both pass\n  ---\n  duration_ms: 21005.918\n  type: 'test'\n  ...\n# Subtest: delivery success produces next PI prompt; failure explicitly accepts rework\nok 7 - delivery success produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 21615.9955\n  type: 'test'\n  ...\n# Subtest: delivery failure produces next PI prompt; failure explicitly accepts rework\nok 8 - delivery failure produces next PI prompt; failure explicitly accepts rework\n  ---\n  duration_ms: 18872.9724\n  type: 'test'\n  ...\n# Subtest: historical task cannot authorize new task branch changes\nok 9 - historical task cannot authorize new task branch changes\n  ---\n  duration_ms: 14685.978\n  type: 'test'\n  ...\n# Subtest: missing Git role is rejected even for valid candidate\nok 10 - missing Git role is rejected even for valid candidate\n  ---\n  duration_ms: 16159.8575\n  type: 'test'\n  ...\n# Subtest: reject revokes completed Git candidate until fresh planning\nok 11 - reject revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 19484.2953\n  type: 'test'\n  ...\n# Subtest: cancel revokes completed Git candidate until fresh planning\nok 12 - cancel revokes completed Git candidate until fresh planning\n  ---\n  duration_ms: 19139.415\n  type: 'test'\n  ...\n# Subtest: Git mode-only change is subject to role and candidate snapshot\nok 13 - Git mode-only change is subject to role and candidate snapshot\n  ---\n  duration_ms: 15354.3319\n  type: 'test'\n  ...\n# Subtest: Hook candidate evidence reuses staged and pushed objects without rerunning tests\nok 14 - Hook candidate evidence reuses staged and pushed objects without rerunning tests\n  ---\n  duration_ms: 13092.2177\n  type: 'test'\n  ...\n# staged fast path: 2156.2 ms\n# Subtest: candidate with changed execution input digest falls back to registered checks\nok 15 - candidate with changed execution input digest falls back to registered checks\n  ---\n  duration_ms: 12779.9754\n  type: 'test'\n  ...\n# Subtest: candidate original TAP tampering never enters fast path\nok 16 - candidate original TAP tampering never enters fast path\n  ---\n  duration_ms: 10408.8732\n  type: 'test'\n  ...\n# Subtest: candidate check definition drift never enters fast path\nok 17 - candidate check definition drift never enters fast path\n  ---\n  duration_ms: 10287.9023\n  type: 'test'\n  ...\n# Subtest: CI snapshot runner does not reuse local candidate execution\nok 18 - CI snapshot runner does not reuse local candidate execution\n  ---\n  duration_ms: 10923.6435\n  type: 'test'\n  ...\n# Subtest: candidate execution from another Node runtime falls back to registered checks\nok 19 - candidate execution from another Node runtime falls back to registered checks\n  ---\n  duration_ms: 12666.8398\n  type: 'test'\n  ...\n# Subtest: cold path registered failure still blocks the Hook\nok 20 - cold path registered failure still blocks the Hook\n  ---\n  duration_ms: 18867.8732\n  type: 'test'\n  ...\n# Subtest: valid dual prompts, explicit acceptance, development and delivery candidate\nok 21 - valid dual prompts, explicit acceptance, development and delivery candidate\n  ---\n  duration_ms: 15649.2046\n  type: 'test'\n  ...\n# Subtest: document-only workflow has no fabricated PI development\nok 22 - document-only workflow has no fabricated PI development\n  ---\n  duration_ms: 8509.2885\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/planning\nok 23 - reject wrong/missing planning role pi-desktop/planning\n  ---\n  duration_ms: 366.3121\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role antigravity/implementation\nok 24 - reject wrong/missing planning role antigravity/implementation\n  ---\n  duration_ms: 330.0145\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/bootstrap\nok 25 - reject wrong/missing planning role pi-desktop/bootstrap\n  ---\n  duration_ms: 363.1728\n  type: 'test'\n  ...\n# Subtest: reject wrong/missing planning role pi-desktop/implementation\nok 26 - reject wrong/missing planning role pi-desktop/implementation\n  ---\n  duration_ms: 325.1698\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot add code in planning\nok 27 - Antigravity cannot add code in planning\n  ---\n  duration_ms: 1284.853\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot delete code in planning\nok 28 - Antigravity cannot delete code in planning\n  ---\n  duration_ms: 1296.7692\n  type: 'test'\n  ...\n# Subtest: Antigravity cannot rename code in planning\nok 29 - Antigravity cannot rename code in planning\n  ---\n  duration_ms: 1323.9196\n  type: 'test'\n  ...\n# Subtest: PI cannot add documentation/registry\nok 30 - PI cannot add documentation/registry\n  ---\n  duration_ms: 4478.896\n  type: 'test'\n  ...\n# Subtest: PI cannot delete documentation/registry\nok 31 - PI cannot delete documentation/registry\n  ---\n  duration_ms: 4431.9968\n  type: 'test'\n  ...\n# Subtest: PI cannot rename documentation/registry\nok 32 - PI cannot rename documentation/registry\n  ---\n  duration_ms: 4543.4829\n  type: 'test'\n  ...\n# Subtest: PI cannot registry documentation/registry\nok 33 - PI cannot registry documentation/registry\n  ---\n  duration_ms: 4516.161\n  type: 'test'\n  ...\n# Subtest: unclassified and overlapping path policies rejected\nok 34 - unclassified and overlapping path policies rejected\n  ---\n  duration_ms: 1300.3441\n  type: 'test'\n  ...\n# Subtest: bad receiver role\nok 35 - bad receiver role\n  ---\n  duration_ms: 2914.1478\n  type: 'test'\n  ...\n# Subtest: bad receiver digest\nok 36 - bad receiver digest\n  ---\n  duration_ms: 2498.8051\n  type: 'test'\n  ...\n# Subtest: bad receiver duplicate\nok 37 - bad receiver duplicate\n  ---\n  duration_ms: 3592.0406\n  type: 'test'\n  ...\n# Subtest: reject kept and requires replanning\nok 38 - reject kept and requires replanning\n  ---\n  duration_ms: 4503.5774\n  type: 'test'\n  ...\n# Subtest: cancel kept and requires replanning\nok 39 - cancel kept and requires replanning\n  ---\n  duration_ms: 4491.1125\n  type: 'test'\n  ...\n# Subtest: handoff content rejects goal\nok 40 - handoff content rejects goal\n  ---\n  duration_ms: 8127.3613\n  type: 'test'\n  ...\n# Subtest: handoff content rejects placeholder\nok 41 - handoff content rejects placeholder\n  ---\n  duration_ms: 8234.9978\n  type: 'test'\n  ...\n# Subtest: handoff content rejects next actions\nok 42 - handoff content rejects next actions\n  ---\n  duration_ms: 7993.231\n  type: 'test'\n  ...\n# Subtest: handoff content rejects limitations\nok 43 - handoff content rejects limitations\n  ---\n  duration_ms: 8155.8284\n  type: 'test'\n  ...\n# Subtest: handoff content rejects build reason\nok 44 - handoff content rejects build reason\n  ---\n  duration_ms: 7915.145\n  type: 'test'\n  ...\n# Subtest: handoff content rejects blocker ready\nok 45 - handoff content rejects blocker ready\n  ---\n  duration_ms: 7975.5857\n  type: 'test'\n  ...\n# Subtest: handoff content rejects verification reference\nok 46 - handoff content rejects verification reference\n  ---\n  duration_ms: 7872.5221\n  type: 'test'\n  ...\n# Subtest: handoff content rejects missing verification\nok 47 - handoff content rejects missing verification\n  ---\n  duration_ms: 7910.326\n  type: 'test'\n  ...\n# Subtest: handoff content rejects PI commit message\nok 48 - handoff content rejects PI commit message\n  ---\n  duration_ms: 8170.5024\n  type: 'test'\n  ...\n# Subtest: tampered handoff digest rejected\nok 49 - tampered handoff digest rejected\n  ---\n  duration_ms: 2176.4943\n  type: 'test'\n  ...\n# Subtest: tampered handoff role rejected\nok 50 - tampered handoff role rejected\n  ---\n  duration_ms: 2152.0993\n  type: 'test'\n  ...\n# Subtest: tampered handoff branch rejected\nok 51 - tampered handoff branch rejected\n  ---\n  duration_ms: 2308.3475\n  type: 'test'\n  ...\n# Subtest: tampered handoff base rejected\nok 52 - tampered handoff base rejected\n  ---\n  duration_ms: 2292.3756\n  type: 'test'\n  ...\n# Subtest: tampered handoff features rejected\nok 53 - tampered handoff features rejected\n  ---\n  duration_ms: 2304.4779\n  type: 'test'\n  ...\n# Subtest: tampered handoff acceptance rejected\nok 54 - tampered handoff acceptance rejected\n  ---\n  duration_ms: 2341.7061\n  type: 'test'\n  ...\n# Subtest: tampered handoff receiver rejected\nok 55 - tampered handoff receiver rejected\n  ---\n  duration_ms: 2338.2405\n  type: 'test'\n  ...\n# Subtest: tampered handoff omission rejected\nok 56 - tampered handoff omission rejected\n  ---\n  duration_ms: 2266.6204\n  type: 'test'\n  ...\n# Subtest: tampered handoff manifest rejected\nok 57 - tampered handoff manifest rejected\n  ---\n  duration_ms: 2211.133\n  type: 'test'\n  ...\n# Subtest: tampered handoff chain rejected\nok 58 - tampered handoff chain rejected\n  ---\n  duration_ms: 2199.9722\n  type: 'test'\n  ...\n# Subtest: post-handoff code drift rejected\nok 59 - post-handoff code drift rejected\n  ---\n  duration_ms: 9662.452\n  type: 'test'\n  ...\n# Subtest: post-handoff plan drift rejected\nok 60 - post-handoff plan drift rejected\n  ---\n  duration_ms: 9642.6125\n  type: 'test'\n  ...\n# Subtest: plan change in documentation requires replanning/rework, not old evidence\nok 61 - plan change in documentation requires replanning/rework, not old evidence\n  ---\n  duration_ms: 14610.2163\n  type: 'test'\n  ...\n# Subtest: rework retains previous failures and executes new code checks\nok 62 - rework retains previous failures and executes new code checks\n  ---\n  duration_ms: 24155.6503\n  type: 'test'\n  ...\n# Subtest: evidence TAP cannot grant handoff\nok 63 - evidence TAP cannot grant handoff\n  ---\n  duration_ms: 7678.4176\n  type: 'test'\n  ...\n# Subtest: evidence counts cannot grant handoff\nok 64 - evidence counts cannot grant handoff\n  ---\n  duration_ms: 7701.8655\n  type: 'test'\n  ...\n# Subtest: evidence source cannot grant handoff\nok 65 - evidence source cannot grant handoff\n  ---\n  duration_ms: 8072.8107\n  type: 'test'\n  ...\n# Subtest: evidence task cannot grant handoff\nok 66 - evidence task cannot grant handoff\n  ---\n  duration_ms: 8007.3129\n  type: 'test'\n  ...\n# Subtest: evidence stale cannot grant handoff\nok 67 - evidence stale cannot grant handoff\n  ---\n  duration_ms: 7964.3521\n  type: 'test'\n  ...\n# Subtest: evidence failed cannot grant handoff\nok 68 - evidence failed cannot grant handoff\n  ---\n  duration_ms: 7585.901\n  type: 'test'\n  ...\n# Subtest: saved prompt mismatch and strict CLI options rejected\nok 69 - saved prompt mismatch and strict CLI options rejected\n  ---\n  duration_ms: 5743.1316\n  type: 'test'\n  ...\n# Subtest: copied bootstrap and historical task cannot bypass policy\nok 70 - copied bootstrap and historical task cannot bypass policy\n  ---\n  duration_ms: 390.1682\n  type: 'test'\n  ...\n# Subtest: new task without handoff log fails closed\nok 71 - new task without handoff log fails closed\n  ---\n  duration_ms: 1609.3305\n  type: 'test'\n  ...\n# Subtest: required future build and compilation actually execute without shell\nok 72 - required future build and compilation actually execute without shell\n  ---\n  duration_ms: 5498.277\n  type: 'test'\n  ...\n# Subtest: unsafe/missing build definition cannot claim compilation\nok 73 - unsafe/missing build definition cannot claim compilation\n  ---\n  duration_ms: 532.5674\n  type: 'test'\n  ...\n# Subtest: manifest is portable across Git LF and Windows CRLF checkout\nok 74 - manifest is portable across Git LF and Windows CRLF checkout\n  ---\n  duration_ms: 680.778\n  type: 'test'\n  ...\n# Subtest: task authorization changes can be replanned but invalidate old delivery\nok 75 - task authorization changes can be replanned but invalidate old delivery\n  ---\n  duration_ms: 31217.6031\n  type: 'test'\n  ...\n# Subtest: application package cannot silently declare build not applicable\nok 76 - application package cannot silently declare build not applicable\n  ---\n  duration_ms: 8938.5265\n  type: 'test'\n  ...\n# Subtest: failed original tests cannot produce ready handoff\nok 77 - failed original tests cannot produce ready handoff\n  ---\n  duration_ms: 7594.7824\n  type: 'test'\n  ...\n# Subtest: missing declared plan cannot grant ready planning\nok 78 - missing declared plan cannot grant ready planning\n  ---\n  duration_ms: 1807.1746\n  type: 'test'\n  ...\n# Subtest: finish and receive require actual active task branch\nok 79 - finish and receive require actual active task branch\n  ---\n  duration_ms: 2292.2835\n  type: 'test'\n  ...\n# Subtest: copied baseline isolates worktree, index, refs, config and evidence\nok 80 - copied baseline isolates worktree, index, refs, config and evidence\n  ---\n  duration_ms: 4522.9746\n  type: 'test'\n  ...\n1..80\n# tests 80\n# suites 0\n# pass 80\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 337777.3856\n",
+          "collaboration-tests.stderr.log": ""
+        }
+      },
+      "build_evidence": null,
+      "digest": "816ca366fee99ce40ea73aab53dfbb57048362d87725b9155022cc0f9bb6d70c"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # 前端 UI 与交互规范
 
-> 状态：拟定设计；页面尚未实现，无视觉基线。功能要求来自[需求](./REQUIREMENTS.md)，接口见[协议](./API_AND_PROTOCOLS.md)。
+> 状态：拟定设计；页面尚未实现，无视觉基线。**前端界面全量由 Antigravity 专职设计、编写与维护（收敛于 `mysql-mcp/web/`）**，详见[全栈分工规范](./FULLSTACK_DIVISION_SPECIFICATION.md)。功能要求来自[需求](./REQUIREMENTS.md)，接口见[协议](./API_AND_PROTOCOLS.md)。
 
 ## 1. 信息结构
 

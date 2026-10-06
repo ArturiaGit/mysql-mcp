@@ -18,16 +18,16 @@ flowchart LR
     P --> J[(最小状态日志与审计)]
 ```
 
-| 层 | 责任 | 禁止 |
-|---|---|---|
-| web | 展示、输入、人工确认 | 直接连 MySQL、存密码到 Web Storage |
-| server/routes | 认证、结构校验、协议映射 | 自建第二套审批逻辑 |
-| mcp | 工具适配、原生确认桥接 | 持有数据库密码、直接执行 SQL |
-| approval | 请求绑定、原子状态迁移、执行授权 | 将模型声明视为用户批准 |
-| db | 分类、目标验证、资源控制、执行 | 自动提权、写入自动重试 |
-| config/security/audit | 配置、凭据、会话、脱敏、最小审计 | 将秘密写入普通文件 |
+| 层 / 物理路径 | 责任 Agent | 责任 | 禁止 |
+|---|---|---|---|
+| web (`mysql-mcp/web/`) | Antigravity | 展示、输入、人工确认、设计系统与交互反馈 | 直接连 MySQL、存密码到 Web Storage、编写后端服务 |
+| server/routes (`mysql-mcp/src/server/`) | PI-Desktop | 认证、结构校验、协议映射、回环监听 | 自建第二套审批逻辑、修改前端页面资产 |
+| mcp (`mysql-mcp/src/mcp/`) | PI-Desktop | 工具适配、原生确认桥接、Stdio 协议 | 持有数据库密码、直接执行 SQL |
+| approval (`mysql-mcp/src/sql/`) | PI-Desktop | 请求绑定、原子状态迁移、AST 策略判定、执行授权 | 将模型声明视为用户批准 |
+| db (`mysql-mcp/src/db/`) | PI-Desktop | 分类、目标验证、连接池管理、资源控制、执行 | 自动提权、写入自动重试 |
+| config/security/audit (`mysql-mcp/src/security/`) | PI-Desktop | 配置、Windows Keyring 凭据、脱敏、最小审计 | 将秘密写入普通文件 |
 
-依赖方向为入口→业务→基础设施，MCP 与 HTTP 共用同一业务服务。管理服务是单实例配置写入者；第二个实例启动应明确报错，不争抢状态文件。
+全栈物理隔离与分工详见[全栈分工规范](./FULLSTACK_DIVISION_SPECIFICATION.md)。依赖方向为入口→业务→基础设施，MCP 与 HTTP 共用同一业务服务。管理服务是单实例配置写入者；第二个实例启动应明确报错，不争抢状态文件。
 
 ## 2. 认证与秘密流向
 
