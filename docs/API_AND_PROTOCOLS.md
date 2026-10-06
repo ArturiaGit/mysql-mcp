@@ -111,3 +111,20 @@ PENDING/APPROVED/EXECUTING 是非终态；其余见模型。UNKNOWN 是执行结
 ## 7. 契约验收
 
 须覆盖参数额外字段、会话越权、错误脱敏、stdio 噪声、确认回执绑定、重复响应、超时、取消、重启、精度和结果截断。原生 UI 与 MCP 实测结果分开记录；目前没有接口可调用，兼容矩阵见[部署指南](./DEPLOYMENT_GUIDE.md)。
+
+---
+
+## 8. MCP Server 原型实现契约 (`createMcpServer` / `startStdioServer`)
+
+- **惰性工厂模式**：
+  - `createMcpServer()`：基于 `@modelcontextprotocol/sdk` 创建独立的 Server 实例，声明 `{ capabilities: { tools: {} } }`；
+  - `tools/list` 响应返回空数组 `{ tools: [] }`，暂未挂载具体数据库工具；
+  - `tools/call` 请求一律抛出 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数对象**，防止参数中夹带的密码或敏感 SQL 泄露到错误回显中。
+- **stdio 协议传输生命周期**：
+  - `startStdioServer()`：基于 `StdioServerTransport` 建立标准 I/O 监听；
+  - 自动注册 `stdin` EOF（`end` 事件）及操作系统的 `SIGINT`、`SIGTERM` 监听，接收到退出信号时触发优雅关闭；
+  - `stdout` 仅允许输出合规的 JSON-RPC 协议帧，严禁混入任何调试文本或堆栈日志。
+- **启动隔离**：
+  - 支持作为独立子进程执行：`node mysql-mcp/dist/mcp/server.js`；
+  - 从主入口 `import { createApplication } from 'mysql-mcp'` 或直接导入聚合包时保持完全惰性，绝不自发启动 HTTP 端口或 stdio 传输通道。
+

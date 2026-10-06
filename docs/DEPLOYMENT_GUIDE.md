@@ -14,21 +14,22 @@
 2. **应用开发工作区命令**（在 `mysql-mcp/` 目录下）：
    - 安装依赖：`npm ci --ignore-scripts`
    - 类型检查：`npm run compile` 或 `npm run typecheck`（执行 `node scripts/compile.mjs`，`tsc --noEmit`，不落盘）
-   - 生产构建与冒烟测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行 6 项冒烟断言）
+   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 4 个套件共 127 项应用测试）
+   - MCP Stdio 原型启动：`node dist/mcp/server.js`（直接作为独立子进程启动，监听 stdin/stdout）
 
 运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。程序目录为工作区 `mysql-mcp/`，运行资料拟为 `%LOCALAPPDATA%/MySQLMCP/`。目录权限应限制其他用户访问。
 
 ## 2. 拟定启动顺序
 
-1. 获软件实施授权后创建代码和锁文件，完成依赖与模拟测试（Phase 1 已建立脚手架与 6 项冒烟测试）。
-2. 用虚构凭据验证系统存储，失败则停止真实凭据保存。
+1. 获软件实施授权后创建代码和锁文件，完成依赖与模拟测试（Phase 1-A 已建立脚手架）。
+2. 用虚构凭据验证系统存储，失败则停止真实凭据保存（Phase 1-B 已在 Windows 上实测通过 5 项 CRUD 与应用重启断言）。
 3. 启动单实例管理服务，校验绑定地址、认证配置和数据目录；只允许回环访问。
 4. 用户在本地获取一次性登录码、打开页面登录；密码仅在页面输入。
 5. 用户明确允许后测试 MySQL 连接，显示版本与脱敏结果，不运行写 SQL。
 6. 单独确认客户端配置修改，先备份原配置，再添加无数据库秘密的 MCP 入口。
 7. 用模拟或无副作用探针验证工具发现、确认通道；通过后再做授权范围内的实际验收。
 
-`npm run build`、`npm run compile`、`npm test` 已在 `mysql-mcp/` 中落地；`npm run start:server`、`npm run start:mcp` 是拟定启动脚本名称，当前尚未实现，不要直接执行。实际启动入口、管理端口、登录码交付方式需后续实现后补齐。
+`npm run build`、`npm run compile`、`npm test` 已在 `mysql-mcp/` 中落地；`npm run start:server` 是拟定启动脚本名称，当前尚未实现，不要直接执行。实际管理服务启动入口、管理端口、登录码交付方式需后续 Phase 2 实现后补齐。
 
 ## 3. 客户端兼容矩阵
 

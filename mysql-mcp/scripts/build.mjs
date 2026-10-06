@@ -28,12 +28,16 @@ try {
     throw new Error(result.error?.message ?? `compiler failed (${result.signal ?? result.status})`);
   }
 
-  // The registered build check also proves that the emitted ESM package loads.
+  // Run deterministic application checks; Windows adds synthetic native CRUD.
   const smoke = spawnSync(process.execPath, [
-    '--test', '--test-reporter=tap', path.join(root, 'tests/smoke.test.mjs')
-  ], { cwd: root, shell: false, stdio: 'inherit', timeout: 10000 });
+    '--test', '--test-reporter=tap',
+    path.join(root, 'tests/smoke.test.mjs'),
+    path.join(root, 'tests/sql-policy.test.mjs'),
+    path.join(root, 'tests/keyring.test.mjs'),
+    path.join(root, 'tests/mcp.test.mjs')
+  ], { cwd: root, shell: false, stdio: 'inherit', timeout: 20000 });
   if (smoke.error || smoke.signal || smoke.status !== 0) {
-    throw new Error(smoke.error?.message ?? `smoke tests failed (${smoke.signal ?? smoke.status})`);
+    throw new Error(smoke.error?.message ?? `application tests failed (${smoke.signal ?? smoke.status})`);
   }
 } catch (error) {
   await rm(output, { recursive: true, force: true });

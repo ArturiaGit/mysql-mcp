@@ -100,3 +100,26 @@ sequenceDiagram
 - 执行取消需要处理驱动和服务端实际状态；关闭连接不等于服务器没有提交。结果不确定时通知用户向 DBA 核对。
 
 具体字段和转换以[数据模型](./DATA_MODELS.md)为准。内部通道实现、文件锁和 Windows 原子持久化行为需测试，以上不是通过证据。
+
+---
+
+## 6. Phase 1-B 落地核心模块与物理边界
+
+在 `mysql-mcp/src/` 中，系统已落地三大核心安全与协议原型，严格遵循模块正交性与关注点分离原则：
+
+```text
+mysql-mcp/src/
+├── index.ts               // 顶层导出聚合器（惰性元数据与工厂重新导出，不产生自发网络/服务副作用）
+├── security/
+│   └── keyring.ts         // Windows Credential Manager 异步系统凭据封装 (ICredentialProvider / WindowsKeyringProvider)
+├── sql/
+│   ├── ast.ts             // 词法分号预查、node-sql-parser 解析适配与资源上限硬阈值
+│   └── policy.ts          // L0~L3 风险分级矩阵、白名单校验器、指纹与摘要计算 (evaluateSql)
+└── mcp/
+    └── server.ts          // @modelcontextprotocol/sdk Stdio Server 原型工厂 (createMcpServer / startStdioServer)
+```
+
+1. **凭据安全模块 (`security/keyring.ts`)**：提供强类型安全异常，屏蔽底层系统堆栈，服务名为 `mysql-mcp:<connection-id>`，用户名统一为 `mysql-mcp`，生产环境绝对无明文后备；
+2. **SQL 策略模块 (`sql/policy.ts` & `sql/ast.ts`)**：纯静态、纯内存 AST 策略校验，在 SQL 接触数据库之前完成 L0~L3 风险阻断，计算结构指纹与准确哈希；
+3. **MCP 通信模块 (`mcp/server.ts`)**：实现标准 stdio 协议帧传输与进程生命周期监听（EOF/SIGINT/SIGTERM），工具未挂载时对未知调用返回标准错误且严格不回显传入参数。
+

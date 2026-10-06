@@ -6,7 +6,14 @@ export interface Application {
   readonly version: typeof APP_VERSION;
 }
 
-// This scaffold is inert: no listeners, database connections or credential access.
+// Importing the package remains inert: factories must be called explicitly.
 export function createApplication(): Readonly<Application> {
   return Object.freeze({ name: APP_NAME, version: APP_VERSION });
 }
+
+export { WindowsKeyringProvider, CredentialStoreError, CredentialArgumentError } from './security/keyring.js';
+export type { ICredentialProvider } from './security/keyring.js';
+export { evaluateSql } from './sql/policy.js';
+export type { SqlDecision, RiskLevel } from './sql/policy.js';
+export { SqlPolicyError, MAX_SQL_BYTES, MAX_SQL_DEPTH, MAX_SQL_TOKENS } from './sql/ast.js';
+export { createMcpServer, startStdioServer } from './mcp/server.js';

@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-05
 - 关联任务：TASK-GOV-008
-- 关联 PR：待交付
-- 关联 Commit：待提交
+- 关联 PR：[#9](https://github.com/ArturiaGit/mysql-mcp/pull/9)
+- 关联 Commit：[`f2dfffc`](https://github.com/ArturiaGit/mysql-mcp/commit/f2dfffcc45e03871efd33b9b62711d6f7b0cd0ca)
 - 责任执行方：Antigravity & PI-Desktop
 - 关联功能/需求：G01, G03 / R15, R16, R17
 

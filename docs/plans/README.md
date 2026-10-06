@@ -109,5 +109,10 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 ## 13. 机械验证性能优化与 Hook 快速验签直通任务
 
-- [机械验证性能优化与 Hook 快速验签实施计划](./governance-verification-performance.md)：TASK-GOV-008，功能 G01、G03，需求 R15、R16、R17。针对交付流程耗时过长（超 2 小时）问题，优化 `check.mjs` 引入候选证据指纹直通，消除 Git Hook 中全量测试的重复冷启动；调整超时至 600s 消除 Windows 误报死循环；优化 `governance.test.mjs` 夹具缓存减少子进程派生。
+- [机械验证性能优化与 Hook 快速验签实施计划](./governance-verification-performance.md)：TASK-GOV-008，功能 G01、G03，需求 R15、R16、R17。针对交付流程耗时过长（超 2 小时）问题，优化 `check.mjs` 引入候选证据指纹直通，消除 Git Hook 中全量测试的重复冷启动；调整超时至 600s 消除 Windows 误报死循环；优化 `governance.test.mjs` 夹具缓存减少子进程派生。已合并交付（PR #9）。
 - 任务分支 `chore/governance-verification-performance`，main 基线 `967db371d78365f9643d96dabbf93ee471371e54`。模式为 `mode: "code"`。
+
+## 14. Phase 1-B 关键依赖可行性与核心安全原型任务
+
+- [Phase 1-B 关键依赖可行性与核心安全原型实施计划](./feasibility-and-sql-policy.md)：TASK-APP-002，功能 F06、F26，需求 R03、R06、R07、R08、R12、R14、R16。开展 Phase 1-B 依赖可行性与核心安全原型验证，封装 Windows 系统凭据存储模块，实现基于 AST 的 SQL 风险分级与单语句策略引擎，验证 MCP Stdio 协议骨架，关闭 Q05/Q07，不连接外部生产数据库，不提权。
+- 任务分支 `feat/feasibility-and-sql-policy`，main 基线 `f2dfffcc45e03871efd33b9b62711d6f7b0cd0ca`。模式为 `mode: "code"`。
