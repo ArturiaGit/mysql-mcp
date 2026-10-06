@@ -8,10 +8,14 @@
 
 ## 职责与人工转交
 
-- **Antigravity**：planning、需求/计划/规范/台账/变更文档、documentation_delivery、提交信息、暂存、commit、push、创建/更新 PR 和查询 CI；负责日常变更文档汇总维护及发版时 Release Notes 聚合归档；可重跑已有检查，不自行修复产品源码或构建配置。
-- **PI-Desktop**：implementation/rework 中的授权代码、测试、依赖与构建配置、实际测试/构建/编译；可以阅读规范与未发版变更文档、在交接报告中提出文档同步请求与技术改动事实，通常不得直接改规范/台账，绝不执行本仓库 commit、push 或 PR 操作。
+- **全栈分工与强制性约束**（详见[全栈分工规范](docs/FULLSTACK_DIVISION_SPECIFICATION.md)）：
+  - **前端界面由 Antigravity 负责**：涵盖 `mysql-mcp/web/` 下的 HTML、CSS、客户端 TS/JS、UI 组件与界面交互及前端自测；严禁侵入后端系统源码与底层数据库驱动。
+  - **PI-Desktop 负责后端**：涵盖 `mysql-mcp/src/` 及相关测试中的 Fastify 服务端路由、MCP Stdio 协议、Windows Keyring 凭据管理、AST 策略引擎与 MySQL 连接执行器；严禁侵入前端界面资产与页面代码。
+  - **接口先行**：前后端以[接口契约](docs/API_AND_PROTOCOLS.md)为唯一交互纽带，未经文档锁定的私有协议或隐式耦合严禁开发。
+- **Antigravity**：planning、需求/计划/规范/台账/变更文档、授权前端界面（`mysql-mcp/web/`）实现、documentation_delivery、提交信息、暂存、commit、push、创建/更新 PR 和查询 CI；负责日常变更文档汇总维护及发版时 Release Notes 聚合归档；可重跑已有检查，严禁自行修复后端系统源码或构建配置。
+- **PI-Desktop**：implementation/rework 中的授权后端代码、测试、依赖与构建配置、实际测试/构建/编译；可以阅读规范与未发版变更文档、在交接报告中提出文档同步请求与技术改动事实，通常不得直接改规范/台账，绝不修改前端页面资产，绝不执行本仓库 commit、push 或 PR 操作。
 - **用户**：在两端人工复制交接 prompt；无自动通信。生成 prompt 不等于已转交，接收方须显式核验并接受准确事件 ID 和 SHA256 摘要。
-- 正常阶段：planning → implementation → documentation_delivery；明确代码问题进入 rework，再回 documentation_delivery。文档-only：planning → documentation_delivery，不伪造 PI 开发或构建。
+- 阶段流转：纯文档任务（`planning → documentation_delivery`）；后端任务（`planning → implementation (PI) → documentation_delivery (Antigravity)`，代码问题走 `rework`）；前端任务（`planning → implementation (Antigravity) → documentation_delivery (Antigravity)`）。不伪造角色阶段。
 
 ## 强制工作流
 

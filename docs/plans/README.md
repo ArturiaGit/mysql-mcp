@@ -114,5 +114,10 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 ## 14. Phase 1-B 关键依赖可行性与核心安全原型任务
 
-- [Phase 1-B 关键依赖可行性与核心安全原型实施计划](./feasibility-and-sql-policy.md)：TASK-APP-002，功能 F06、F26，需求 R03、R06、R07、R08、R12、R14、R16。开展 Phase 1-B 依赖可行性与核心安全原型验证，封装 Windows 系统凭据存储模块，实现基于 AST 的 SQL 风险分级与单语句策略引擎，验证 MCP Stdio 协议骨架，关闭 Q05/Q07，不连接外部生产数据库，不提权。
+- [Phase 1-B 关键依赖可行性与核心安全原型实施计划](./feasibility-and-sql-policy.md)：TASK-APP-002，功能 F06、F26，需求 R03、R06、R07、R08、R12、R14、R16。开展 Phase 1-B 依赖可行性与核心安全原型验证，封装 Windows 系统凭据存储模块，实现基于 AST 的 SQL 风险分级与单语句策略引擎，验证 MCP Stdio 协议骨架，关闭 Q05/Q07，不连接外部生产数据库，不提权。已合并交付（PR #10）。
 - 任务分支 `feat/feasibility-and-sql-policy`，main 基线 `f2dfffcc45e03871efd33b9b62711d6f7b0cd0ca`。模式为 `mode: "code"`。
+
+## 15. 全栈分工与前后端物理隔离协作规范任务
+
+- [全栈分工与前后端物理隔离协作规范实施计划](./fullstack-division-specification.md)：TASK-GOV-009，功能 G02、G03，需求 R01、R11、R13、R15、R16、R17。用户授权建立全栈分工规范，确立前端界面由 Antigravity 专职负责（`mysql-mcp/web/`）、PI-Desktop 专职负责后端系统（`mysql-mcp/src/` 等）的强制性约束，确立双向禁止红线、接口先行原则与任务模式扩展。
+- 任务分支 `docs/fullstack-division-specification`，main 基线 `be2079577e664e29437bb5a603e03a08b0a1b117`。模式为 `mode: "docs"`（文档-only）。
