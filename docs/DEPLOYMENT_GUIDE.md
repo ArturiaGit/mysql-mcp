@@ -14,22 +14,51 @@
 2. **应用开发工作区命令**（在 `mysql-mcp/` 目录下）：
    - 安装依赖：`npm ci --ignore-scripts`
    - 类型检查：`npm run compile` 或 `npm run typecheck`（执行 `node scripts/compile.mjs`，`tsc --noEmit`，不落盘）
-   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 4 个套件共 127 项应用测试）
+   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 5 个套件共 190 项应用测试，含 63 项 Fastify 服务端测试）
    - MCP Stdio 原型启动：`node dist/mcp/server.js`（直接作为独立子进程启动，监听 stdin/stdout）
 
-运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。程序目录为工作区 `mysql-mcp/`，运行资料拟为 `%LOCALAPPDATA%/MySQLMCP/`。目录权限应限制其他用户访问。
+运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。
 
-## 2. 拟定启动顺序
+### 存储路径与锁机制（Phase 2-A 落地）
+- **连接数据路径**：
+  - Windows 环境：默认使用 `%LOCALAPPDATA%/mysql-mcp/connections.json`；
+  - 非 Windows 环境：默认使用 `$HOME/mysql-mcp/connections.json`；
+  - 原生凭据存储依赖 Windows Keyring，若系统底层凭据存储不可用则 fail-closed 直接拒绝启动或操作；
+- **单写者锁管理 (`connections.json.lock`)**：
+  - 采用独占式排他打开标志（`wx`）创建 `.lock` 租约文件，防止双进程并发写入；
+  - 正常停止服务（`await server.close()`）时自动安全删除 `.lock` 文件；
+  - 崩溃或异常断电遗留锁：服务端坚决**不自动猜测进程存活或强制抢锁**（fail-closed）；用户需在人工确认无其他 `mysql-mcp` 运行进程后手动删除 `.lock` 文件；
+- **目录权限与原子写入**：
+  - 目录创建模式 `0700`，文件创建模式 `0600`（Windows 环境继承用户目录 ACL，未做独立 Windows ACL 强化验收）；
+  - 数据写入经过临时文件与 `file.sync()`，通过原子 `rename` 覆盖，断电或崩溃不损坏原文件。
 
-1. 获软件实施授权后创建代码和锁文件，完成依赖与模拟测试（Phase 1-A 已建立脚手架）。
-2. 用虚构凭据验证系统存储，失败则停止真实凭据保存（Phase 1-B 已在 Windows 上实测通过 5 项 CRUD 与应用重启断言）。
-3. 启动单实例管理服务，校验绑定地址、认证配置和数据目录；只允许回环访问。
-4. 用户在本地获取一次性登录码、打开页面登录；密码仅在页面输入。
-5. 用户明确允许后测试 MySQL 连接，显示版本与脱敏结果，不运行写 SQL。
-6. 单独确认客户端配置修改，先备份原配置，再添加无数据库秘密的 MCP 入口。
-7. 用模拟或无副作用探针验证工具发现、确认通道；通过后再做授权范围内的实际验收。
+## 2. Fastify 本地回环管理服务（Phase 2-A 落地）
 
-`npm run build`、`npm run compile`、`npm test` 已在 `mysql-mcp/` 中落地；`npm run start:server` 是拟定启动脚本名称，当前尚未实现，不要直接执行。实际管理服务启动入口、管理端口、登录码交付方式需后续 Phase 2 实现后补齐。
+### 2.1 工厂 API 与生命周期
+```typescript
+import { createLocalServer } from './server/app.js';
+
+// 1. 创建服务实例（惰性工厂，导入与实例化时不产生网络监听或副作用）
+const server = await createLocalServer({
+  port: 3210, // 默认回环端口为 3210；测试或端口占用时可设为 0 由 OS 分配
+  storageFile: 'path/to/connections.json', // 可选自定义文件路径
+});
+
+// 2. 生成单次高熵登录码 (32 字节 HEX)
+const code = server.issueLocalCode();
+console.log(`本地登录代码: ${code}`);
+
+// 3. 启动监听（严格且仅绑定 127.0.0.1）
+await server.start();
+console.log(`管理服务运行于: http://127.0.0.1:${server.port}`);
+
+// 4. 优雅关闭（释放单写者锁与底层资源）
+await server.close();
+```
+
+### 2.2 生产与安全运维说明
+- **日志与安全脱敏**：Fastify 内部请求日志已显式禁用（`logger: false`），杜绝请求头或密码落入本地文件；所有未知异常仅返回固定安全提示（`INTERNAL_ERROR`），严禁泄漏任何原生错误堆栈；
+- **零外部中间件**：服务基于 Fastify 5.x 核心纯内建实现会话、Cookie 解析与 CSRF 拦截，零新增第三方脆弱依赖。
 
 ## 3. 客户端兼容矩阵
 

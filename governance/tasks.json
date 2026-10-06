@@ -241,6 +241,41 @@
       ],
       "plan_path": "docs/plans/fullstack-division-specification.md",
       "mode": "docs",
+      "pr": 11,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-APP-003",
+      "kind": "new",
+      "status": "in_progress",
+      "feature_ids": ["F25", "F01", "F02", "F03", "F04", "F05"],
+      "branch": "feat/server-connection-and-auth",
+      "base_commit": "bdbef3f6247e581eb793270c3768c530cf7728b6",
+      "authorization": "用户批准 Phase 2-A 回环服务与连接管理后端实现：落地 Fastify 回环 HTTP 服务、会话认证、CSRF 防护、连接元数据存储、Windows Keyring 关联以及连接测试模拟服务，编写后端自动化测试；遵循全栈分工规范，不编写前端界面资产，不连接外部生产数据库。",
+      "allowed_paths": [
+        "mysql-mcp/",
+        "docs/",
+        "governance/"
+      ],
+      "plan_path": "docs/plans/server-connection-and-auth.md",
+      "mode": "code",
+      "build_checks": [
+        {
+          "id": "app-build",
+          "kind": "build",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/build.mjs"],
+          "timeout_ms": 60000
+        },
+        {
+          "id": "app-compile",
+          "kind": "compile",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/compile.mjs"],
+          "timeout_ms": 60000
+        }
+      ],
       "pr": null,
       "scope_changes": [],
       "governance_change": true
