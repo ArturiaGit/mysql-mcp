@@ -17,3 +17,8 @@ export { evaluateSql } from './sql/policy.js';
 export type { SqlDecision, RiskLevel } from './sql/policy.js';
 export { SqlPolicyError, MAX_SQL_BYTES, MAX_SQL_DEPTH, MAX_SQL_TOKENS } from './sql/ast.js';
 export { createMcpServer, startStdioServer } from './mcp/server.js';
+export { createLocalServer } from './server/app.js';
+export type { LocalServerOptions } from './server/app.js';
+export { ConnectionService, JsonMetadataStorage, simulatedConnectionTester } from './server/connections.js';
+export type { ConnectionView, ConnectionDraft, MetadataStorage, ConnectionTester, TestResult } from './server/connections.js';
+export { ServerError, sanitizeError } from './server/errors.js';

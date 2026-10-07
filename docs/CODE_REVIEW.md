@@ -13,7 +13,7 @@ TypeScript strict 不能替代运行时校验。标识符不能通过值参数�
 | 命令 | 执行入口 | 覆盖范围 | 当前状态 |
 |---|---|---|---|
 | `npm run typecheck` / `npm run compile` | `node scripts/compile.mjs` | 类型与模块边界（严格 NodeNext，`tsc --noEmit`，不落盘） | 已实现（Phase 1 / F28，作为 `app-compile` 门禁） |
-| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行全部 127 项应用测试（smoke 6项、keyring 5项、sql-policy 113项、mcp 3项） | 已实现（Phase 1-B / F06, F26, F28，作为 `app-build` 门禁） |
+| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行全部 190 项应用测试（smoke 6项、keyring 5项、sql-policy 113项、mcp 3项、server 63项） | 已实现（Phase 2-A / F01~F05, F25, F28，作为 `app-build` 门禁） |
 | `node scripts/governance/prepare.mjs` | `scripts/governance/prepare.mjs` | 治理快照与 CI 依赖准备契约（无 Shell，`npm ci --ignore-scripts`） | 已实现（Phase 1 / F28） |
 | `npm run test:e2e` | 拟建 | 浏览器交互，默认模拟数据库 | 未实现（后续 Phase） |
 
@@ -23,9 +23,9 @@ TypeScript strict 不能替代运行时校验。标识符不能通过值参数�
 
 | 编号 | 场景 | 通过条件 | 当前进度 |
 |---|---|---|---|
-| T01 | 配置 CRUD、密码替换及存储失败 | 不回显秘密；失败保留有效旧配置，无明文后备 | Phase 1-B 已完成 Windows 系统凭据 5 项 CRUD 与应用重启测试 |
-| T02 | 未认证、伪 Host/Origin、CSRF | 变更前拒绝；内部令牌不能批准网页请求 | 未实现（Phase 2） |
-| T03 | 多连接/数据库并发 | 无目标串用，默认库不替代显式参数 | 未实现（Phase 2/3） |
+| T01 | 配置 CRUD、密码替换及存储失败 | 不回显秘密；失败保留有效旧配置，无明文后备 | Phase 2-A 已完成原子 JSON 持久化、单写者独占锁与四阶段 Keyring 补偿清理测试 |
+| T02 | 未认证、伪 Host/Origin、CSRF | 变更前拒绝；内部令牌不能批准网页请求 | Phase 2-A 已完成 Fastify 服务端严格 Host/Origin、Session 与 CSRF 拦截测试（63项） |
+| T03 | 多连接/数据库并发 | 无目标串用，默认库不替代显式参数 | 未实现（Phase 3） |
 | T04 | 多语句、可执行注释、CTE、文件写入、危险函数 | 策略拒绝越界；无驱动执行 | Phase 1-B 已完成 AST 策略 113 项正反例测试 |
 | T05 | 合法读取及权限不足 | 保持精度、正确截断、错误脱敏 |
 | T06 | request_change 尚未确认 | 无写入派发 |

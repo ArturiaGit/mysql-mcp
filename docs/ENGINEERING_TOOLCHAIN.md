@@ -101,7 +101,7 @@
 3. **确定性退出码**：检查成功返回退出码 0；任何语法、类型错误或构建失败必须返回非 0，并在 stderr 输出清晰诊断信息。
 4. **无副作用与失败清理**：
    - `compile.mjs` 纯类型检查（`--noEmit`），严禁向磁盘写入任何持久构建产物；
-   - `build.mjs` 在构建开始前与构建失败时均清理 `mysql-mcp/dist/`，编译成功后立即调用全部 4 个测试套件（`smoke.test.mjs`、`sql-policy.test.mjs`、`keyring.test.mjs`、`mcp.test.mjs`）执行 127 项应用断言，产物仅允许输出至受 `.gitignore` 保护的 `mysql-mcp/dist/`。
+   - `build.mjs` 在构建开始前与构建失败时均清理 `mysql-mcp/dist/`，编译成功后立即调用全部 5 个测试套件（`smoke.test.mjs`、`sql-policy.test.mjs`、`keyring.test.mjs`、`mcp.test.mjs`、`server.test.mjs`）执行 190 项应用断言，产物仅允许输出至受 `.gitignore` 保护的 `mysql-mcp/dist/`。
 
 ---
 

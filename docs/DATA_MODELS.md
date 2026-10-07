@@ -15,34 +15,53 @@
 
 文件拟位于用户本地数据目录，由单实例服务写入并限制访问。保留周期与容量须在实现时明确；未指定不等于永久保留。
 
-## 2. 连接模型
+## 2. 连接模型与存储格式（Phase 2-A 落地实现）
 
+### 2.1 存储文件结构 (`connections.json`)
+本地持久化存储采用单写者原子重命名机制，顶层结构如下：
 ```typescript
+interface StoreData {
+  schema_version: 1;
+  items: ConnectionRecord[];       // 已保存的连接记录（至多 256 项）
+  cleanup_refs: string[];          // 待清理的旧凭据引用队列（至多 512 项，用于崩溃恢复与重试）
+}
+
 interface ConnectionRecord {
-  connection_id: string;
+  id: string;                      // 稳定 UUID v4
+  name: string;                    // 连接名称 (1..64 字符)
+  host: string;                    // 主机名 (1..255 字符)
+  port: number;                    // 端口号 (1..65535)
+  username: string;                // 用户名 (1..128 字符)
+  default_database: string | null; // 默认库 (可选, 1..64 字符)
+  version: number;                 // 乐观并发版本号 (从 1 递增)
+  credential_ref: string;          // 服务端专用凭据引用 (UUID)，绝对不对外暴露
+}
+
+// 客户端与接口视图（脱敏）
+interface ConnectionView {
+  id: string;
   name: string;
   host: string;
   port: number;
   username: string;
   default_database: string | null;
-  credential_ref: string;
-  connection_version: number;
-  created_at: string;
-  updated_at: string;
+  version: number;
 }
 ```
 
-| 字段/规则 | 约束 |
-|---|---|
-| name | 必填、可编辑；名称歧义以 ID 区分 |
-| host / port | 不接受包含密码的连接 URL；端口整数 1–65535 |
-| username | 必填，不默认 root |
-| default_database | null 表示未设置；不免除工具显式 database 参数 |
-| credential_ref | 仅服务端存储可见，不返回 MCP 或普通页面 |
-| connection_version | 执行相关配置或密码变化递增，待审批请求失效 |
-| 删除 | 执行中拒绝；否则失效相关等待请求并补偿清理凭据 |
-
-TLS 资料结构待 Q08 关闭后补充；不能隐含允许关闭证书校验。连接修改和凭据替换须采用补偿流程，不把密码放普通文件以求原子性。
+### 2.2 存储与凭据生命周期事务补偿
+1. **凭据引用与服务名**：创建连接时初次 `credential_ref = id`；服务名严格为 `mysql-mcp:<credential_ref>`，用户名为 `mysql-mcp`；
+2. **密码更新防丢失**：修改连接密码时，系统分配全新 UUID 作为新 `credential_ref`，绝不直接原地覆盖旧凭据；
+3. **四阶段事务补偿顺序**：
+   - 第一阶段（记账）：将可能废弃的凭据引用写入 `cleanup_refs` 队列并原子落盘；
+   - 第二阶段（写入凭据）：将新密码安全写入 Windows Keyring；
+   - 第三阶段（提交配置）：更新 `items` 中连接记录的新引用与递增版本号，原子落盘；
+   - 第四阶段（清理旧凭据）：从 Keyring 删除旧凭据，并在落盘成功后从 `cleanup_refs` 移除；若删除失败则保留非秘密 tombstone，后续任何修改操作将自动重试清理；
+4. **并发与状态保护**：
+   - 测试任务进行中持有连接使用读锁；实际测试任务未结束不归还并发额度；
+   - 对使用中或测试中的连接发起编辑或删除，服务端返回 `409 STATE_CONFLICT` 坚决拒绝；
+   - 乐观锁并发控制：编辑或删除时前端必须提供 `expected_version`，与当前记录不一致时返回 `409 STATE_CONFLICT`；
+   - 注：本地人工审批系统尚未实现（规划于 Phase 4），当前阶段不声称已实测“旧审批失效”。
 
 ## 3. 会话与请求
 

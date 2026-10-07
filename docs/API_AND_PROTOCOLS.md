@@ -42,27 +42,44 @@ MCP 基于协商版本的 JSON-RPC/stdio，stdout 只输出协议，日志到 st
 
 这不是现有库表或可直接执行命令，返回 PENDING 也不表示已经插入。
 
-## 3. 浏览器管理 HTTP 草案
+## 3. 浏览器管理 HTTP 契约（Phase 2-A 落地实现）
 
-除建立会话的受控接口外，下表均需有效浏览器会话。所有变更型请求验证 CSRF、Origin、Host；页面认证不能被 MCP 内部令牌替代。
+除建立会话的受控接口外，所有业务管理接口均需有效浏览器会话。所有变更型请求强制验证 CSRF、Origin、Host；页面认证不能被 MCP 内部令牌替代。
 
-| 方法与路径 | 请求 | 响应/行为 |
-|---|---|---|
-| POST /session | local_code | 一次性本地码换 HttpOnly 会话，限速；不返回会话秘密 |
-| DELETE /session | 无 | 注销并清理会话 |
-| GET /connections | cursor? | 脱敏列表 |
-| POST /connections | name, host, port, username, default_database, password | 创建；201，脱敏资料 |
-| PATCH /connections/:connection_id | expected_version 及待修改字段，password 可省略 | 版本冲突 409；200 |
-| DELETE /connections/:connection_id | expected_version | 执行中拒绝；200 删除摘要 |
-| POST /connections/test | 草稿连接字段及 password | 只测试不保存；200 测试摘要 |
-| POST /connections/:connection_id/test | expected_version | 测试已保存连接；不回传凭据 |
-| GET /changes | cursor? | 认证管理用户可查看请求摘要 |
-| GET /changes/:request_id | 无 | 待审批详情包含准确 SQL 和有效期；仅内存尚存时可见 |
-| POST /changes/:request_id/decision | decision, approval_nonce, sql_fingerprint, connection_version | approve/reject/cancel；只接受当前网页挑战 |
+### 3.1 路由契约列表
 
-新增连接 password 是仅浏览器接收字段，绝不复制到 MCP。编辑 UI 留空表示保持原密码，客户端应省略 password 字段；首期不提供“留空清除密码”的含糊行为。测试草稿不要提前持久化。成功保存不等于测试成功，二者单独展示。
+| 方法与路径 | 必填 Header | 请求体 | 响应状态与数据结构 | 说明 |
+|---|---|---|---|---|
+| `POST /api/v1/session` | 无 | `{ local_code: string }` | 200 `{ ok: true, data: { csrf_token: string } }`<br>Set-Cookie: HttpOnly; Path=/; SameSite=Strict | 一次性高熵本地码（32字节HEX）换取会话；单次消费，限速每分钟最多10次；不返回会话秘密 |
+| `DELETE /api/v1/session` | Cookie, x-csrf-token | 无（或空对象） | 200 `{ ok: true, data: { logged_out: true } }`<br>Set-Cookie 清空 | 注销并清理服务端内存会话与 CSRF Token |
+| `GET /api/v1/connections` | Cookie | 无（拒绝任何 query 参数） | 200 `{ ok: true, data: { items: ConnectionView[], next_cursor: null } }` | 脱敏连接列表，至多256项，next_cursor 固定为 null（本阶段不分页）；列表项**绝不含密码或 credential_ref** |
+| `POST /api/v1/connections` | Cookie, x-csrf-token | `{ name, host, port, username, default_database, password }` | 201 `{ ok: true, data: ConnectionView }` | 创建连接；输入严格校验；密码存入 Windows Keyring（服务名为 `mysql-mcp:<id>`）；分配稳定 UUID，version=1；返回脱敏资料 |
+| `PATCH /api/v1/connections/:connection_id` | Cookie, x-csrf-token | `{ expected_version, name?, host?, port?, username?, default_database?, password? }` | 200 `{ ok: true, data: ConnectionView }`<br>版本冲突 409 STATE_CONFLICT<br>使用中 409 STATE_CONFLICT | 更新连接；校验 expected_version；留空/省略 password 保持原密码；替换密码分配新 UUID 引用以防回滚丢失；成功后 version 自增 |
+| `DELETE /api/v1/connections/:connection_id` | Cookie, x-csrf-token | `{ expected_version }` | 200 `{ ok: true, data: { id: string, deleted: true } }`<br>版本冲突 409 STATE_CONFLICT<br>使用中 409 STATE_CONFLICT | 删除连接；校验 expected_version；同步清理 Windows Keyring 中凭据；返回删除摘要 |
+| `POST /api/v1/connections/test` | Cookie, x-csrf-token | 草稿连接字段及 password | 200 `{ ok: true, data: { connected: boolean, simulated: boolean, duration_ms: number } }` | 测试草稿连接；只测试不保存，草稿数据不入库且不写 Keyring；默认模拟器返回 `{ connected: false, simulated: true }`，不宣称真实连通 |
+| `POST /api/v1/connections/:connection_id/test` | Cookie, x-csrf-token | `{ expected_version }` | 200 `{ ok: true, data: { connected: boolean, simulated: boolean, duration_ms: number } }` | 测试已保存连接；从 Keyring 读取凭据进行测试，响应不回传凭据；测试期间持有读/使用锁，防止并发编辑或删除 |
+| `GET /api/v1/changes` | Cookie | cursor? | 待审批列表（Phase 4 实现） | 认证管理用户可查看变更请求摘要 |
+| `GET /api/v1/changes/:request_id` | Cookie | 无 | 待审批详情（Phase 4 实现） | 待审批详情包含准确 SQL 和有效期；仅内存尚存时可见 |
+| `POST /api/v1/changes/:request_id/decision` | Cookie, x-csrf-token | `{ decision, approval_nonce, sql_fingerprint, connection_version }` | 审批决策（Phase 4 实现） | approve/reject/cancel；只接受当前网页挑战 |
 
-审批详情中服务端生成 approval_nonce，禁止进入 URL。批准时复核绑定和期限；重复点击返回现有状态或状态冲突，不再次派发。浏览器请求仅能批准 web 通道，不能抢占等待原生响应的请求。
+### 3.2 数据结构定义：ConnectionView
+接口返回的脱敏连接视图定义如下：
+```typescript
+interface ConnectionView {
+  id: string;                 // 稳定 UUID v4
+  name: string;               // 连接名称 (1..64 字符)
+  host: string;               // 数据库主机名 (1..255 字符)
+  port: number;               // 端口号 (1..65535)
+  username: string;           // 用户名 (1..128 字符)
+  default_database: string | null; // 默认数据库 (可选, 1..64 字符)
+  version: number;            // 乐观并发控制版本号 (自增整数)
+}
+```
+**安全红线**：
+1. `password` 仅在新增连接或明确修改密码的请求体中接收，绝对不出现在任何 GET/POST/PATCH 响应体中；
+2. 服务端内部持久化使用的 `credential_ref` 属于系统内部敏感标识，绝对不对外暴露；
+3. 编辑连接时省略或留空 `password` 表示保持原密码；
+4. 测试已保存连接期间对该连接施加使用锁，若在测试中发起 PATCH 或 DELETE 操作，服务端返回 `409 STATE_CONFLICT` 明确阻断。
 
 ## 4. 内部桥接接口草案
 

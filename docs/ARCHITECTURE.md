@@ -29,33 +29,49 @@ flowchart LR
 
 全栈物理隔离与分工详见[全栈分工规范](./FULLSTACK_DIVISION_SPECIFICATION.md)。依赖方向为入口→业务→基础设施，MCP 与 HTTP 共用同一业务服务。管理服务是单实例配置写入者；第二个实例启动应明确报错，不争抢状态文件。
 
-## 2. 认证与秘密流向
+## 2. 认证与秘密流向（Phase 2-A 落地实现）
 
-浏览器用短期一次性本地登录码建立 HttpOnly、SameSite 会话；登录码由用户本地交互获取，不出现在模型、URL 或持久日志。实际登录码交付方式和会话寿命需实施验证。
+1. **本地回环 Fastify 服务**：
+   - 严格仅绑定 `127.0.0.1`，禁止监听外部网卡；
+   - 强校验 `Host`（仅允许 `127.0.0.1:<port>` 或 `localhost:<port>`）与 `Origin`（强制同源），跨域外网请求直接 403 阻断；
+   - 身份认证：通过控制台输出的 32 字节高熵随机 HEX 本地码（`local_code`）换取会话，单次使用、5分钟过期；限速每分钟最多 10 次尝试；
+   - 会话与防 CSRF：基于内存管理（最多 16 会话，TTL 30 分钟），通过 `Set-Cookie: HttpOnly; Path=/; SameSite=Strict` 保持；所有状态变更请求校验 `x-csrf-token`；
+2. **秘密绝不上浮**：
+   - 密码仅通过页面 POST/PATCH 请求体直达服务端内存，随即写入 Windows Keyring；
+   - 所有接口响应（连接列表、连接详情、错误消息）绝对剔除 `password` 与内部 `credential_ref`；
+   - 错误响应统一通过安全错误白名单脱敏，严禁泄漏操作系统路径或原生数据库堆栈；
+3. **威胁边界**：
+   - 本地服务与 Keyring 无法抵御同一 Windows 用户上下文下的恶意进程；此安全边界公开披露。
 
-MCP 桥接进程使用独立内部凭据，只能访问其服务端授予的操作；内部凭据拟存系统存储。它不是浏览器 Cookie，不能拿来批准网页请求。凭据存储权限不能抵御同一 Windows 用户下的恶意进程，此威胁边界必须说明。
-
-密码仅经浏览器到管理服务，再进入系统凭据存储和执行器；保存或测试返回值只有结果摘要。查询结果可能由客户端发往远程模型，接入时需告知用户。
-
-## 3. 连接管理与读取
+## 3. 连接管理与存储架构（Phase 2-A 落地实现）
 
 ```mermaid
 sequenceDiagram
-    participant U as 用户页面
-    participant H as 管理服务
-    participant K as 凭据存储
-    participant D as MySQL
-    U->>H: 认证后提交连接及本地输入密码
-    H->>K: 创建新凭据引用
-    H->>H: 原子提交非敏感配置
-    H-->>U: 脱敏连接资料
-    U->>H: 明确测试此连接
-    H->>K: 读取执行所需密码
-    H->>D: 有界连接测试（不修改数据）
-    H-->>U: 成功或脱敏失败
+    participant U as 浏览器/用户页面
+    participant S as Fastify回环服务
+    participant F as 文件存储 (connections.json)
+    participant K as Windows Keyring
+    U->>S: POST /api/v1/connections (带密码及CSRF)
+    S->>S: 生成稳定UUID及校验输入
+    S->>F: 阶段1：原子记账 (cleanup_refs 登记)
+    S->>K: 阶段2：写入密码 (mysql-mcp:UUID)
+    S->>F: 阶段3：原子写新配置并重命名
+    S->>K: 阶段4：清理队列中废弃凭据
+    S-->>U: 返回 201 及脱敏 ConnectionView
+    U->>S: POST /api/v1/connections/:id/test
+    S->>S: 获取连接使用锁 (加读计数)
+    S->>K: 读取密码进行模拟握手/连通测试
+    S->>S: 释放使用锁并归还并发额度
+    S-->>U: 返回测试结果摘要 (connected/simulated/duration_ms)
 ```
 
-读取：MCP 请求显式 connection_id/database → 校验连接版本及 SQL → 获取绑定目标的会话 → 受限读取 → 编码/截断结果 → 清理会话。数据库选择不得由前次工具调用隐式继承。测试连接不是创建数据库的机会。
+1. **单写者文件存储 (`JsonMetadataStorage`)**：
+   - 独占式排他创建 `.lock` 租约文件，防止双实例并发冲突；服务正常退出时自动删除 `.lock`；
+   - 写入采用带 UUID 的临时文件 (`.tmp`)，经 `file.sync()` 强制落盘后，通过原子重命名（`rename`）覆盖原目标文件；
+   - 故障关闭：若写入失败，原有配置完好无损；
+2. **并发控制与连接锁**：
+   - 读写互斥与使用锁：连接在测试执行期间持有活跃计数；若此时收到编辑或删除请求，服务端返回 `409 STATE_CONFLICT` 拒绝冲突操作；
+   - 乐观并发控制：编辑与删除必须提供 `expected_version`，与当前配置版本一致才允许推进。
 
 ## 4. 写入与双通道确认
 
