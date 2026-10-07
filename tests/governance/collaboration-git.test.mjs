@@ -82,3 +82,16 @@ test('cold path registered failure still blocks the Hook',t=>{
   mutateLog(f,l=>{l.events.at(-1).evidence.report.input_sha256='0'.repeat(64);});f.git('add','.');
   const r=f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity',SYNTHETIC_FAIL_CHECK:'1'});failed(r,/registered checks failed/);assert.match(r.stdout,/hook cold path/);
 });
+test('frontend staged candidate keeps Git delivery exclusive and rejects stale UI objects',t=>{
+  const f=fixture(t,'frontend');f.candidate();f.git('add','.');
+  failed(f.cli('check',['--staged'],undefined,{GOV_ROLE:'pi-desktop'}),/GOV_ROLE=antigravity/);
+  const good=f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'});assert.equal(good.status,0,good.stdout+good.stderr);assert.match(good.stdout,/candidate evidence reused/);
+  f.write('mysql-mcp/web/value.mjs','stale UI');f.git('add','mysql-mcp/web/value.mjs');f.write('mysql-mcp/web/value.mjs','export const value = 1;\n');
+  failed(f.cli('check',['--staged'],undefined,{GOV_ROLE:'antigravity'}),/snapshot changed|candidate/);
+});
+test('frontend CI failure hands rework back to Antigravity, never PI',t=>{
+  const f=fixture(t,'frontend'), candidate=f.candidate();f.git('add','.');f.git('commit','-m',candidate.details.commit_message);const commit=f.git('rev-parse','HEAD');
+  const log=readLog(f.root,f.task), e=append(log,{type:'delivery',role:'antigravity',candidate:candidate.id,source_head:commit,commit,pr:99,pr_url:'https://github.com/ArturiaGit/mysql-mcp/pull/99',branch:f.task.branch,base:'main',ci:{status:'failure',reason:'Synthetic frontend CI failure, not remote evidence.',url:'https://github.com/ArturiaGit/mysql-mcp/actions/runs/99'},next_actions:['Repair only the authorized UI and rerun checks.'],receiver:'antigravity',next_phase:'rework'});saveLog(f.root,f.task,log);
+  assert.match(prompt(f.task,e),/^请交给 Antigravity/);check(f,{delivery:true});
+  assert.throws(()=>f.accept(e,'pi-desktop'),/receiver role/);f.accept(e);assert.throws(()=>f.start('pi-desktop','rework'),/illegal begin/);f.start('antigravity','rework');assert.equal(check(f).active.role,'antigravity');
+});

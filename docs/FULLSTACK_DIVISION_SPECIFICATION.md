@@ -196,7 +196,7 @@ flowchart LR
 
 ## 7. 机械门禁演进与路径归属规范
 
-为了在机械层面强制保障本规范的执行，后续治理门禁（`collaboration.json` 与 `collaboration.mjs`）的职责映射策略如下：
+为了在机械层面强制保障本规范的执行，治理门禁（`collaboration.json` 与 `collaboration.mjs`）的职责映射策略如下：
 
 ```json
 {
@@ -206,13 +206,21 @@ flowchart LR
       "docs/",
       "*.md",
       ".gitignore",
-      "governance/",
-      "mysql-mcp/web/"
+      "governance/features.json",
+      "governance/tasks.json",
+      "governance/checks.json",
+      "governance/collaboration.json",
+      "mysql-mcp/web/",
+      "mysql-mcp/tests/web/"
     ],
     "pi-desktop": [
       "mysql-mcp/src/",
       "mysql-mcp/scripts/",
-      "mysql-mcp/tests/",
+      "mysql-mcp/tests/smoke.test.mjs",
+      "mysql-mcp/tests/keyring.test.mjs",
+      "mysql-mcp/tests/sql-policy.test.mjs",
+      "mysql-mcp/tests/mcp.test.mjs",
+      "mysql-mcp/tests/server.test.mjs",
       "mysql-mcp/package.json",
       "mysql-mcp/package-lock.json",
       "mysql-mcp/tsconfig.json",
@@ -225,8 +233,9 @@ flowchart LR
 }
 ```
 
-- `mysql-mcp/web/` 与 `mysql-mcp/src/` 完全非重叠，完全满足 `collaboration.mjs` 中的 `overlapping role paths` 互斥要求；
-- 后续前端任务在 `mode: "frontend"` 下，Antigravity 可合法修改 `mysql-mcp/web/`，而 PI-Desktop 对此目录拥有零写入权限；
-- 后端任务下，PI-Desktop 仅可修改 `mysql-mcp/src/` 及相关测试脚本，Antigravity 对后端源码拥有零写入权限。
+- **消除路径前缀重叠**：前端测试专属路径 `mysql-mcp/tests/web/` 归属 Antigravity，后端测试以单文件明确列出归属 PI-Desktop。杜绝了旧配置中 `mysql-mcp/tests/` 总前缀覆盖 Antigravity 子路径引发的 `overlapping role paths` 冲突；
+- **物理领域边界强校验**：应用物理目录（如 `mysql-mcp/src/` 或 `mysql-mcp/web/`）内的 Markdown 文件属于各物理领域，不再借由根目录 `*.md` 规则穿透角色边界；
+- **前端资产严格阶段绑定**：`mysql-mcp/web/` 与 `mysql-mcp/tests/web/` 只能在 `mode: "frontend"` 的 `implementation` 与 `rework` 阶段由 Antigravity 修改；开发快照摘要强制绑定 `web/` 与 `tests/web/`，旧证据和漂移候选坚决拒绝；
+- **后端单测扩展机制**：未来若新增后端单测文件，必须在新任务 planning 阶段由 Antigravity 在 `collaboration.json` 的 `pi-desktop` 列表中显式登记单文件路径，未分类或前缀重叠路径一律机械拦截。
 
 通过本规范的建立，项目在保持最强安全防御与自动化门禁的同时，打通了全栈高质感 UI 与高性能安全后端的协同演进路径。

@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-06
 - 关联任务：TASK-APP-003
-- 关联 PR：待交付
-- 关联 Commit：待提交
+- 关联 PR：[#12](https://github.com/ArturiaGit/mysql-mcp/pull/12)
+- 关联 Commit：[`ed7cb80`](https://github.com/ArturiaGit/mysql-mcp/commit/ed7cb8075671b382dce009edf1e99bbccfdb48e2)
 - 责任执行方：Antigravity (Planning & Documentation Delivery) × PI-Desktop (Implementation)
 - 关联功能/需求：F25, F01, F02, F03, F04, F05 / R01, R02, R03, R14, R15, R16, R17
 

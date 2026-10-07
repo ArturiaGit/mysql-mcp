@@ -102,6 +102,8 @@ test('real offline npm ci in an isolated application disables lifecycle scripts 
 function applicationFixture(t) {
   const f = collaborationFixture(t);
   f.task.allowed_paths.push('.gitignore');
+  // The offline dependency fixture owns this synthetic backend-only vendor directory.
+  f.policy.roles['pi-desktop'].push('mysql-mcp/vendor/');
   f.task.build_checks = ['build', 'compile'].map(kind => ({
     id: `app-${kind}`, kind, command: 'node', args: [`mysql-mcp/scripts/${kind}.mjs`], timeout_ms: 10000
   }));

@@ -248,7 +248,7 @@
     {
       "id": "TASK-APP-003",
       "kind": "new",
-      "status": "in_progress",
+      "status": "completed",
       "feature_ids": ["F25", "F01", "F02", "F03", "F04", "F05"],
       "branch": "feat/server-connection-and-auth",
       "base_commit": "bdbef3f6247e581eb793270c3768c530cf7728b6",
@@ -259,6 +259,43 @@
         "governance/"
       ],
       "plan_path": "docs/plans/server-connection-and-auth.md",
+      "mode": "code",
+      "build_checks": [
+        {
+          "id": "app-build",
+          "kind": "build",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/build.mjs"],
+          "timeout_ms": 60000
+        },
+        {
+          "id": "app-compile",
+          "kind": "compile",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/compile.mjs"],
+          "timeout_ms": 60000
+        }
+      ],
+      "pr": 12,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-GOV-010",
+      "kind": "maintenance",
+      "status": "in_progress",
+      "feature_ids": ["G02", "G03"],
+      "branch": "chore/enforce-fullstack-division-gates",
+      "base_commit": "ed7cb8075671b382dce009edf1e99bbccfdb48e2",
+      "authorization": "用户批准全栈分工机械门禁落地：按照全栈分工规范第 7 节演进 collaboration.json 路径所有权拆分，在 collaboration.mjs 与相关治理测试中支持 mode: \"frontend\" 协作流程（planning → implementation (Antigravity) → documentation_delivery (Antigravity)），确保 mysql-mcp/web/ 与 mysql-mcp/src/ 物理路径互斥与角色权限强校验，不破坏既有 code 与 docs 模式。",
+      "allowed_paths": [
+        "AGENTS.md",
+        "docs/",
+        "governance/",
+        "scripts/governance/",
+        "tests/governance/"
+      ],
+      "plan_path": "docs/plans/enforce-fullstack-division-gates.md",
       "mode": "code",
       "build_checks": [
         {

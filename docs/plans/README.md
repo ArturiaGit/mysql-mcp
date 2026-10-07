@@ -126,3 +126,8 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 - [Phase 2-A 回环服务与连接管理后端实现计划](./server-connection-and-auth.md)：TASK-APP-003，功能 F25、F01、F02、F03、F04、F05，需求 R01、R02、R03、R14、R15、R16、R17。开展 Phase 2-A 回环服务与连接管理后端实现，落地 Fastify 回环 HTTP 服务、会话认证、CSRF 防护、连接元数据存储、Windows Keyring 关联以及连接测试模拟服务，编写后端自动化测试；遵循全栈分工规范，不编写前端界面资产，不连接外部生产数据库。
 - 任务分支 `feat/server-connection-and-auth`，main 基线 `bdbef3f6247e581eb793270c3768c530cf7728b6`。模式为 `mode: "code"`。
+
+## 17. 全栈分工机械门禁落地任务
+
+- [全栈分工机械门禁落地实施计划](./enforce-fullstack-division-gates.md)：TASK-GOV-010，功能 G02、G03，需求 R13、R15、R16、R17。按照全栈分工规范第 7 节演进 collaboration.json 路径所有权拆分，在 collaboration.mjs 与相关治理测试中支持 mode: "frontend" 协作流程（planning → implementation (Antigravity) → documentation_delivery (Antigravity)），确保 mysql-mcp/web/ 与 mysql-mcp/src/ 物理路径互斥与角色权限强校验，不破坏既有 code 与 docs 模式。
+- 任务分支 `chore/enforce-fullstack-division-gates`，main 基线 `ed7cb8075671b382dce009edf1e99bbccfdb48e2`。模式为 `mode: "code"`。

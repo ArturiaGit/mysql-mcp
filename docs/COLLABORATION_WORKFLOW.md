@@ -12,7 +12,7 @@
 | PI-Desktop（`pi-desktop`） | implementation/rework 的授权**后端核心源码（`mysql-mcp/src/`）**、后端测试、依赖/锁文件与构建配置、实际测试/构建/编译；阅读规范并记录文档同步请求 | 修改前端界面资产（`mysql-mcp/web/`）；通常直接修改规范/台账；本仓库 commit、push、创建/更新 PR |
 | 用户 | 在两端人工复制完整 prompt，明确任务范围与合并授权 | 用整体开发授权替代每次数据库写入/DDL 确认 |
 
-Antigravity 管理根 `AGENTS.md`、`docs/`、规范 Markdown、功能/任务/检查登记、协作策略以及 `mysql-mcp/web/` 前端界面资产。PI 管理 `mysql-mcp/src/` 后端系统实现、`mysql-mcp/tests/` 后端测试，以及明确登记 `governance_change` 的 `scripts/governance/`、治理测试、Hook、CI 技术实现。任务 `allowed_paths` 是上限，不替代角色与领域约束。
+Antigravity 管理根 `AGENTS.md`、`docs/`、规范 Markdown、功能/任务/检查登记、协作策略以及 `mysql-mcp/web/` 前端界面与 `mysql-mcp/tests/web/` 前端测试资产。PI 管理 `mysql-mcp/src/` 后端系统实现、`mysql-mcp/tests/` 下登记的具体后端测试单文件，以及明确登记 `governance_change` 的 `scripts/governance/`、治理测试、Hook、CI 技术实现。严禁跨角色路径前缀重叠。任务 `allowed_paths` 是上限，不替代角色与领域约束。
 
 `governance/collaboration.json` 定义策略；`governance/handoffs/<ID>.json` 为单任务交接链，没有可跨任务随意改写的全局“当前阶段”。交接 JSON、prompt、执行报告是受约束机器产物，双方仅按阶段操作生成，不能借机器产物越权。未分类、交叉归属、路径穿越、非普通文件、任务外路径须拒绝；删除/重命名同样校验。
 
@@ -20,17 +20,20 @@ Antigravity 管理根 `AGENTS.md`、`docs/`、规范 Markdown、功能/任务/�
 
 ## 2. 阶段与停止点
 
-1. **planning / Antigravity**：核实仓库/分支/main 基线和既有功能/PR，通读 `docs/changes/` 下所有活动未发版变更文档以掌握近期架构演进与警示，准备任务分支；先登记可观察验收、范围和禁止事项，冻结接口契约，再生成给 PI 的交接（文档任务直接推进至 documentation_delivery；前端任务由 Antigravity 实施）。
+1. **planning / Antigravity**：核实仓库/分支/main 基线和既有功能/PR，通读 `docs/changes/` 下所有活动未发版变更文档以掌握近期架构演进与警示，准备任务分支；先登记可观察验收、范围和禁止事项，冻结接口契约，再生成给接收方的交接（文档任务直接推进至 documentation_delivery；前端任务由 Antigravity 实施）。
 2. **implementation / PI (后端) 或 Antigravity (前端)**：
    - 后端任务（`mode: code`）：用户转交后核验并接受准确 ID/摘要；由 PI 开始阶段，执行授权后端技术变更和真实检查，结束时列实际结果、文档同步请求和限制。
-   - 前端任务（`mode: frontend`）：由 Antigravity 依据已锁定接口实现 `mysql-mcp/web/` 页面与交互，执行浏览器预览自测。
+   - 前端任务（`mode: frontend`）：由 Antigravity 依据已锁定接口实现 `mysql-mcp/web/` 与 `mysql-mcp/tests/web/` 页面与交互，执行浏览器预览自测。
 3. **documentation_delivery / Antigravity**：接受实现结果、同步文档/台账，并在 `docs/changes/` 撰写本次任务变更文档（含发版说明板块与 Agent 避坑指南，维护未发版索引），检查结果与代码一致，生成准确交付候选、暂存摘要和 Conventional Commits 提交信息。必要门禁通过后仅由 Antigravity 完成 Git 交付。
-4. **rework / PI**：明确后端代码缺陷/CI 失败交回 PI，核验接受后只修复授权问题并重测；新交接再回 documentation_delivery，旧结果不再授权交付。
+4. **rework / PI (后端) 或 Antigravity (前端)**：
+   - 后端任务（`mode: code`）：明确后端代码缺陷/CI 失败交回 PI，核验接受后只修复授权问题并重测；新交接再回 documentation_delivery，旧结果不再授权交付。
+   - 前端任务（`mode: frontend`）：前端界面缺陷/CI 失败由 Antigravity 自行 rework 并重测，严禁交回 PI 去修 UI 界面。
 
-正常路径：
-- 后端开发：`planning → implementation (PI) → documentation_delivery (Antigravity)`；返工为 `documentation_delivery → rework → documentation_delivery`。
-- 文档任务：由 Antigravity 走 `planning → documentation_delivery`，不伪造 PI 开发或构建阶段。
-- 前端任务：由 Antigravity 走 `planning → implementation (Antigravity) → documentation_delivery (Antigravity)`。
+正常路径与状态机映射：
+- 后端开发（`mode: code`）：`planning (Antigravity) → implementation (PI) → documentation_delivery (Antigravity)`；返工为 `documentation_delivery → rework (PI) → documentation_delivery (Antigravity)`。
+- 文档任务（`mode: docs`）：由 Antigravity 走 `planning (Antigravity) → documentation_delivery (Antigravity)`，不伪造 PI 开发或构建阶段。
+- 前端任务（`mode: frontend`）：由 Antigravity 走 `planning (Antigravity) → implementation (Antigravity) → documentation_delivery (Antigravity)`；返工为 `documentation_delivery → rework (Antigravity) → documentation_delivery (Antigravity)`。
+  - **强制性约束**：在前端模式下，即使 implementation / rework 与 planning / delivery 均为 Antigravity 同角色，各阶段流转依然必须执行显式 `accept` 与 `begin` 命令，严禁隐式跳过交接链。
 
 阶段结束或终端生成 prompt 都不证明用户已转交；接收方必须显式接受。blocked、reject、cancel 保留事件，不自动推进。无下一项授权时回传“等待用户授权，不开始开发”；PR 成功后等待用户确认合并，不自动合并、开启自动合并、删除分支、创建 Tag 或发布。
 
@@ -54,7 +57,7 @@ node scripts/governance/handoff.mjs reject --task <ID> --role <RECEIVER> --hando
 node scripts/governance/handoff.mjs cancel --task <ID> --role <SENDER> --handoff <EVENT_ID> --digest <SHA256> --reason <TEXT>
 node scripts/governance/handoff.mjs check --task <ID>
 node scripts/governance/handoff.mjs prompt --task <ID> --handoff <EVENT_ID>
-node scripts/governance/handoff.mjs builds --task <ID> --role pi-desktop
+node scripts/governance/handoff.mjs builds --task <ID> --role antigravity|pi-desktop
 node scripts/governance/handoff.mjs record-delivery --task <ID> --role antigravity --details <FILE>
 ```
 

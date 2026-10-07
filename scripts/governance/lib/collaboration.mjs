@@ -11,9 +11,14 @@ const oid = s => typeof s === 'string' && /^[a-f0-9]{40,64}$/.test(s);
 const roles = ['antigravity', 'pi-desktop'];
 const phases = { planning:'antigravity', implementation:'pi-desktop', documentation_delivery:'antigravity', rework:'pi-desktop' };
 const codePhases = ['implementation', 'rework', 'bootstrap'];
+const modes = ['code', 'docs', 'frontend'];
+const phaseRole = (t, phase) => t.mode === 'frontend' && ['implementation', 'rework'].includes(phase) ? 'antigravity' : phases[phase];
+const receiverFor = (t, phase) => phaseRole(t, phase) || 'pi-desktop';
 const policyPath = 'governance/collaboration.json';
 const bootstrapBase = 'ed631a2201e6b439bc79ca6d241176db68ddad82';
 const matches = (n, p) => n === p || (p.endsWith('/') && n.startsWith(p)) || (p === '*.md' && n.endsWith('.md'));
+const frontendPath = n => ['mysql-mcp/web/', 'mysql-mcp/tests/web/'].some(p => matches(n,p));
+const applicationRole = n => frontendPath(n) ? 'antigravity' : ['mysql-mcp/src/', 'mysql-mcp/scripts/', 'mysql-mcp/tests/', 'mysql-mcp/package.json', 'mysql-mcp/package-lock.json', 'mysql-mcp/tsconfig.json'].some(p => matches(n,p)) ? 'pi-desktop' : null;
 const machine = n => n.startsWith('governance/handoffs/') || n.startsWith('.governance-evidence/');
 const regular = (root, n) => { const s = fs.lstatSync(path.join(root, n)); assert(s.isFile() && !s.isSymbolicLink(), `non-regular file: ${n}`); };
 const manifestCache = new Map(); // Only immutable object IDs, never working files or HEAD.
@@ -74,21 +79,25 @@ export function readPolicy(root, required = true) {
 }
 export function owner(p, n) {
   assert(safePath(n) && !machine(n), `unsafe/unclassified path: ${n}`);
-  // Markdown is documentation even when kept alongside source.
-  const owners = n.endsWith('.md') && p.roles.antigravity.includes('*.md') ? ['antigravity'] : roles.filter(r => p.roles[r].some(x => matches(n,x)));
+  // Application domains are physical boundaries, including Markdown kept inside them.
+  const owners = !applicationRole(n) && n.endsWith('.md') && p.roles.antigravity.includes('*.md') ? ['antigravity'] : roles.filter(r => p.roles[r].some(x => x !== '*.md' && matches(n,x)));
   assert(owners.length === 1, `unclassified/ambiguous responsibility path: ${n}`);
   return owners[0];
 }
 function isBootstrap(p,t) { return p.bootstrap && t.id === p.bootstrap.task_id && t.branch === p.bootstrap.branch && t.base_commit === p.bootstrap.base_commit; }
 function permitted(p,t,phase,role,diff) {
-  assert(role === (phase === 'bootstrap' ? 'pi-desktop' : phases[phase]), 'wrong phase role');
+  assert(role === (phase === 'bootstrap' ? 'pi-desktop' : phaseRole(t,phase)), 'wrong phase role');
   if (phase === 'bootstrap') assert(isBootstrap(p,t), 'bootstrap exception does not apply to task');
   for (const c of diff) {
     assert(t.allowed_paths.some(n => matches(c.path,n)), `out of task scope: ${c.path}`);
     const r = owner(p,c.path);
     assert(r === role || (phase === 'bootstrap' && p.bootstrap.documentation_paths.includes(c.path) && r === 'antigravity'), `responsibility boundary: ${role}/${phase} cannot change ${c.path}`);
+    const domainRole = applicationRole(c.path);
+    assert(!domainRole || domainRole === role, `responsibility boundary: ${role}/${phase} cannot change ${c.path}`);
+    if (frontendPath(c.path)) assert(t.mode === 'frontend' && ['implementation','rework'].includes(phase), 'frontend assets require frontend implementation/rework');
+    if (t.mode === 'frontend' && codePhases.includes(phase)) assert(frontendPath(c.path), `frontend implementation/rework cannot change non-frontend path: ${c.path}`);
     if (/^(scripts\/governance\/|tests\/governance\/|\.githooks\/|\.github\/workflows\/|governance\/)/.test(c.path)) assert(t.governance_change, 'explicit governance_change required');
-    if (t.mode === 'docs') assert(r === 'antigravity', 'document-only task cannot change code');
+    if (t.mode === 'docs') assert(r === 'antigravity' && !frontendPath(c.path), 'document-only task cannot change code');
   }
 }
 export function contractHash(t,m) {
@@ -99,7 +108,7 @@ export function contractHash(t,m) {
 }
 export function developmentHash(root,t,p = readPolicy(root),m = manifest(root)) {
   if (!p) return null;
-  return hash(JSON.stringify({ contract:contractHash(t,m), code:Object.entries(m).filter(([n]) => owner(p,n) === 'pi-desktop') }));
+  return hash(JSON.stringify({ contract:contractHash(t,m), code:Object.entries(m).filter(([n]) => owner(p,n) === 'pi-desktop' || (t.mode === 'frontend' && frontendPath(n))) }));
 }
 function goodText(s) { return typeof s === 'string' && s.trim().length > 0 && !/(?:\bTODO\b|\bTBD\b|<[^>]+>|待填写|占位符)/i.test(s); }
 function texts(a, nonempty = false) { return Array.isArray(a) && (!nonempty || a.length > 0) && a.every(goodText); }
@@ -124,7 +133,7 @@ function expectedStart(t,events,p) {
   const h = events.find(e => e.id === last.handoff);
   if (last.decision !== 'accept') return {phase:'planning',role:'antigravity'};
   assert(h && ['handoff','delivery'].includes(h.type), 'missing accepted handoff');
-  return {phase:h.next_phase,role:phases[h.next_phase]};
+  return {phase:h.next_phase,role:receiverFor(h.task_definition || t,h.next_phase)};
 }
 function detailsCheck(d,e,t,data,p,root,currentContract) {
   assert(d && goodText(d.goal) && goodText(d.outcome) && texts(d.next_actions,true) && texts(d.forbidden,true) && texts(d.documentation_requests) && texts(d.limitations,true) && texts(d.blockers), 'incomplete/placeholder handoff details');
@@ -168,7 +177,7 @@ function prefixCheck(root,t,log,ref) {
   }
 }
 export function validateLog(root,t,p,log,{current = true,delivery = false,base,head,ciMain = false,message} = {}) {
-  assert(['code','docs'].includes(t.mode) && safePath(t.plan_path), 'task missing collaboration mode/plan');
+  assert(modes.includes(t.mode) && safePath(t.plan_path), 'task missing collaboration mode/plan');
   assert(log.task_id === t.id && log.schema_version === 1 && Array.isArray(log.events) && log.events.length, 'missing handoff events');
   let previous = null, active = null, end = manifest(root,t.base_commit), lastHandoff = null, latestCode = null, candidateRevoked = false;
   const anchorManifest = end;
@@ -181,7 +190,7 @@ export function validateLog(root,t,p,log,{current = true,delivery = false,base,h
     const effectiveBefore = bootstrapLegacy ? anchorManifest : e.before;
     if (bootstrapLegacy) assert(eq(e.before,Object.fromEntries(Object.entries(anchorManifest).map(([n,h])=>[n,h.slice(7)]))), 'legacy bootstrap baseline mismatch');
     const stageTask = ['begin','handoff'].includes(e.type) ? e.task_definition : t;
-    if (['begin','handoff'].includes(e.type)) assert(stageTask && stageTask.id === t.id && stageTask.branch === t.branch && stageTask.base_commit === t.base_commit && Array.isArray(stageTask.feature_ids) && Array.isArray(stageTask.allowed_paths) && stageTask.allowed_paths.every(safePath) && ['code','docs'].includes(stageTask.mode), 'invalid/frozen task definition');
+    if (['begin','handoff'].includes(e.type)) assert(stageTask && stageTask.id === t.id && stageTask.branch === t.branch && stageTask.base_commit === t.base_commit && Array.isArray(stageTask.feature_ids) && Array.isArray(stageTask.allowed_paths) && stageTask.allowed_paths.every(safePath) && modes.includes(stageTask.mode), 'invalid/frozen task definition');
     assert(e.schema_version === 1 && e.id === `${t.id}-E${i+1}` && e.sequence === i+1 && e.previous === previous && e.digest === eventDigest(e) && !Number.isNaN(Date.parse(e.at)), 'invalid event digest/order/chain');
     assert(roles.includes(e.role), 'wrong event role'); previous = e.digest;
     if (e.type === 'begin') {
@@ -201,12 +210,12 @@ export function validateLog(root,t,p,log,{current = true,delivery = false,base,h
       assert(eq(e.acceptance_ids,e.acceptance_definitions.map(a=>a.id).sort()), 'wrong handoff acceptance IDs');
       if (e.contract_sha256 === currentContract) assert(eq(e.acceptance_ids,taskData.acceptance_ids), 'wrong current acceptance IDs');
       assert(e.next_phase === legalNext(e,stageTask), 'invalid next stage');
-      const receiver = e.next_phase === 'planning' || e.next_phase === 'documentation_delivery' ? 'antigravity' : 'pi-desktop';
+      const receiver = receiverFor(stageTask,e.next_phase);
       if (e.details.result === 'ready') assert(e.after[stageTask.plan_path], 'ready handoff requires existing declared plan');
       assert(e.receiver === receiver, 'wrong handoff receiver');
       detailsCheck(e.details,e,stageTask,taskData.data,p,root,currentContract);
       if (codePhases.includes(e.phase)) latestCode = e;
-      if (e.phase === 'documentation_delivery' && e.details.result === 'ready' && e.next_phase === 'wait' && stageTask.mode === 'code') {
+      if (e.phase === 'documentation_delivery' && e.details.result === 'ready' && e.next_phase === 'wait' && stageTask.mode !== 'docs') {
         assert(latestCode && latestCode.details.result === 'ready' && latestCode.contract_sha256 === e.contract_sha256 && developmentHash(root,latestCode.task_definition,p,latestCode.after) === developmentHash(root,stageTask,p,e.after), 'plan/code drift: replan and rework before delivery');
       }
       if (e.phase === 'documentation_delivery' && e.details.result === 'ready' && e.next_phase === 'wait') candidateRevoked = false;
@@ -223,7 +232,8 @@ export function validateLog(root,t,p,log,{current = true,delivery = false,base,h
       assert(!active && lastHandoff?.phase === 'documentation_delivery' && lastHandoff.details.result === 'ready' && lastHandoff.next_phase === 'wait' && e.role === 'antigravity' && e.candidate === lastHandoff.id, 'delivery requires Antigravity candidate');
       assert(oid(e.commit) && e.commit === e.source_head && Number.isInteger(e.pr) && e.pr > 0 && e.pr_url === p.repository.replace(/\.git$/,'')+`/pull/${e.pr}` && e.base === 'main' && e.branch === t.branch && ['pending','success','failure','not_configured'].includes(e.ci.status) && texts(e.next_actions,true) && goodText(e.ci.reason), 'invalid real Git/PR/CI delivery metadata');
       assert(eq(manifest(root,e.commit),end) && git(root,['show','-s','--format=%B',e.commit]).trim() === lastHandoff.details.commit_message.trim(), 'delivery commit/candidate mismatch');
-      assert(e.receiver === 'pi-desktop' && e.next_phase === (e.ci.status === 'failure' ? 'rework' : 'wait'), 'delivery next action/receiver mismatch');
+      const deliveryPhase = e.ci.status === 'failure' ? 'rework' : 'wait';
+      assert(e.receiver === receiverFor(t,deliveryPhase) && e.next_phase === deliveryPhase, 'delivery next action/receiver mismatch');
       assert(e.ci.status === 'not_configured' ? e.ci.url === null : /^https:\/\/github\.com\/.+\/actions\/runs\/\d+$/.test(e.ci.url), 'missing CI run URL');
     } else assert(false, 'unknown event type');
   }
@@ -292,7 +302,7 @@ export function finish(root,t,role,details) {
   const build_evidence = build_report ? JSON.parse(fs.readFileSync(build_report,'utf8')) : evidence?.report.builds || null;
   const next_phase = d.result === 'blocked' && a.phase !== 'documentation_delivery' ? 'planning' : a.phase === 'planning' ? (t.mode === 'docs' ? 'documentation_delivery' : 'implementation') : codePhases.includes(a.phase) ? 'documentation_delivery' : details.next_phase || 'wait';
   delete d.next_phase;
-  const e = append(log,{type:'handoff',role,phase:a.phase,task_definition:structuredClone(t),begin:a.id,source_head:a.source_head,before:a.before,after,changes:changes(a.before,after),contract_sha256:contractHash(t,after),acceptance_ids:dataForTask(root,t).acceptance_ids,acceptance_definitions:load(root).features.filter(f=>t.feature_ids.includes(f.id)).flatMap(f=>f.acceptance),next_phase,receiver:['planning','documentation_delivery'].includes(next_phase) ? 'antigravity' : 'pi-desktop',details:d,check_definitions:load(root).checks,evidence,build_evidence});
+  const e = append(log,{type:'handoff',role,phase:a.phase,task_definition:structuredClone(t),begin:a.id,source_head:a.source_head,before:a.before,after,changes:changes(a.before,after),contract_sha256:contractHash(t,after),acceptance_ids:dataForTask(root,t).acceptance_ids,acceptance_definitions:load(root).features.filter(f=>t.feature_ids.includes(f.id)).flatMap(f=>f.acceptance),next_phase,receiver:receiverFor(t,next_phase),details:d,check_definitions:load(root).checks,evidence,build_evidence});
   validateLog(root,t,p,log); return {log,event:e};
 }
 export function receive(root,t,role,id,digest,decision = 'accept',reason = '用户转交后显式核验准确交接 ID、摘要和当前快照。') {
@@ -312,8 +322,8 @@ export function saveLog(root,t,log) {
 export function prompt(t,e) {
   assert(['handoff','delivery'].includes(e.type), 'only finished handoff/delivery can generate prompt');
   const common = `交接事件：${e.id}\nSHA256：${e.digest}\n任务：${t.id}；分支：${t.branch}；基线：${t.base_commit}\n记录：${recordPath(t)}\n由用户手动转交；生成此 prompt 不等于已转交或已接受。角色声明不是工具身份认证。\n`;
-  if (e.type === 'delivery') return `请交给 PI-Desktop：\n${common}Antigravity 已记录实际交付：commit ${e.commit}；PR ${e.pr_url}；CI ${e.ci.status}（${e.ci.reason}），${e.ci.url || '未配置'}。\n下一步：\n${e.next_actions.map(s=>'- '+s).join('\n')}\n禁止自行合并、发布或启动新功能。若无明确 rework 交接，等待用户授权，不开始开发。\n`;
-  const d = e.details, roleText = e.receiver === 'antigravity' ? '负责规划、各类文档、提交信息、暂存、commit/push/PR 和 CI；不自行修复源码/构建。' : '负责授权代码、测试、构建和编译；不修改规范/台账，不 commit/push/PR。';
+  if (e.type === 'delivery') return `请交给 ${e.receiver === 'antigravity' ? 'Antigravity' : 'PI-Desktop'}：\n${common}Antigravity 已记录实际交付：commit ${e.commit}；PR ${e.pr_url}；CI ${e.ci.status}（${e.ci.reason}），${e.ci.url || '未配置'}。\n下一步：\n${e.next_actions.map(s=>'- '+s).join('\n')}\n禁止自行合并、发布或启动新功能。若无明确 rework 交接，等待用户授权，不开始开发。\n`;
+  const d = e.details, roleText = e.receiver === 'antigravity' ? (t.mode === 'frontend' ? '负责规划、授权前端界面与 UI 测试、文档和 Git 交付；不得修改后端源码或构建。' : '负责规划、各类文档、提交信息、暂存、commit/push/PR 和 CI；不自行修复源码/构建。') : '负责授权后端代码、测试、构建和编译；不修改前端资产或规范/台账，不 commit/push/PR。';
   const evidence = e.evidence?.report;
   return `请交给 ${e.receiver === 'antigravity' ? 'Antigravity' : 'PI-Desktop'}：\n${common}发送方：${e.role}；阶段：${e.phase}；结果：${d.result}；后续阶段：${e.next_phase}\n接收方职责：${roleText}\n先读取 AGENTS.md、docs/COLLABORATION_WORKFLOW.md 及需求/安全/Git/验收规范，核对工作区。\n显式接收命令：\nnode scripts/governance/handoff.mjs accept --task ${t.id} --role ${e.receiver} --handoff ${e.id} --digest ${e.digest}\n目标：${d.goal}\n授权：${t.authorization}\n功能：${t.feature_ids.join(', ')}；验收：${e.acceptance_ids.join(', ')}\n规划/标准摘要：${e.contract_sha256}\n开发快照：${evidence?.development_sha256 || 'planning 尚无开发结果'}；源 HEAD：${e.source_head}\n实际结果：${d.outcome}\n变更文件：\n${e.changes.length ? e.changes.map(c=>`- ${c.action} ${c.path} ${c.after || c.before}`).join('\n') : '- 无文件变化'}\n实际检查：\n${evidence ? evidence.checks.map(c=>`- ${c.command} ${c.args.join(' ')}；exit=${c.exit_code}；tests/pass=${c.counts.tests}/${c.counts.pass}；fail/skipped/cancelled/todo=${c.counts.fail}/${c.counts.skipped}/${c.counts.cancelled}/${c.counts.todo}`).join('\n') : '- planning：未执行开发检查，不宣称通过'}\n构建/编译：${d.build.status}；${d.build.reason}\n文档同步请求：\n${d.documentation_requests.length ? d.documentation_requests.map(s=>'- '+s).join('\n') : '- 无新增请求'}\n下一步：\n${d.next_actions.map(s=>'- '+s).join('\n')}\n禁止事项：\n${d.forbidden.map(s=>'- '+s).join('\n')}\n限制：\n${d.limitations.map(s=>'- '+s).join('\n')}\n阻塞：\n${d.blockers.length ? d.blockers.map(s=>'- '+s).join('\n') : '- 无；未执行项不因此变成通过'}\n阶段完成后使用 handoff finish/prompt（Git 交付后 record-delivery）生成下一步 prompt，由用户转交；不要自动发送或自动开始未授权任务。\n`;
 }

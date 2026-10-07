@@ -125,9 +125,8 @@ flowchart TD
 | [TASK-GOV-008 机械验证性能优化与 Hook 快速验签直通](./2026-10-05-TASK-GOV-008-governance-verification-performance.md) | TASK-GOV-008 | [#9](https://github.com/ArturiaGit/mysql-mcp/pull/9) | [`f2dfffc`](https://github.com/ArturiaGit/mysql-mcp/commit/f2dfffcc45e03871efd33b9b62711d6f7b0cd0ca) | 优化 check.mjs 候选证据指纹直通，调整超时至 600s，优化测试夹具缓存 |
 | [TASK-APP-002 Phase 1-B 关键依赖可行性与核心安全原型](./2026-10-06-TASK-APP-002-feasibility-and-sql-policy.md) | TASK-APP-002 | [#10](https://github.com/ArturiaGit/mysql-mcp/pull/10) | [`be20795`](https://github.com/ArturiaGit/mysql-mcp/commit/be2079577e664e29437bb5a603e03a08b0a1b117) | 落地 Windows Keyring 异步凭据封装、AST SQL 四级风险策略引擎与 MCP Stdio 原型，应用测试扩充至 127 项 |
 | [TASK-GOV-009 全栈分工与前后端物理隔离协作规范](./2026-10-06-TASK-GOV-009-fullstack-division-specification.md) | TASK-GOV-009 | [#11](https://github.com/ArturiaGit/mysql-mcp/pull/11) | [`bdbef3f`](https://github.com/ArturiaGit/mysql-mcp/commit/bdbef3f6247e581eb793270c3768c530cf7728b6) | 确立前端界面由 Antigravity 专职负责（`mysql-mcp/web/`）、PI-Desktop 专职负责后端系统（`mysql-mcp/src/` 等）的强制性约束与接口先行原则 |
-| [TASK-APP-003 Phase 2-A 回环服务与连接管理后端实现](./2026-10-06-TASK-APP-003-server-connection-and-auth.md) | TASK-APP-003 | 待交付 | 待提交 | 落地 Fastify 回环服务、本地代码会话/CSRF、连接单写者原子存储与 Keyring 事务补偿、模拟连接测试，应用测试扩充至 190 项 |
-
-
+| [TASK-APP-003 Phase 2-A 回环服务与连接管理后端实现](./2026-10-06-TASK-APP-003-server-connection-and-auth.md) | TASK-APP-003 | [#12](https://github.com/ArturiaGit/mysql-mcp/pull/12) | [`ed7cb80`](https://github.com/ArturiaGit/mysql-mcp/commit/ed7cb8075671b382dce009edf1e99bbccfdb48e2) | 落地 Fastify 回环服务、本地代码会话/CSRF、连接单写者原子存储与 Keyring 事务补偿、模拟连接测试，应用测试扩充至 190 项 |
+| [TASK-GOV-010 全栈分工机械门禁落地与前后端物理隔离强校验](./2026-10-07-TASK-GOV-010-enforce-fullstack-division-gates.md) | TASK-GOV-010 | [#13](https://github.com/ArturiaGit/mysql-mcp/pull/13) | 待提交 | 落地 collaboration.mjs 前后端物理路径互斥强校验与 mode: frontend 状态机支持，消除 tests/ 前缀重叠，新增 33 项协作回归测试 |
 ---
 
 ## 5. 历史版本归档索引 (Released Archives)
