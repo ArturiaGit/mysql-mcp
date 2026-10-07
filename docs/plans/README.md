@@ -131,3 +131,9 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 - [全栈分工机械门禁落地实施计划](./enforce-fullstack-division-gates.md)：TASK-GOV-010，功能 G02、G03，需求 R13、R15、R16、R17。按照全栈分工规范第 7 节演进 collaboration.json 路径所有权拆分，在 collaboration.mjs 与相关治理测试中支持 mode: "frontend" 协作流程（planning → implementation (Antigravity) → documentation_delivery (Antigravity)），确保 mysql-mcp/web/ 与 mysql-mcp/src/ 物理路径互斥与角色权限强校验，不破坏既有 code 与 docs 模式。
 - 任务分支 `chore/enforce-fullstack-division-gates`，main 基线 `ed7cb8075671b382dce009edf1e99bbccfdb48e2`。模式为 `mode: "code"`。
+
+## 18. Phase 2-B 前端管理控制台与连接管理交互实施任务
+
+- [Phase 2-B 前端管理控制台与连接管理交互实施计划](./web-connection-management.md)：TASK-APP-004，功能 F01、F02、F03、F04、F05、F25、F27，需求 R01、R02、R14、R15、R16、R17。在 mode: "frontend" 模式下由 Antigravity 专职落地 `mysql-mcp/web/` 与 `mysql-mcp/tests/web/`，实现本地登录页、会话/CSRF 驱动、连接列表与表单 CRUD、测试连接状态与无障碍交互，遵循全栈分工规范，不修改后端源码，不连接外部生产数据库。
+- 任务分支 `feat/web-connection-management`，main 基线 `b6af7e90c5cb89ec1c26e04c675380775b9a0a6f`。模式为 `mode: "frontend"`。
+
