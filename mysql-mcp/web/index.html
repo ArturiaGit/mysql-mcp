@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySQL MCP 本地安全管控平台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 顶栏 -->
+  <header class="app-header" role="banner">
+    <div class="brand-area">
+      <h1 class="brand-title">MySQL MCP 本地管控平台</h1>
+      <span class="brand-badge" aria-label="环境: 本地安全沙箱">LOCAL</span>
+    </div>
+    <div class="header-status-area">
+      <div class="connection-security-pill" title="回环单实例服务保护">
+        <span class="security-indicator-dot" aria-hidden="true"></span>
+        <span id="header-loopback-label">127.0.0.1 隔离</span>
+      </div>
+      <button id="btn-logout" class="btn btn-secondary btn-sm hidden" type="button">注销会话</button>
+    </div>
+  </header>
+
+  <!-- 主工作区 -->
+  <main class="app-main" role="main">
+    <!-- 登录视图 -->
+    <section id="login-view" class="login-container" aria-labelledby="login-heading">
+      <div class="card">
+        <h2 id="login-heading" class="card-title">本地回环认证</h2>
+        <p class="card-subtitle">单次高熵代码会话交换与 CSRF 安全防护</p>
+
+        <div class="security-notice-box" role="note">
+          <strong>安全提示：</strong> 服务端启动时在控制台输出单次随机高熵登录码（5 分钟内有效）。请输入该代码建立安全会话。
+        </div>
+
+        <div id="login-feedback" class="alert-box alert-error hidden" role="alert" aria-live="polite"></div>
+
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label for="local-code-input" class="form-label">本地单次登录码 (Local Code)</label>
+            <input 
+              id="local-code-input" 
+              class="form-input font-mono" 
+              type="password" 
+              name="local_code" 
+              required 
+              maxlength="128" 
+              autocomplete="off" 
+              autocorrect="off" 
+              spellcheck="false" 
+              placeholder="输入控制台输出的高熵代码">
+            <span class="form-hint">成功验证后将自动换取 HttpOnly 会话凭据与 CSRF 保护令牌。</span>
+          </div>
+          <button id="btn-login-submit" class="btn btn-primary btn-full" type="submit">
+            验证并进入控制台
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 主控制台视图 (连接管理) -->
+    <section id="dashboard-view" class="hidden" aria-labelledby="dashboard-heading">
+      <div class="dashboard-actions-bar">
+        <h2 id="dashboard-heading" class="section-title">数据库连接管理</h2>
+        <div class="actions-group">
+          <button id="btn-refresh" class="btn btn-secondary btn-sm" type="button">刷新列表</button>
+          <button id="btn-new-connection" class="btn btn-primary" type="button">+ 新增连接</button>
+        </div>
+      </div>
+
+      <!-- 全局通知反馈条 -->
+      <div id="global-feedback" class="alert-box hidden" role="status" aria-live="polite"></div>
+
+      <!-- 加载提示 -->
+      <div id="loading-state" class="alert-box alert-info hidden" role="status" aria-live="polite">
+        正在安全读取连接配置列表...
+      </div>
+
+      <!-- 表格容器 -->
+      <div id="table-container" class="table-responsive">
+        <table class="data-table" aria-label="已配置的 MySQL 连接列表">
+          <thead>
+            <tr>
+              <th scope="col">连接名称</th>
+              <th scope="col">主机与端口</th>
+              <th scope="col">用户名</th>
+              <th scope="col">默认数据库</th>
+              <th scope="col">版本号</th>
+              <th scope="col">操作</th>
+            </tr>
+          </thead>
+          <tbody id="connections-tbody">
+            <!-- 动态注入行数据 -->
+          </tbody>
+        </table>
+
+        <!-- 空态提示 -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-state-icon" aria-hidden="true">🗄️</div>
+          <h3 class="empty-state-title">未配置任何数据库连接</h3>
+          <p class="empty-state-desc">本地尚未保存任何 MySQL 连接。点击上方【+ 新增连接】创建首个受限连接配置。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 新增/编辑连接模态框 -->
+  <div id="connection-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="connection-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="connection-modal-title" class="modal-title">新增 MySQL 连接</h2>
+        <button id="btn-connection-modal-close" class="modal-close-btn" type="button" aria-label="关闭对话框">✕</button>
+      </div>
+      <form id="connection-form" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="form-conn-id">
+          <input type="hidden" id="form-conn-version">
+
+          <div id="modal-feedback" class="alert-box alert-error hidden" role="alert" aria-live="polite"></div>
+
+          <div class="form-group">
+            <label for="form-name" class="form-label">连接名称 <span aria-hidden="true">*</span></label>
+            <input id="form-name" class="form-input" type="text" required maxlength="64" placeholder="如 生产只读备库 或 本地测试库">
+            <span class="form-hint">1 至 64 个字符，用于直观识别不同数据源。</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="form-host" class="form-label">主机地址 (Host) <span aria-hidden="true">*</span></label>
+              <input id="form-host" class="form-input font-mono" type="text" required maxlength="255" placeholder="如 127.0.0.1 或 localhost">
+            </div>
+            <div class="form-group">
+              <label for="form-port" class="form-label">端口号 (Port) <span aria-hidden="true">*</span></label>
+              <input id="form-port" class="form-input font-mono" type="number" required min="1" max="65535" value="3306">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-username" class="form-label">数据库用户名 (Username) <span aria-hidden="true">*</span></label>
+            <input id="form-username" class="form-input font-mono" type="text" required maxlength="128" placeholder="如 readonly_user">
+          </div>
+
+          <div class="form-group">
+            <label for="form-password" class="form-label">密码 (Password)</label>
+            <input id="form-password" class="form-input" type="password" autocomplete="new-password" placeholder="请输入数据库密码">
+            <span id="form-password-hint" class="form-hint">输入数据库密码，将安全存储至 Windows Keyring，绝不回显。</span>
+          </div>
+
+          <div class="form-group">
+            <label for="form-database" class="form-label">默认数据库 (Default Database)</label>
+            <input id="form-database" class="form-input font-mono" type="text" maxlength="64" placeholder="可选，留空则由各查询显式指定">
+            <span class="form-hint">可选；指定默认目标数据库，但不替代每次操作的目标检查。</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-modal-test" class="btn btn-secondary" type="button">测试连接</button>
+          <button id="btn-modal-cancel" class="btn btn-secondary" type="button">取消</button>
+          <button id="btn-modal-save" class="btn btn-primary" type="submit">保存连接</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 删除确认模态框 -->
+  <div id="delete-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="delete-modal-title" class="modal-title">确认删除连接</h2>
+        <button id="btn-delete-modal-close" class="modal-close-btn" type="button" aria-label="关闭对话框">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="delete-conn-id">
+        <input type="hidden" id="delete-conn-version">
+
+        <div class="modal-warning-card" role="alert">
+          <p class="modal-warning-text">
+            <strong>⚠️ 重要安全提示：</strong> 删除本地连接资料及凭据，不删除数据库。此操作仅清除本机安全凭据与元数据，绝不影响数据库本身。
+          </p>
+        </div>
+
+        <div id="delete-target-preview" class="security-notice-box font-mono">
+          <!-- 动态注入删除目标简要信息 -->
+        </div>
+
+        <div id="delete-feedback" class="alert-box alert-error hidden" role="alert" aria-live="polite"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-delete-cancel" class="btn btn-secondary" type="button">取消</button>
+        <button id="btn-delete-confirm" class="btn btn-danger" type="button">确认删除本地配置与凭据</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 测试连接结果浮层模态框 -->
+  <div id="test-result-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="test-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="test-modal-title" class="modal-title">连通性测试结果</h2>
+        <button id="btn-test-modal-close" class="modal-close-btn" type="button" aria-label="关闭对话框">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="test-result-content">
+          <!-- 动态呈现测试指标或错误详情 -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-test-modal-done" class="btn btn-secondary" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
