@@ -14,7 +14,7 @@ main(() => {
     check:[], prompt:['handoff','prompt-file'], builds:['role'], 'record-delivery':['role','details']
   };
   if (command === '--help') {
-    console.log('Manual relay only; no commit/push/PR or automatic messages.\nCommands: begin, finish, accept, reject, cancel, check, prompt, builds, record-delivery\nAll require --task ID. begin: --role ROLE --phase PHASE; finish/record-delivery: --role ROLE --details JSON_FILE; accept/reject/cancel: --role ROLE --handoff ID --digest SHA256 [--reason TEXT]; prompt: --handoff ID [--prompt-file FILE] validates an existing saved prompt; builds: --role pi-desktop.\nRoles: antigravity, pi-desktop. Phases: planning, implementation, documentation_delivery, rework; bootstrap only TASK-GOV-004.\nDetails: goal, outcome, result ready|blocked, next_actions[], forbidden[], documentation_requests[], limitations[], blockers[], build{status,reason,check_ids}, verification[{check_id,reason}], report (required for ready non-planning), optional build_report; documentation_delivery adds next_phase wait|rework|planning and commit_message only for ready wait.\nBuild definitions: task.build_checks = [{id,kind:build|compile,command:node,args:[project-script,...],timeout_ms}]. Commands run without shell.'); return;
+    console.log('Manual relay only; no commit/push/PR or automatic messages.\nCommands: begin, finish, accept, reject, cancel, check, prompt, builds, record-delivery\nAll require --task ID. begin: --role ROLE --phase PHASE; finish/record-delivery: --role ROLE --details JSON_FILE; accept/reject/cancel: --role ROLE --handoff ID --digest SHA256 [--reason TEXT]; prompt: --handoff ID [--prompt-file FILE] validates an existing saved prompt; builds: --role pi-desktop (code) or antigravity (frontend).\nRoles: antigravity, pi-desktop. Phases: planning, implementation, documentation_delivery, rework; bootstrap only TASK-GOV-004.\nDetails: goal, outcome, result ready|blocked, next_actions[], forbidden[], documentation_requests[], limitations[], blockers[], build{status,reason,check_ids}, verification[{check_id,reason}], report (required for ready non-planning), optional build_report; documentation_delivery adds next_phase wait|rework|planning and commit_message only for ready wait.\nBuild definitions: task.build_checks = [{id,kind:build|compile,command:node,args:[project-script,...],timeout_ms}]. Commands run without shell.'); return;
   }
   if (!commands[command]) throw new Error('unknown handoff command; use --help');
   const options = {};
@@ -42,7 +42,8 @@ main(() => {
     }
   } else if (command === 'builds') {
     const {collaboration} = validate(root,{branch:t.branch});
-    if (options.role !== 'pi-desktop' || collaboration?.active?.role !== options.role) throw new Error('builds require active PI-Desktop phase');
+    const buildRole = t.mode === 'frontend' ? 'antigravity' : 'pi-desktop';
+    if (options.role !== buildRole || collaboration?.active?.role !== options.role || !['implementation','rework','bootstrap'].includes(collaboration?.active?.phase)) throw new Error('builds require active development phase owner');
     const report = runBuilds(root,t), output = path.join(root,'.governance-evidence','builds.json');
     fs.mkdirSync(path.dirname(output),{recursive:true}); fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');
     console.log(`build/compile diagnostics: ${output}`);
@@ -69,7 +70,8 @@ main(() => {
       const status = run.status !== 'completed' ? 'pending' : run.conclusion === 'success' ? 'success' : 'failure';
       if (run.headSha !== d.commit || run.url !== d.ci.url || status !== d.ci.status || run.workflowName !== 'Governance') throw new Error('actual governance CI version/result mismatch');
     }
-    const event = append(log,{type:'delivery',role:'antigravity',candidate:state.lastHandoff.id,source_head:d.commit,commit:d.commit,pr:pr.number,pr_url:pr.url,branch:t.branch,base:'main',ci:d.ci,next_actions:d.next_actions,next_phase:d.ci.status === 'failure' ? 'rework' : 'wait',receiver:'pi-desktop'});
+    const next_phase = d.ci.status === 'failure' ? 'rework' : 'wait';
+    const event = append(log,{type:'delivery',role:'antigravity',candidate:state.lastHandoff.id,source_head:d.commit,commit:d.commit,pr:pr.number,pr_url:pr.url,branch:t.branch,base:'main',ci:d.ci,next_actions:d.next_actions,next_phase,receiver:t.mode === 'frontend' && next_phase === 'rework' ? 'antigravity' : 'pi-desktop'});
     validateLog(root,t,p,log,{delivery:true}); result = {log,event};
   }
   if (result) {

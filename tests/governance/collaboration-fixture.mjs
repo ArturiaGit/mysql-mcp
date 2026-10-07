@@ -28,6 +28,9 @@ function baselineRepository() {
     write('docs/REQUIREMENTS.md','| R01 | Synthetic collaboration |\n');
     write('docs/ACCEPTANCE.md','# Immutable acceptance\n'); write('docs/PROJECT_CONSTRAINTS.md','# Safety\n');
     write('docs/plans/test.md','# Approved synthetic scope\n');
+    write('mysql-mcp/web/index.html','<!doctype html><title>Synthetic fixture</title>\n');
+    write('mysql-mcp/tests/web/ui.mjs','export const synthetic = true;\n');
+    write('mysql-mcp/src/existing.mjs','export const backend = true;\n');
     write('tests/governance/example.test.mjs',"import test from 'node:test';import assert from 'node:assert/strict';test('explicit assertion',()=>assert.equal(1,1));\n");
     git('add','.'); git('commit','-m','fixture: pre-policy baseline');
     baseline = {root,base:git('rev-parse','HEAD')};
@@ -45,6 +48,7 @@ export function fixture(t,mode = 'code') {
   const base = seed.base;
   const policy = JSON.parse(fs.readFileSync(path.join(source,'governance/collaboration.json'),'utf8'));
   policy.enabled_base = base; delete policy.bootstrap;
+  // Inherit the production role paths unchanged so regressions cannot be masked by fixture overrides.
   const task = {id:'TASK',kind:'maintenance',status:'in_progress',feature_ids:['G03'],branch:'chore/test',base_commit:base,authorization:'Explicit synthetic authorization; no real database.',allowed_paths:['docs/','governance/','mysql-mcp/','scripts/','tests/','.githooks/','outside.bin'],plan_path:'docs/plans/test.md',mode,pr:null,scope_changes:[],governance_change:true};
   const data = {
     tasks:[task], features:[{id:'G03',key:'collaboration',title:'Collaboration',kind:'engineering',requirements:['R01'],behavior:'Explicit collaboration gates',dependencies:[],implementation_paths:[],test_paths:[],task_ids:['TASK'],implementation:'planned',acceptance:[{id:'G03-A1',description:'Synthetic stage checks',evidence_types:['automated'],check_ids:['unit']}],evidence:[]}],
@@ -60,7 +64,7 @@ export function fixture(t,mode = 'code') {
   const accept = (event,role = event.receiver) => persist(receive(root,task,role,event.id,event.digest));
   const run = () => { const r = cli('run'); assert.equal(r.status,0,r.stdout+r.stderr); return path.join(root,'.governance-evidence/run.json'); };
   const planning = () => {start('antigravity','planning');const e = end('antigravity');accept(e);return e;};
-  const implementation = () => {planning();start('pi-desktop','implementation');write('mysql-mcp/src/value.mjs','export const value = 1;\n');const e = end('pi-desktop',{report:run()});accept(e);return e;};
+  const implementation = () => {planning();const role = mode === 'frontend' ? 'antigravity' : 'pi-desktop';start(role,'implementation');write(mode === 'frontend' ? 'mysql-mcp/web/value.mjs' : 'mysql-mcp/src/value.mjs','export const value = 1;\n');const e = end(role,{report:run()});accept(e);return e;};
   const candidate = () => { if(mode === 'docs')planning();else implementation();start('antigravity','documentation_delivery');write('docs/result.md','# Actual synthetic results\n');return end('antigravity',{report:run(),commit_message:'chore(collaboration): synthetic delivery'}); };
   return {root,write,git,shell,base,policy,task,data,save,cli,persist,start,end,accept,details,run,planning,implementation,candidate};
 }
