@@ -117,4 +117,12 @@ export interface SqlDecision {
 2. **拒绝方言歧义与隐藏通道**：坚决拦截可执行注释（`/*!50000 ... */`）、优化器 hint（`/*+ ... */`）、用户变量（`@var`、`@@global`）、双引号模式以及非 ASCII 反斜线转义；
 3. **严格库名一致性**：显式前缀必须与当前显式目标 `database` 完全一致（大小写严格匹配），硬性拦截任何系统库（`mysql`、`information_schema`、`performance_schema`、`sys`）前缀；
 4. **白名单函数与类型**：仅放行常见安全数学、字符串、聚合函数（`ABS`, `CONCAT`, `COUNT`, `SUM` 等），拒绝未知或自定义函数；
-5. **预算元数据说明**：返回的 `max_rows` 与 `max_response_bytes` 仅为预算元数据，本原型未做 SQL 文本改写或结果集截断。未验证真实 MySQL 版本与运行时影响。
+5. **Phase 3 SQL 改写与哨兵保护 (`prepareReadonlySql`)**：
+   - MCP `query` 工具仅接受纯 AST L0 SELECT 语句（`operation === 'SELECT'`，`risk_level === 'L0'`，`requires_approval === false`）；拒绝任何 L1 写入或 SHOW/EXPLAIN 语句（元数据走专用工具）；
+   - **LIMIT 1001 哨兵注入**：若语句未包含 LIMIT，语法树尾节点自动注入 `LIMIT 1001`；若已包含 LIMIT，强制校验各数值为非负安全整数并将行数上限强制收敛为 `Math.min(count, 1001)`；
+   - **改写后二次 AST 复验**：经 AST `sqlify` 重新序列化后，必须再次送入 `evaluateSql` 执行完整策略判定，确保改写后输出依然为合法的 L0 SELECT 语句，杜绝任何序列化注入风险；
+6. **固定元数据 SQL 占位绑定 (`metadataStatement`)**：
+   - 探查库表结构的元数据 SQL 使用固定白名单模板，参数绑定采用 SQL mode 无关的 UTF-8 16进制转换（`CONVERT(X'...' USING utf8mb4)`），彻底消除转义歧义与注入漏洞；
+7. **流式结果集受控截断 (`collectRows`)**：
+   - 实际执行时，行数达到 1000 行标记 `truncation_reason = 'row_limit'`；
+   - 列数超过 128 列、单字段超过 64KiB、或编码后整帧超过 1MiB 预算标记 `truncation_reason = 'byte_limit'`。超限保护真实生效。

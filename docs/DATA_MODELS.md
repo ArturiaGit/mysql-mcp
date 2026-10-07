@@ -58,9 +58,10 @@ interface ConnectionView {
    - 第三阶段（提交配置）：更新 `items` 中连接记录的新引用与递增版本号，原子落盘；
    - 第四阶段（清理旧凭据）：从 Keyring 删除旧凭据，并在落盘成功后从 `cleanup_refs` 移除；若删除失败则保留非秘密 tombstone，后续任何修改操作将自动重试清理；
 4. **并发与状态保护**：
-   - 测试任务进行中持有连接使用读锁；实际测试任务未结束不归还并发额度；
-   - 对使用中或测试中的连接发起编辑或删除，服务端返回 `409 STATE_CONFLICT` 坚决拒绝；
-   - 乐观锁并发控制：编辑或删除时前端必须提供 `expected_version`，与当前记录不一致时返回 `409 STATE_CONFLICT`；
+   - **测试锁与读租约**：测试任务进行中持有独占使用锁；受限读取任务通过 `withReadConnection` 获取并行读租约（基于内存计数 Map），允许多个只读请求安全并发复用凭据；
+   - **使用中状态互斥**：只要连接仍有活跃的测试锁或只读租约（`readers.get(id) > 0`），对该连接发起的 `PATCH` 编辑或 `DELETE` 删除操作，服务端均直接返回 `409 STATE_CONFLICT` 拒绝执行，杜绝读取进行中凭据被清理或连接配置漂移；
+   - **完全隔离的会话生命周期**：读租约仅共享不可变的连接配置草稿与解密凭据，**绝不跨请求共享 MySQL 连接实例或会话状态**；每个请求均建立全新的独立 MySQL 只读会话，查询完毕后立即销毁；
+   - **乐观锁并发控制**：编辑或删除时前端必须提供 `expected_version`，与当前记录不一致时返回 `409 STATE_CONFLICT`；
    - 注：本地人工审批系统尚未实现（规划于 Phase 4），当前阶段不声称已实测“旧审批失效”。
 
 ## 3. 会话与请求
@@ -119,18 +120,82 @@ interface ChangeRequest {
 
 审批记录持久化不保存可重放的 SQL。重启对旧执行意图保守标 UNKNOWN；旧待审批请求失效。重连会话不能通过猜 ID 获取别人的结果；旧请求摘要可由认证管理页面查看，MCP 跨会话恢复机制不在首期承诺内。
 
-## 5. 结果与审计
+## 5. 结果与审计（Phase 3 落地模型）
+
+### 5.1 查询结果模型 (`QueryResult`)
+在 Phase 3 中，受限只读查询结果模型在 `mysql-mcp/src/sql/results.ts` 完整锁定：
 
 ```typescript
-interface QueryResult {
-  columns: { name: string; mysql_type: string; encoding: string }[];
-  rows: unknown[][];
-  returned_rows: number;
-  truncated: boolean;
-  truncation_reason: 'row_limit' | 'byte_limit' | null;
-  duration_ms: number;
+export interface ColumnMeta {
+  name: string;                         // 列名（截断上限 1024 字符）
+  mysql_type: string;                   // MySQL 底层字段类型编号或名称（截断上限 128 字符）
+  encoding: 'text' | 'base64';          // 编码方式：二进制或原始字节流使用 base64，文本使用 text
 }
 
+export interface QueryResult {
+  columns: ColumnMeta[];                // 列元数据数组（最多 128 列，超限截断并触发 byte_limit）
+  rows: unknown[][];                    // 二维数据数组（保留同名重复列；最多 1000 行）
+  returned_rows: number;                // 实际返回行数（0..1000）
+  truncated: boolean;                   // 是否发生截断
+  truncation_reason: 'row_limit' | 'byte_limit' | null; // 截断原因：行数超限为 row_limit；单字段超限/列超限/整帧超限为 byte_limit
+  duration_ms: number;                  // 实际查询与流式拉取耗时毫秒数（0..15000）
+}
+```
+
+**类型映射与序列化规则**：
+- **精度安全**：`BIGINT`（64位整数）与 `DECIMAL`（定点数）强制转为高精度字符串返回，杜绝 JavaScript IEEE 754 浮点精度截断；
+- **日期与时间**：强制配置 `dateStrings: true`，直接输出原始 MySQL 日期/时间文本，不擅自做本地时区漂移转换；
+- **二进制与 BIT**：字符集为二进制（charset 63 且类型为 BLOB/VARBINARY/BINARY/BIT 等）的字段，内容在服务端编码为标准 `base64` 文本（单字段上限 49,149 原始字节，base64 编码后不超过 64KiB），`encoding` 标记为 `'base64'`；
+- **安全基本类型**：`null`、`boolean`、以及 JavaScript 安全范围内的有限数值（`Number.isSafeInteger` 或非 NaN/Infinity 浮点数）保持原样输出；
+- **字段截断防线**：单字段超过 64KiB (`65,536` 字节) 执行边界裁剪（避免破坏 UTF-16 代理对或 base64 四元组），并触发 `truncation_reason: 'byte_limit'`；
+- **整帧预算熔断**：单次响应计算包含 JSON-RPC 及 text content 转义的完整预算 `responseBytes(result)`，若超过 1MiB (`1,048,576` 字节)，自动弹出超出预算的最后一行并触发 `byte_limit` 截断。
+
+### 5.2 元数据工具数据模型
+- **`list_databases` 响应**：
+  ```typescript
+  interface DatabaseListResult {
+    items: string[];                    // 数据库名列表（过滤为账号实际可见库）
+    next_cursor: null;
+  }
+  ```
+- **`list_tables` 响应**：
+  ```typescript
+  interface TableListResult {
+    items: {
+      name: string;                     // 表或视图名
+      type: 'table' | 'view';           // 区分基表与视图
+    }[];
+    next_cursor: null;
+  }
+  ```
+- **`describe_table` 响应**：
+  ```typescript
+  interface TableSchemaResult {
+    columns: {
+      name: string;                     // 列名
+      mysql_type: string;               // 完整 MySQL 类型声明（如 varchar(255)）
+      nullable: boolean;                // 是否可空 (IS_NULLABLE === 'YES')
+      primary_key: boolean;             // 是否主键 (COLUMN_KEY === 'PRI')
+      ordinal_position: number;         // 列顺序位置 (1-based)
+    }[];
+    indexes: {
+      name: string;                     // 索引名称
+      column: string | null;            // 索引包含的列名（可为 null）
+      unique: boolean;                  // 是否唯一索引 (NON_UNIQUE === 0)
+      sequence: number;                 // 复合索引中的序号 (SEQ_IN_INDEX)
+    }[];
+  }
+  ```
+- **`list_connections` 响应**：
+  ```typescript
+  interface ConnectionListResult {
+    items: ConnectionView[];            // 脱敏连接视图（至多 256 项）
+    next_cursor: null;
+  }
+  ```
+
+### 5.3 变更结果草案（Phase 4）
+```typescript
 interface ChangeResult {
   request_id: string;
   state: ChangeState;
@@ -140,8 +205,6 @@ interface ChangeResult {
   effect_note?: string;
 }
 ```
-
-rows 用数组保留同名列；BIGINT/DECIMAL 用字符串避免精度损失，二进制使用显式编码标识，日期不擅自做时区转换。具体类型映射须按驱动测试后锁定。truncated 为 true 不意味着数据库总行数已知；不能将 returned_rows 当总记录数。
 
 审计最小字段：event_id、request_id、session_id 的非秘密标识、connection_id、database、operation、sql_fingerprint、channel、state、时间、error_code 和必要执行摘要。目标库名同样是敏感元数据，应限制访问。日志不要保存原始 SQL 或业务结果；错误消息先脱敏。
 

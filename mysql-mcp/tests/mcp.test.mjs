@@ -90,7 +90,7 @@ test('MCP factory is explicit, independent and does not connect a transport', as
   }
 });
 
-test('REAL SDK stdio: initialize, ping, empty tools, safe refusal, clean stdout and shutdown', { timeout: 25000 }, async () => {
+test('REAL SDK stdio: initialize, ping, five tools, safe refusal, clean stdout and shutdown', { timeout: 25000 }, async () => {
   const transport = new ObservedStdioTransport({
     command: process.execPath, args: [serverPath], cwd: root,
     env: childEnvironment(), stderr: 'pipe'
@@ -108,8 +108,16 @@ test('REAL SDK stdio: initialize, ping, empty tools, safe refusal, clean stdout 
     assert.deepEqual(client.getServerVersion(), { name: 'mysql-mcp', version: '0.1.0-alpha.0' });
     assert.deepEqual(client.getServerCapabilities(), { tools: {} });
     assert.deepEqual(await bounded(client.ping()), {});
-    assert.deepEqual(await bounded(client.listTools()), { tools: [] });
-    for (const name of ['query', 'approve_change', 'password', 'unknown_SYNTHETIC_SECRET_MARKER']) {
+    const listed = await bounded(client.listTools());
+    assert.deepEqual(listed.tools.map(tool => tool.name), ['list_connections', 'list_databases', 'list_tables', 'describe_table', 'query']);
+    for (const tool of listed.tools) assert.equal(tool.inputSchema.additionalProperties, false);
+    const invalid = await bounded(client.callTool({ name: 'query', arguments: { password: 'SYNTHETIC_SECRET_MARKER' } }));
+    assert.equal(invalid.isError, true);
+    assert.equal(JSON.parse(invalid.content[0].text).error.code, 'INVALID_ARGUMENT');
+    const unavailable = await bounded(client.callTool({ name: 'list_connections', arguments: {} }));
+    assert.equal(unavailable.isError, true);
+    assert.equal(JSON.parse(unavailable.content[0].text).error.code, 'SERVICE_UNAVAILABLE');
+    for (const name of ['approve_change', 'password', 'unknown_SYNTHETIC_SECRET_MARKER']) {
       await assert.rejects(() => bounded(client.callTool({ name, arguments: {} })), error => {
         assert.ok(error instanceof McpError);
         assert.equal(error.code, ErrorCode.MethodNotFound);
@@ -148,4 +156,24 @@ test('REAL SDK stdio: initialize, ping, empty tools, safe refusal, clean stdout 
   // EOF shutdown was graceful; SDK did not need to terminate/kill the server.
   assert.equal(transport.child.exitCode, 0);
   assert.equal(transport.child.signalCode, null);
+});
+test('malformed stdio input logs only a fixed diagnostic on stderr', () => {
+  const result = spawnSync(process.execPath, [serverPath], {
+    cwd: root, env: childEnvironment(), shell: false, windowsHide: true,
+    input: '{invalid SYNTHETIC_SECRET_MARKER}\n', encoding: 'utf8', timeout: 10000, maxBuffer: 65536
+  });
+  assert.equal(result.status, 0);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'MCP protocol error.\n');
+});
+test('raw stdio oversized request ID is not echoed or dispatched', () => {
+  const id = 'x'.repeat(1_048_576);
+  const result = spawnSync(process.execPath, [serverPath], {
+    cwd: root, env: childEnvironment(), shell: false, windowsHide: true,
+    input: JSON.stringify({ jsonrpc: '2.0', id, method: 'tools/call', params: { name: 'list_connections', arguments: {} } }) + '\n',
+    encoding: 'utf8', timeout: 10000, maxBuffer: 65536
+  });
+  assert.equal(result.status, 0);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'MCP protocol error.\n');
 });

@@ -23,6 +23,7 @@
       "mysql-mcp/tests/sql-policy.test.mjs",
       "mysql-mcp/tests/mcp.test.mjs",
       "mysql-mcp/tests/server.test.mjs",
+      "mysql-mcp/tests/tools.test.mjs",
       "mysql-mcp/package.json",
       "mysql-mcp/package-lock.json",
       "mysql-mcp/tsconfig.json",

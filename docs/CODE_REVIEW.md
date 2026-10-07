@@ -13,7 +13,7 @@ TypeScript strict 不能替代运行时校验。标识符不能通过值参数�
 | 命令 | 执行入口 | 覆盖范围 | 当前状态 |
 |---|---|---|---|
 | `npm run typecheck` / `npm run compile` | `node scripts/compile.mjs` | 类型与模块边界（严格 NodeNext，`tsc --noEmit`，不落盘） | 已实现（Phase 1 / F28，作为 `app-compile` 门禁） |
-| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行全部 190 项应用测试（smoke 6项、keyring 5项、sql-policy 113项、mcp 3项、server 63项） | 已实现（Phase 2-A / F01~F05, F25, F28，作为 `app-build` 门禁） |
+| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行全部 307 项应用测试（smoke 6项、keyring 5项、sql-policy 113项、mcp 12项、server 63项、tools 108项） | 已实现（Phase 3 / F07~F11, F28，作为 `app-build` 门禁） |
 | `node scripts/governance/prepare.mjs` | `scripts/governance/prepare.mjs` | 治理快照与 CI 依赖准备契约（无 Shell，`npm ci --ignore-scripts`） | 已实现（Phase 1 / F28） |
 | `npm run test:e2e` | 拟建 | 浏览器交互，默认模拟数据库 | 未实现（后续 Phase） |
 
@@ -25,21 +25,22 @@ TypeScript strict 不能替代运行时校验。标识符不能通过值参数�
 |---|---|---|---|
 | T01 | 配置 CRUD、密码替换及存储失败 | 不回显秘密；失败保留有效旧配置，无明文后备 | Phase 2-A 已完成原子 JSON 持久化、单写者独占锁与四阶段 Keyring 补偿清理测试 |
 | T02 | 未认证、伪 Host/Origin、CSRF | 变更前拒绝；内部令牌不能批准网页请求 | Phase 2-A 已完成 Fastify 服务端严格 Host/Origin、Session 与 CSRF 拦截测试（63项） |
-| T03 | 多连接/数据库并发 | 无目标串用，默认库不替代显式参数 | 未实现（Phase 3） |
+| T03 | 多连接/数据库并发 | 无目标串用，默认库不替代显式参数 | Phase 3 已完成内存驱动与独立会话隔离测试，无目标串用，并发读租约与 4 并发额度保护 |
 | T04 | 多语句、可执行注释、CTE、文件写入、危险函数 | 策略拒绝越界；无驱动执行 | Phase 1-B 已完成 AST 策略 113 项正反例测试 |
-| T05 | 合法读取及权限不足 | 保持精度、正确截断、错误脱敏 |
-| T06 | request_change 尚未确认 | 无写入派发 |
-| T07 | 原生/网页拒绝、取消、过期 | 无写入，拒绝不改道后备 |
-| T08 | 修改 SQL/目标/连接版本 | 旧批准不可复用 |
-| T09 | 重复点击、并发响应、迟到挑战 | 原请求最多取得一次派发权 |
-| T10 | 会话越权及伪造 confirmed | 拒绝，不能获取他人请求 |
-| T11 | 超时、断连、状态日志失败、进程崩溃 | 保守记录 UNKNOWN 或执行前失败，不重放 |
-| T12 | 原生不支持/自动批准风险 | 网页后备，未确认不执行 |
-| T13 | stdio、脱敏、超大输入输出 | stdout 协议纯净，资源有界 |
-| T14 | UI 长 SQL/XSS/密码/键盘 | 安全渲染，完整审批内容，焦点正确 |
-| T15 | 隔离 MySQL DML/DDL（另行授权） | 逐次人工确认，DBA 权限有效，不承诺 DDL 回滚 |
+| T05 | 合法读取及权限不足 | 保持精度、正确截断、错误脱敏 | Phase 3 已完成 5 个 MCP 工具严格 Schema、参数校验、AST L0 校验、行数/列数/字段/帧截断、错误脱敏及白名单映射自动化测试（tools.test.mjs 108项） |
+| T06 | request_change 尚未确认 | 无写入派发 | 未实现（Phase 4） |
+| T07 | 原生/网页拒绝、取消、过期 | 无写入，拒绝不改道后备 | 未实现（Phase 4） |
+| T08 | 修改 SQL/目标/连接版本 | 旧批准不可复用 | 未实现（Phase 4） |
+| T09 | 重复点击、并发响应、迟到挑战 | 原请求最多取得一次派发权 | 未实现（Phase 4） |
+| T10 | 会话越权及伪造 confirmed | 拒绝，不能获取他人请求 | 未实现（Phase 4） |
+| T11 | 超时、断连、状态日志失败、进程崩溃 | 保守记录 UNKNOWN 或执行前失败，不重放 | Phase 3 已实现只读超时与断连主动销毁会话释放资源；写入状态机规划于 Phase 4 |
+| T12 | 原生不支持/自动批准风险 | 网页后备，未确认不执行 | 未实现（Phase 4） |
+| T13 | stdio、脱敏、超大输入输出 | stdout 协议纯净，资源有界 | Phase 3 已完成 BudgetTransport（ID <= 256B, Frame <= 1MiB）测试，超限关闭不回显，stderr 脱敏诊断，SDK stdio 集成测试 |
+| T14 | UI 长 SQL/XSS/密码/键盘 | 安全渲染，完整审批内容，焦点正确 | Phase 2-B 已完成前端管理控制台安全渲染与表单边界测试 |
+| T15 | 隔离 MySQL DML/DDL（另行授权） | 逐次人工确认，DBA 权限有效，不承诺 DDL 回滚 | 未实现（待真实数据库授权） |
 
 每个测试记录前置状态、动作、预期、实际结果、版本和证据。不能只测成功路径，不能把模拟测试当真实客户端或数据库通过。
+**警示**：输出受控截断（1000行/128列/64KiB单字段/1MiB帧）属于应用服务层保护，不等于底层 mysql2 解码或数据库内部扫描的物理硬内存上限；超时销毁套接字不等于 MySQL 服务端远端执行已立即中止。
 
 ## 4. 变更审查清单
 

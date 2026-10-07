@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-07
 - 关联任务：TASK-APP-004
-- 关联 PR：[#14](https://github.com/ArturiaGit/mysql-mcp/pull/14)（待提交创建）
-- 关联 Commit：待提交
+- 关联 PR：[#14](https://github.com/ArturiaGit/mysql-mcp/pull/14)
+- 关联 Commit：[`f79f4e1`](https://github.com/ArturiaGit/mysql-mcp/commit/f79f4e14f042136c6fd0fc36467fcfd77185ecef) (Squash: [`e94b446`](https://github.com/ArturiaGit/mysql-mcp/commit/e94b44660a7c5a720e74c02cc419111db244b066))
 - 责任执行方：Antigravity (Planning, Frontend Implementation & Documentation Delivery)
 - 关联功能/需求：F01, F02, F03, F04, F05, F25, F27 / R01, R02, R14, R15, R16, R17
 

@@ -137,3 +137,8 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 - [Phase 2-B 前端管理控制台与连接管理交互实施计划](./web-connection-management.md)：TASK-APP-004，功能 F01、F02、F03、F04、F05、F25、F27，需求 R01、R02、R14、R15、R16、R17。在 mode: "frontend" 模式下由 Antigravity 专职落地 `mysql-mcp/web/` 与 `mysql-mcp/tests/web/`，实现本地登录页、会话/CSRF 驱动、连接列表与表单 CRUD、测试连接状态与无障碍交互，遵循全栈分工规范，不修改后端源码，不连接外部生产数据库。
 - 任务分支 `feat/web-connection-management`，main 基线 `b6af7e90c5cb89ec1c26e04c675380775b9a0a6f`。模式为 `mode: "frontend"`。
 
+## 19. Phase 3 受限读取及 MCP 协议骨架实现任务
+
+- [Phase 3 受限读取及 MCP 协议骨架实现计划](./mcp-read-and-tools.md)：TASK-APP-005，功能 F07、F08、F09、F10、F11，需求 R04、R05、R06、R07、R08、R14、R16、R17。在 mode: "code" 模式下由 PI-Desktop 落地 5 个受限读取/元数据 MCP 工具（list_connections, list_databases, list_tables, describe_table, query）、动态目标隔离、AST 策略驱动的只读校验、行数/列数/大字段硬阈值截断、错误脱敏模型及后端自动化测试；遵循全栈分工规范，不编写前端界面，不连接外部生产数据库。
+- 任务分支 `feat/mcp-read-and-tools`，main 基线 `e94b44660a7c5a720e74c02cc419111db244b066`。模式为 `mode: "code"`。
+

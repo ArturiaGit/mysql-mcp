@@ -14,8 +14,10 @@
 2. **应用开发工作区命令**（在 `mysql-mcp/` 目录下）：
    - 安装依赖：`npm ci --ignore-scripts`
    - 类型检查：`npm run compile` 或 `npm run typecheck`（执行 `node scripts/compile.mjs`，`tsc --noEmit`，不落盘）
-   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 5 个套件共 190 项应用测试，含 63 项 Fastify 服务端测试）
-   - MCP Stdio 原型启动：`node dist/mcp/server.js`（直接作为独立子进程启动，监听 stdin/stdout）
+   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 6 个套件共 307 项应用测试，含 63 项 Fastify 服务端测试与 108 项 MCP 工具测试）
+   - MCP Stdio 服务启动：
+     - 代码集成方式：调用 `startStdioServer({ connections: connectionService })`，显式注入活动 `ConnectionService` 实例以支持受限读取与元数据探查；
+     - 直接独立子进程方式：`node dist/mcp/server.js`（直接作为独立子进程启动，监听 stdin/stdout，可正常发现 5 个工具；但由于未注入连接依赖，调用数据库工具安全返回 `SERVICE_UNAVAILABLE`，绝不猜测本地配置路径）
 
 运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。
 
@@ -83,9 +85,10 @@ await server.close();
 
 ## 4. 数据库与网络边界
 
-本地页面回环监听不等于 MySQL 只能位于本机；多个服务器连接受 DBA 授权与网络策略约束。远程连接 TLS/证书需求待确认，不静默跳过证书验证。
-
-查询结果会进入客户端/模型上下文，需核实所用模型的数据处理政策；不要把凭据未出本机描述成全部数据仅本地处理。审批必须显示目标，生产连接应有显著名称标识，但不虚构已存在的环境标签功能。
+本地页面回环监听不等于 MySQL 只能位于本机；多个服务器连接受 DBA 授权与网络策略约束。
+- **默认回环目标限制**：当前默认 MySQL 执行适配器（`mysqlReadSession`）严格限定连接目标仅允许回环地址（`127.0.0.1`、`localhost`、`::1`）；
+- **远程 TLS 契约未冻结**：远程服务器的 TLS 证书与加密契约尚未在架构规范中冻结，连接非回环主机将确定性返回 `SERVICE_UNAVAILABLE`，坚决不静默关闭证书校验；
+- **模型上下文边界**：查询结果会进入客户端/模型上下文，需核实所用模型的数据处理政策；不要把凭据未出本机描述成全部数据仅本地处理。审批必须显示目标，生产连接应有显著名称标识，但不虚构已存在的环境标签功能。
 
 ## 5. 运维与排错
 
