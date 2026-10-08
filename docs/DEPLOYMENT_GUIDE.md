@@ -14,17 +14,18 @@
 2. **应用开发工作区命令**（在 `mysql-mcp/` 目录下）：
    - 安装依赖：`npm ci --ignore-scripts`
    - 类型检查：`npm run compile` 或 `npm run typecheck`（执行 `node scripts/compile.mjs`，`tsc --noEmit`，不落盘）
-   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 6 个套件共 307 项应用测试，含 63 项 Fastify 服务端测试与 108 项 MCP 工具测试）
+   - 生产构建与全量测试：`npm run build` 或 `npm test`（执行 `node scripts/build.mjs`，清理 `dist/`，编译产物并运行全部 7 个套件共 603 项应用测试，含 64 项 Fastify 服务端测试、106 项 MCP 只读工具测试与 113 项变更生命周期与审批测试）
    - MCP Stdio 服务启动：
-     - 代码集成方式：调用 `startStdioServer({ connections: connectionService })`，显式注入活动 `ConnectionService` 实例以支持受限读取与元数据探查；
-     - 直接独立子进程方式：`node dist/mcp/server.js`（直接作为独立子进程启动，监听 stdin/stdout，可正常发现 5 个工具；但由于未注入连接依赖，调用数据库工具安全返回 `SERVICE_UNAVAILABLE`，绝不猜测本地配置路径）
+     - 代码集成方式：调用 `startStdioServer({ connections: connectionService, changes: changeManager })`，显式注入活动连接与变更服务实例；
+     - 直接独立子进程方式：`node dist/mcp/server.js`（直接作为独立子进程启动，监听 stdin/stdout，可正常发现 7 个工具；但由于未注入依赖，调用数据库工具安全返回 `SERVICE_UNAVAILABLE`，绝不猜测本地配置路径）
 
 运行身份为有权限使用其系统凭据存储的本机用户，不默认管理员权限，不自动注册 Windows 服务或开放防火墙。
 
-### 存储路径与锁机制（Phase 2-A 落地）
-- **连接数据路径**：
-  - Windows 环境：默认使用 `%LOCALAPPDATA%/mysql-mcp/connections.json`；
-  - 非 Windows 环境：默认使用 `$HOME/mysql-mcp/connections.json`；
+### 存储路径与锁机制（Phase 2-A & Phase 4-A 落地）
+- **连接与变更数据路径**：
+  - Windows 环境：默认使用 `%LOCALAPPDATA%/mysql-mcp/connections.json` 与 `%LOCALAPPDATA%/mysql-mcp/changes.json`；
+  - 非 Windows 环境：默认使用 `$HOME/mysql-mcp/connections.json` 与 `$HOME/mysql-mcp/changes.json`；
+  - `changes.json` 采用 `schema_version: 1` 最小状态日志格式，仅记录脱敏指纹与状态摘要，绝不持久化明文 SQL；
   - 原生凭据存储依赖 Windows Keyring，若系统底层凭据存储不可用则 fail-closed 直接拒绝启动或操作；
 - **单写者锁管理 (`connections.json.lock`)**：
   - 采用独占式排他打开标志（`wx`）创建 `.lock` 租约文件，防止双进程并发写入；
@@ -34,7 +35,7 @@
   - 目录创建模式 `0700`，文件创建模式 `0600`（Windows 环境继承用户目录 ACL，未做独立 Windows ACL 强化验收）；
   - 数据写入经过临时文件与 `file.sync()`，通过原子 `rename` 覆盖，断电或崩溃不损坏原文件。
 
-## 2. Fastify 本地回环管理服务（Phase 2-A 落地）
+## 2. Fastify 本地回环管理服务（Phase 2-A & Phase 4-A 落地）
 
 ### 2.1 工厂 API 与生命周期
 ```typescript
@@ -43,18 +44,18 @@ import { createLocalServer } from './server/app.js';
 // 1. 创建服务实例（惰性工厂，导入与实例化时不产生网络监听或副作用）
 const server = await createLocalServer({
   port: 3210, // 默认回环端口为 3210；测试或端口占用时可设为 0 由 OS 分配
-  storageFile: 'path/to/connections.json', // 可选自定义文件路径
+  metadataFile: 'path/to/connections.json', // 可选自定义连接配置路径
+  changeFile: 'path/to/changes.json',       // 可选自定义变更日志路径
 });
 
-// 2. 生成单次高熵登录码 (32 字节 HEX)
-const code = server.issueLocalCode();
-console.log(`本地登录代码: ${code}`);
+// 2. 导出同进程绑定的 MCP Server（共用同一连接与审批权威单例）
+const mcpServer = server.createMcpServer();
 
 // 3. 启动监听（严格且仅绑定 127.0.0.1）
-await server.start();
-console.log(`管理服务运行于: http://127.0.0.1:${server.port}`);
+const { host, port } = await server.start();
+console.log(`管理服务运行于: http://${host}:${port}`);
 
-// 4. 优雅关闭（释放单写者锁与底层资源）
+// 4. 优雅关闭（释放单写者锁、中断活动租约与底层资源）
 await server.close();
 ```
 

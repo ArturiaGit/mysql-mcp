@@ -126,3 +126,24 @@ export interface SqlDecision {
 7. **流式结果集受控截断 (`collectRows`)**：
    - 实际执行时，行数达到 1000 行标记 `truncation_reason = 'row_limit'`；
    - 列数超过 128 列、单字段超过 64KiB、或编码后整帧超过 1MiB 预算标记 `truncation_reason = 'byte_limit'`。超限保护真实生效。
+
+### 6.4 Phase 4-A 受控 DML 与 DDL 策略细则与有界支持矩阵
+
+在 Phase 4-A 中，`evaluateSql(sql, database, channel)` 演进为支持双通道（`'query'` 与 `'change'`）的精确分级策略：
+
+1. **通道目标不符区分**：
+   - 在 `'change'` 变更通道中，若语句显式库名前缀与当前显式目标 `database` 不一致，精准返回 `TARGET_MISMATCH`；
+   - 在 `'query'` 只读通道中，任何非目标库或系统库访问一律维持 `SQL_NOT_ALLOWED`。
+2. **受支持 DML 规范**：
+   - **INSERT**：仅允许单表 `INSERT INTO <table> (columns...) VALUES (...)`，严格校验列名去重与各行行宽一致性；判定为 L1；
+   - **UPDATE**：仅允许单表 `UPDATE <table> SET ...`。含 `WHERE` 子句判定为 L1；缺少 `WHERE` 子句判定为全表更新，标记 L2 并附加风险码 `HIGH_RISK`；
+   - **DELETE**：仅允许单表 `DELETE FROM <table> ...`。含 `WHERE` 子句判定为 L1；缺少 `WHERE` 子句判定为全表删除，标记 L2 并附加风险码 `HIGH_RISK`。
+3. **受支持 DDL 规范与有界适配**：
+   - **CREATE TABLE**：仅允许有界受支持列类型子集（常见数值、字符、日期时间），支持 `PRIMARY KEY` 与基本列属性；判定为 L2 `HIGH_RISK`；
+   - **ALTER TABLE**：仅允许列级变更（`ADD COLUMN`, `DROP COLUMN`, `MODIFY COLUMN`），拒绝任意嵌套复合 DDL；判定为 L2 `HIGH_RISK`；
+   - **CREATE / DROP DATABASE**：仅允许显式指定与当前目标一致的合法标识符；判定为 L2 `HIGH_RISK`；
+   - **ALTER DATABASE**：支持字符集与排序规则的有界子集适配；判定为 L2 `HIGH_RISK`；
+   - **TRUNCATE TABLE**：仅允许单表截断；判定为 L2 `HIGH_RISK`。
+4. **Fail-Closed 默认拒绝原则**：
+   - 未知子语法、非白名单关键字、存储过程/触发器/视图及未经完全证明的子句一律 Fail-Closed 拦截；
+   - 结构指纹 `sql_fingerprint`（AST 归一化后 SHA256）与输入文本摘要 `exact_sql_digest`（原始输入字节 SHA256）作为独立元数据协同绑定。

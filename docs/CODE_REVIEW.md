@@ -13,7 +13,7 @@ TypeScript strict 不能替代运行时校验。标识符不能通过值参数�
 | 命令 | 执行入口 | 覆盖范围 | 当前状态 |
 |---|---|---|---|
 | `npm run typecheck` / `npm run compile` | `node scripts/compile.mjs` | 类型与模块边界（严格 NodeNext，`tsc --noEmit`，不落盘） | 已实现（Phase 1 / F28，作为 `app-compile` 门禁） |
-| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行全部 307 项应用测试（smoke 6项、keyring 5项、sql-policy 113项、mcp 12项、server 63项、tools 108项） | 已实现（Phase 3 / F07~F11, F28，作为 `app-build` 门禁） |
+| `npm test` / `npm run build` | `node scripts/build.mjs` | 清理 `dist/`，编译产物并执行全部 603 项应用测试（smoke 6项、keyring 5项、sql-policy 296项、mcp 13项、server 64项、tools 106项、changes 113项） | 已实现（Phase 4-A / F12~F21, F28，作为 `app-build` 门禁） |
 | `node scripts/governance/prepare.mjs` | `scripts/governance/prepare.mjs` | 治理快照与 CI 依赖准备契约（无 Shell，`npm ci --ignore-scripts`） | 已实现（Phase 1 / F28） |
 | `npm run test:e2e` | 拟建 | 浏览器交互，默认模拟数据库 | 未实现（后续 Phase） |
 
@@ -25,22 +25,27 @@ TypeScript strict 不能替代运行时校验。标识符不能通过值参数�
 |---|---|---|---|
 | T01 | 配置 CRUD、密码替换及存储失败 | 不回显秘密；失败保留有效旧配置，无明文后备 | Phase 2-A 已完成原子 JSON 持久化、单写者独占锁与四阶段 Keyring 补偿清理测试 |
 | T02 | 未认证、伪 Host/Origin、CSRF | 变更前拒绝；内部令牌不能批准网页请求 | Phase 2-A 已完成 Fastify 服务端严格 Host/Origin、Session 与 CSRF 拦截测试（63项） |
-| T03 | 多连接/数据库并发 | 无目标串用，默认库不替代显式参数 | Phase 3 已完成内存驱动与独立会话隔离测试，无目标串用，并发读租约与 4 并发额度保护 |
-| T04 | 多语句、可执行注释、CTE、文件写入、危险函数 | 策略拒绝越界；无驱动执行 | Phase 1-B 已完成 AST 策略 113 项正反例测试 |
-| T05 | 合法读取及权限不足 | 保持精度、正确截断、错误脱敏 | Phase 3 已完成 5 个 MCP 工具严格 Schema、参数校验、AST L0 校验、行数/列数/字段/帧截断、错误脱敏及白名单映射自动化测试（tools.test.mjs 108项） |
-| T06 | request_change 尚未确认 | 无写入派发 | 未实现（Phase 4） |
-| T07 | 原生/网页拒绝、取消、过期 | 无写入，拒绝不改道后备 | 未实现（Phase 4） |
-| T08 | 修改 SQL/目标/连接版本 | 旧批准不可复用 | 未实现（Phase 4） |
-| T09 | 重复点击、并发响应、迟到挑战 | 原请求最多取得一次派发权 | 未实现（Phase 4） |
-| T10 | 会话越权及伪造 confirmed | 拒绝，不能获取他人请求 | 未实现（Phase 4） |
-| T11 | 超时、断连、状态日志失败、进程崩溃 | 保守记录 UNKNOWN 或执行前失败，不重放 | Phase 3 已实现只读超时与断连主动销毁会话释放资源；写入状态机规划于 Phase 4 |
-| T12 | 原生不支持/自动批准风险 | 网页后备，未确认不执行 | 未实现（Phase 4） |
-| T13 | stdio、脱敏、超大输入输出 | stdout 协议纯净，资源有界 | Phase 3 已完成 BudgetTransport（ID <= 256B, Frame <= 1MiB）测试，超限关闭不回显，stderr 脱敏诊断，SDK stdio 集成测试 |
-| T14 | UI 长 SQL/XSS/密码/键盘 | 安全渲染，完整审批内容，焦点正确 | Phase 2-B 已完成前端管理控制台安全渲染与表单边界测试 |
+| T03 | 多连接/数据库并发 | 无目标串用，默认库不替代显式参数 | Phase 3/4-A 已完成内存驱动与独立会话隔离测试，无目标串用，并发读租约/写独占锁与 4 并发额度保护 |
+| T04 | 多语句、可执行注释、CTE、文件写入、危险函数 | 策略拒绝越界；无驱动执行 | Phase 1-B/4-A 已完成 AST 策略 296 项正反例测试，涵盖 DML/DDL 有界矩阵与 Fail-Closed 拦截 |
+| T05 | 合法读取及权限不足 | 保持精度、正确截断、错误脱敏 | Phase 3 已完成 5 个 MCP 工具严格 Schema、参数校验、AST L0 校验、行数/列数/字段/帧截断、错误脱敏及白名单映射自动化测试（tools.test.mjs 106项） |
+| T06 | request_change 尚未确认 | 无写入派发 | Phase 4-A 已实现（`changes.test.mjs` 113项）：待批请求保持 PENDING，未批准状态绝不派发底层数据库 |
+| T07 | 原生/网页拒绝、取消、过期 | 无写入，拒绝不改道后备 | Phase 4-A 已实现：显式 reject 置 REJECTED，cancel 置 CANCELLED，到期置 EXPIRED，拒绝不后备改道 |
+| T08 | 修改 SQL/目标/连接版本 | 旧批准不可复用 | Phase 4-A 已实现：连接更新自动将旧待批置 INVALIDATED，版本不符报 409 CONNECTION_CHANGED，指纹不符报 400 |
+| T09 | 重复点击、并发响应、迟到挑战 | 原请求最多取得一次派发权 | Phase 4-A 已实现：单次 Nonce 消费即销毁，重复提交报 409 STATE_CONFLICT，只派发一次 |
+| T10 | 会话越权及伪造 confirmed | 拒绝，不能获取他人请求 | Phase 4-A 已实现：未认证报 401，跨会话隔离（MCP 仅查所属会话请求），伪造 Nonce 严格拒绝 |
+| T11 | 超时、断连、状态日志失败、进程崩溃 | 保守记录 UNKNOWN 或执行前失败，不重放 | Phase 4-A 已实现：派发后超时/断连保守记录 UNKNOWN，非重试说明，日志落盘失败 UNKNOWN，重启旧 EXECUTING 置 UNKNOWN 且不重放 SQL |
+| T12 | 原生不支持/自动批准风险 | 网页后备，未确认不执行 | Phase 4-A 已实现：受信客户端验证 + accept/decline/cancel 无副作用探针通过才启用原生，L2 强制 Web，未确认不执行 |
+| T13 | stdio、脱敏、超大输入输出 | stdout 协议纯净，资源有界 | Phase 3/4-A 已完成 BudgetTransport（ID <= 256B, Frame <= 1MiB）测试，超限关闭不回显，stderr 脱敏诊断，SDK stdio 集成测试 |
+| T14 | UI 长 SQL/XSS/密码/键盘 | 安全渲染，完整审批内容，焦点正确 | Phase 2-B 已完成前端管理控制台安全渲染与表单边界测试；Phase 4-B 待实现审批 UI |
 | T15 | 隔离 MySQL DML/DDL（另行授权） | 逐次人工确认，DBA 权限有效，不承诺 DDL 回滚 | 未实现（待真实数据库授权） |
 
 每个测试记录前置状态、动作、预期、实际结果、版本和证据。不能只测成功路径，不能把模拟测试当真实客户端或数据库通过。
-**警示**：输出受控截断（1000行/128列/64KiB单字段/1MiB帧）属于应用服务层保护，不等于底层 mysql2 解码或数据库内部扫描的物理硬内存上限；超时销毁套接字不等于 MySQL 服务端远端执行已立即中止。
+**警示与限制**：
+1. 输出受控截断（1000行/128列/64KiB单字段/1MiB帧）属于应用服务层保护，不等于底层 mysql2 解码或数据库内部扫描的物理硬内存上限；
+2. 超时销毁套接字不等于 MySQL 服务端远端执行已立即中止，执行超时/网络断连结果保守置为 `UNKNOWN`，坚决不自动重试；
+3. 默认写驱动仅回环、multipleStatements=false、禁 LOCAL_FILES、逐次新会话显式 autocommit；预检拒绝视图、触发器、外键；
+4. 外部 DBA 并发 DDL 不能由本地连接租约锁住，预检不是绝对影响范围或恰好一次证明；不承诺 DDL 或非事务表自动回滚；
+5. 本地 805 项测试（应用 603 + 治理 89 + 协作 113）全绿只是隔离环境诊断，不等于真实客户端、真实 MySQL 或最终功能验收。
 
 ## 4. 变更审查清单
 

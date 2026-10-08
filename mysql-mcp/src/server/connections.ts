@@ -152,6 +152,12 @@ export class ConnectionService {
   private closed = false;
   private readonly busy = new Set<string>();
   private readonly readers = new Map<string, number>();
+  private readonly listeners = new Set<(id: string) => void>();
+  subscribe(listener: (id: string) => void): () => void {
+    this.listeners.add(listener);
+    return () => { this.listeners.delete(listener); };
+  }
+  get(id: string): Promise<ConnectionView> { return this.serial(async () => view(this.find(id))); }
   constructor(private readonly storage: MetadataStorage,
     private readonly credentials: ICredentialProvider = new WindowsKeyringProvider(),
     private readonly tester: ConnectionTester = simulatedConnectionTester,
@@ -174,7 +180,15 @@ export class ConnectionService {
     if (version !== undefined && item.version !== version) throw new ServerError('STATE_CONFLICT');
     return item;
   }
-  private async commit(data: StoreData): Promise<void> { await this.storage.write(data); this.data = data; }
+  private async commit(data: StoreData): Promise<void> {
+    await this.storage.write(data);
+    const changed = this.data.items.filter(old => data.items.find(item => item.id === old.id)?.version !== old.version);
+    this.data = data;
+    for (const old of changed) for (const listener of this.listeners) {
+      // Notifications are synchronous after commit; observers must not block metadata writes.
+      try { listener(old.id); } catch { /* observer failure cannot undo a committed update */ }
+    }
+  }
   // Retain tombstones when native cleanup or follow-up persistence fails.
   private async cleanup(): Promise<void> {
     const remaining: string[] = [];
@@ -309,6 +323,25 @@ export class ConnectionService {
       const count = (this.readers.get(id) ?? 1) - 1;
       if (count === 0) this.readers.delete(id); else this.readers.set(id, count);
     }
+  }
+  /** Exclusive write lease binds the exact version and outlives ambiguous timeouts. */
+  async withChangeConnection<T>(id: string, version: number, signal: AbortSignal,
+    action: (draft: Readonly<ConnectionDraft>) => Promise<T>): Promise<T> {
+    const record = await this.serial(async () => {
+      const found = this.find(id);
+      if (found.version !== version) throw new ServerError('CONNECTION_CHANGED');
+      if (signal.aborted) throw new ServerError('EXECUTION_TIMEOUT');
+      if (this.busy.has(id) || this.readers.has(id)) throw new ServerError('STATE_CONFLICT');
+      this.busy.add(id);
+      return { ...found };
+    });
+    try {
+      const secret = await this.credentials.getCredential(record.credential_ref);
+      if (signal.aborted) throw new ServerError('EXECUTION_TIMEOUT');
+      if (secret === null) throw new CredentialStoreError();
+      const { id: _id, version: _version, ...metadata } = view(record);
+      return await action(Object.freeze({ ...metadata, password: secret }));
+    } finally { this.busy.delete(id); }
   }
   async close(): Promise<void> { this.closed = true; await this.tail; await this.storage.close?.(); }
 }

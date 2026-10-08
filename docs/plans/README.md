@@ -146,5 +146,7 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 - [Phase 3 元数据与交接链同步归档实施计划](./sync-task-app-005-metadata.md)：TASK-GOV-011，功能 G01、G02，需求 R15、R16、R17、R18。用户批准方案 A，执行文档与治理维护同步：在任务台账中回填 TASK-APP-005 的 PR #15 元数据，在 docs/changes/ 中闭环真实 Commit 与 PR 链接，同步实施路线图与规划台账，保持工作区干净自洽，为 Phase 4 确立纯净基线。
 - 任务分支 `docs/sync-task-app-005-metadata`，main 基线 `bcf7866cd838109f14ffb7d03cf9e05654f03fbb`。模式为 `mode: "docs"`（文档-only）。
+## 21. Phase 4-A 受控写入审批与状态机后端实现任务
 
-
+- [Phase 4-A 受控写入审批与状态机后端实现计划](./controlled-change-approval.md)：TASK-APP-006，功能 F12、F13、F14、F15、F16、F17、F18、F19、F20、F21，需求 R06、R07、R09、R10、R14、R16、R17。在 mode: "code" 模式下由 PI-Desktop 落地 2 个变更管理 MCP 工具（request_change, get_change_status）、10 状态变更生命周期引擎（PENDING/APPROVED/EXECUTING/SUCCEEDED/FAILED/UNKNOWN/REJECTED/CANCELLED/EXPIRED/INVALIDATED）、Fastify 审批与决策 HTTP 路由（GET /api/v1/changes, GET /api/v1/changes/:request_id, POST /api/v1/changes/:request_id/decision）、单次 Nonce 挑战与 5 分钟超时清理、原生确认探针与 Web 审批后备、DML/DDL AST 策略拦截与非重试 UNKNOWN 故障语义，及后端自动化测试；遵循全栈分工规范，不编写前端界面，不连接外部生产数据库。
+- 任务分支 `feat/controlled-change-approval`，main 基线 `817a701eda4e149890be4f2bf1bd4781d706ab7f`。模式为 `mode: "code"`。

@@ -226,7 +226,7 @@ test('REAL SDK in-memory transport discovers and executes tools with text envelo
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   await server.connect(serverTransport); await client.connect(clientTransport);
   try {
-    assert.equal((await client.listTools()).tools.length, 5);
+    assert.equal((await client.listTools()).tools.length, 7);
     assert.deepEqual(success(await client.callTool({ name: 'list_connections', arguments: {} })).items, [view]);
     assert.equal(success(await client.callTool({ name: 'query', arguments: args })).returned_rows, 1);
     failure(await client.callTool({ name: 'query', arguments: { ...args, confirmed: true } }), 'INVALID_ARGUMENT');

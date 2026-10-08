@@ -48,6 +48,8 @@
 - [ ] 并发去重、到期、版本失效、状态日志及重启 UNKNOWN。
 - [ ] 常见 DML/DDL 策略，写入不自动重试。
 
+> 当前落地进展：TASK-APP-006 完成了 Phase 4-A 受控写入审批与状态机后端实现，落地 request_change 与 get_change_status 工具、十状态生命周期引擎、Fastify 变更管理路由（Nonce 挑战与版本失效）、DML/DDL 安全策略分级与不可重试 UNKNOWN 故障语义，应用自动化测试扩充至 603 项全绿（涵盖 changes 113 项与 sql-policy 296 项）。Phase 4-B 前端审批 UI 与交互处于规划中。
+
 退出条件：确认前和拒绝/失效情况下无派发；重复批准无第二次派发；不承诺万能回滚或恰好一次。
 
 ### Phase 5：三个客户端与界面

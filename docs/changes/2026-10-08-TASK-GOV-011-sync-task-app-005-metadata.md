@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-08
 - 关联任务：TASK-GOV-011
-- 关联 PR：待交付后确认
-- 关联 Commit：待提交
+- 关联 PR：[#16](https://github.com/ArturiaGit/mysql-mcp/pull/16)
+- 关联 Commit：[`817a701`](https://github.com/ArturiaGit/mysql-mcp/commit/817a701eda4e149890be4f2bf1bd4781d706ab7f)
 - 责任执行方：Antigravity (Planning & Documentation Delivery)
 - 关联功能/需求：G01, G02 / R15, R16, R17, R18
 

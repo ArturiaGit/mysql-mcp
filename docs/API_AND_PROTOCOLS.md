@@ -19,14 +19,14 @@ HTTP 拟用 `/api/v1`；监听 `127.0.0.1`，端口待实现确定。JSON 字段
 | `list_tables` | `connection_id: string`<br>`database: string` (1..64 字符 ASCII 标识符) | `{ items: { name: string, type: 'table' \| 'view' }[], next_cursor: null }` | 查询 `information_schema.TABLES`，返回指定库的基表与视图列表 |
 | `describe_table` | `connection_id: string`<br>`database: string`<br>`table: string` (1..64 字符) | `{ columns: ColumnInfo[], indexes: IndexInfo[] }` | 查询 `information_schema.COLUMNS` 与 `STATISTICS`，目标不存在返回 NOT_FOUND |
 | `query` | `connection_id: string`<br>`database: string`<br>`sql: string` (1..65536 字符) | `QueryResult`（最多 1000 行，128 列，受控截断） | **严格仅限 AST L0 SELECT**，禁写操作、禁多语句、禁用户变量、禁跨库访问 |
-| *`request_change`* | *connection_id, database, sql, reason* | *ChangeResult（规划于 Phase 4）* | *变更请求排队，需人工批准* |
-| *`get_change_status`* | *request_id* | *ChangeResult（规划于 Phase 4）* | *仅查当前会话请求状态* |
+| `request_change` | `connection_id: string` (UUID v4)<br>`database: string` (1..64 字符)<br>`sql: string` (1..65536 字符)<br>`reason?: string` (1..2048 字符) | `{ request_id, state: 'PENDING', confirmation_channel: 'web' \| 'native', management_url, risk_codes, expires_at }` | **DML/DDL 变更排队**；进行 AST L1/L2 策略与目标一致性校验，生成指纹与单次 Nonce，无自动批准入口 |
+| `get_change_status` | `request_id: string` (36 字符 UUID v4) | `{ request_id, state, updated_at, result?, error_code?, effect_note? }` | **仅查当前 MCP 会话请求状态**；返回十状态与执行回执或脱敏错误，**绝不自动重试 SQL** |
 
 ### 2.1 参数校验与模式强化
-- **严格 JSON Schema 与无额外属性**：所有工具 Schema 显式声明 `additionalProperties: false`；工具分发器（`argumentsFor`）前置拦截任何额外属性（严禁传入 `password`、`credential_ref`、`confirmed`、`max_rows` 等未声明字段）；
+- **严格 JSON Schema 与无额外属性**：所有工具 Schema 显式声明 `additionalProperties: false`；工具分发器前置拦截任何额外属性（严禁传入 `password`、`credential_ref`、`confirmed`、`max_rows` 等未声明字段）；
 - **参数合法性防线**：拒绝非法 UTF-8 编码、控制字符（`[\x00-\x1f\x7f]`）、空字符串或纯空白；`database` 强制校验正则 `^[A-Za-z_][A-Za-z0-9_]{0,63}$`；
 - **显式目标绑定**：除 `list_connections`（无需目标）和 `list_databases`（仅需 `connection_id`）外，所有数据库调用必须显式提供 `connection_id` 与 `database`，严禁隐式继承默认库；
-- **工具注解**：5 个只读工具均标注 MCP 元数据注解 `{ readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true }`。
+- **工具注解**：5 个只读工具标注 `{ readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true }`；`request_change` 标注 `{ readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true }`；`get_change_status` 标注 `{ readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }`。
 
 ### 2.2 响应格式与错误包装
 MCP 工具响应在 `CallToolResult` 的 `content` 中承载序列化 JSON 文本帧：
@@ -40,15 +40,15 @@ MCP 工具响应在 `CallToolResult` 的 `content` 中承载序列化 JSON 文�
 - **业务受控错误** (`isError: true`)：
   ```json
   {
-    "content": [{ "type": "text", "text": "{\"ok\":false,\"error\":{\"code\":\"SQL_NOT_ALLOWED\",\"message\":\"SQL is outside the supported read-only policy.\"}}" }],
+    "content": [{ "type": "text", "text": "{\"ok\":false,\"error\":{\"code\":\"SQL_NOT_ALLOWED\",\"message\":\"SQL is outside the supported policy.\"}}" }],
     "isError": true
   }
   ```
 - **未知工具调用**：若客户端调用未注册工具，服务端直接抛出 JSON-RPC 级 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数内容**，杜绝参数夹带的敏感信息在报错中反弹。
 
-## 3. 浏览器管理 HTTP 契约（Phase 2-A 落地实现）
+## 3. 浏览器管理 HTTP 契约（Phase 2-A & Phase 4-A 落地实现）
 
-除建立会话的受控接口外，所有业务管理接口均需有效浏览器会话。所有变更型请求强制验证 CSRF、Origin、Host；页面认证不能被 MCP 内部令牌替代。
+除建立会话的受控接口外，所有业务管理接口均需有效浏览器会话。所有变更型请求强制验证 CSRF、Origin、Host；页面认证不能被 MCP 内部令牌替代。所有路由拒绝任何 query 参数。
 
 ### 3.1 路由契约列表
 
@@ -58,13 +58,14 @@ MCP 工具响应在 `CallToolResult` 的 `content` 中承载序列化 JSON 文�
 | `DELETE /api/v1/session` | Cookie, x-csrf-token | 无（或空对象） | 200 `{ ok: true, data: { logged_out: true } }`<br>Set-Cookie 清空 | 注销并清理服务端内存会话与 CSRF Token |
 | `GET /api/v1/connections` | Cookie | 无（拒绝任何 query 参数） | 200 `{ ok: true, data: { items: ConnectionView[], next_cursor: null } }` | 脱敏连接列表，至多256项，next_cursor 固定为 null（本阶段不分页）；列表项**绝不含密码或 credential_ref** |
 | `POST /api/v1/connections` | Cookie, x-csrf-token | `{ name, host, port, username, default_database, password }` | 201 `{ ok: true, data: ConnectionView }` | 创建连接；输入严格校验；密码存入 Windows Keyring（服务名为 `mysql-mcp:<id>`）；分配稳定 UUID，version=1；返回脱敏资料 |
-| `PATCH /api/v1/connections/:connection_id` | Cookie, x-csrf-token | `{ expected_version, name?, host?, port?, username?, default_database?, password? }` | 200 `{ ok: true, data: ConnectionView }`<br>版本冲突 409 STATE_CONFLICT<br>使用中 409 STATE_CONFLICT | 更新连接；校验 expected_version；留空/省略 password 保持原密码；替换密码分配新 UUID 引用以防回滚丢失；成功后 version 自增 |
-| `DELETE /api/v1/connections/:connection_id` | Cookie, x-csrf-token | `{ expected_version }` | 200 `{ ok: true, data: { id: string, deleted: true } }`<br>版本冲突 409 STATE_CONFLICT<br>使用中 409 STATE_CONFLICT | 删除连接；校验 expected_version；同步清理 Windows Keyring 中凭据；返回删除摘要 |
+| `PATCH /api/v1/connections/:connection_id` | Cookie, x-csrf-token | `{ expected_version, name?, host?, port?, username?, default_database?, password? }` | 200 `{ ok: true, data: ConnectionView }`<br>版本冲突 409 STATE_CONFLICT<br>使用中 409 STATE_CONFLICT | 更新连接；校验 expected_version；留空/省略 password 保持原密码；替换密码分配新 UUID 引用以防回滚丢失；成功后 version 自增；触发旧待批请求 INVALIDATED |
+| `DELETE /api/v1/connections/:connection_id` | Cookie, x-csrf-token | `{ expected_version }` | 200 `{ ok: true, data: { id: string, deleted: true } }`<br>版本冲突 409 STATE_CONFLICT<br>使用中 409 STATE_CONFLICT | 删除连接；校验 expected_version；同步清理 Windows Keyring 中凭据；返回删除摘要；触发旧待批请求 INVALIDATED |
 | `POST /api/v1/connections/test` | Cookie, x-csrf-token | 草稿连接字段及 password | 200 `{ ok: true, data: { connected: boolean, simulated: boolean, duration_ms: number } }` | 测试草稿连接；只测试不保存，草稿数据不入库且不写 Keyring；默认模拟器返回 `{ connected: false, simulated: true }`，不宣称真实连通 |
 | `POST /api/v1/connections/:connection_id/test` | Cookie, x-csrf-token | `{ expected_version }` | 200 `{ ok: true, data: { connected: boolean, simulated: boolean, duration_ms: number } }` | 测试已保存连接；从 Keyring 读取凭据进行测试，响应不回传凭据；测试期间持有读/使用锁，防止并发编辑或删除 |
-| `GET /api/v1/changes` | Cookie | cursor? | 待审批列表（Phase 4 实现） | 认证管理用户可查看变更请求摘要 |
-| `GET /api/v1/changes/:request_id` | Cookie | 无 | 待审批详情（Phase 4 实现） | 待审批详情包含准确 SQL 和有效期；仅内存尚存时可见 |
-| `POST /api/v1/changes/:request_id/decision` | Cookie, x-csrf-token | `{ decision, approval_nonce, sql_fingerprint, connection_version }` | 审批决策（Phase 4 实现） | approve/reject/cancel；只接受当前网页挑战 |
+| `GET /api/v1/changes` | Cookie | 无（拒绝任何 query 参数） | 200 `{ ok: true, data: ChangeSummary[] }` | 变更请求摘要列表；包含 ID、目标连接/库、操作、风险码、状态与过期时间；**列表项绝不包含原始 SQL 或审批 Nonce** |
+| `GET /api/v1/changes/:request_id` | Cookie | 无（拒绝任何 query 参数） | 200 `{ ok: true, data: ChangeDetail }` | 获取指定变更详情；仅在内存活动时包含完整原始 SQL、reason 及绑定当前认证浏览器会话的单次 32 字节高熵 `approval_nonce` |
+| `POST /api/v1/changes/:request_id/decision` | Cookie, x-csrf-token | `{ decision, approval_nonce, sql_fingerprint, connection_version }` | 200 `{ ok: true, data: { state, updated_at, result?, error_code?, effect_note? } }`<br>409 STATE_CONFLICT<br>409 APPROVAL_EXPIRED<br>409 CONNECTION_CHANGED | 提交审批决策（approve/reject/cancel）；严格核验单次 Nonce、SQL 指纹与连接版本；单次消费 Nonce；终态不重试；返回确定的执行状态与不可撤销说明 |
+
 
 ### 3.2 数据结构定义：ConnectionView
 接口返回的脱敏连接视图定义如下：
@@ -135,24 +136,33 @@ PENDING/APPROVED/EXECUTING 是非终态；其余见模型。UNKNOWN 是执行结
 
 ---
 
-## 8. MCP Server 服务架构与执行实现 (`createMcpServer` / `startStdioServer` / `ReadToolService`)
+## 8. MCP Server 服务架构与执行实现 (`createMcpServer` / `startStdioServer` / `ReadToolService` / `ChangeToolService`)
 
-在 Phase 3 中，MCP Server 演进为具备依赖注入、动态限额与主动取消的生产就绪服务架构：
+在 Phase 3 与 Phase 4-A 中，MCP Server 演进为具备读写分离、依赖注入、动态限额与主动取消的生产就绪服务架构：
 
-- **工具暴露与服务分发 (`ReadToolService`)**：
-  - `createMcpServer(options?: McpServerOptions)`：基于 `@modelcontextprotocol/sdk` 创建 Server 实例，挂载 5 个受限读取工具（`list_connections`、`list_databases`、`list_tables`、`describe_table`、`query`）；
-  - **依赖注入契约**：接受可选参数 `{ connections?: ReadConnections; sessionFactory?: ReadSessionFactory; timeoutMs?: number }`；
-  - **直接 stdio 模式防线**：若直接执行 `node mysql-mcp/dist/mcp/server.js` 或调用未注入 `connections` 的 `startStdioServer()`，`tools/list` 正常列出 5 个工具定义，但调用任何数据库工具均安全返回 `{ ok: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Read service is unavailable.' } }`，**坚决不自行猜测或扫描磁盘配置路径**；
-  - **未知工具调用安全**：`tools/call` 请求若未匹配已知只读工具，抛出 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数对象**，杜绝参数泄密。
+- **工具暴露与服务分发 (`ReadToolService` & `ChangeToolService`)**：
+  - `createMcpServer(options?: McpServerOptions)`：基于 `@modelcontextprotocol/sdk` 创建 Server 实例，挂载全部 7 个受限数据库工具（5 个只读工具与 2 个受控变更工具 `request_change`、`get_change_status`）；
+  - **依赖注入契约**：接受可选参数 `{ connections?: ReadConnections; sessionFactory?: ReadSessionFactory; timeoutMs?: number; changes?: ChangeManager; nativeApproval?: NativeApprovalOptions }`；
+  - **直接 stdio 模式防线**：若直接执行 `node mysql-mcp/dist/mcp/server.js` 或调用未注入依赖的 `startStdioServer()`，`tools/list` 正常列出 7 个工具定义，但调用任何数据库工具均安全返回 `{ ok: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Read/change service is unavailable.' } }`，**坚决不自行猜测或扫描磁盘配置路径**；
+  - **未知工具调用安全**：`tools/call` 请求若未匹配已知 7 个工具，抛出 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数对象**，杜绝参数泄密。
 - **传输层预算守卫 (`BudgetTransport`)**：
   - 包装底层 `Transport`，在派发 SDK 与回传响应全链路施加硬上限校验；
   - **JSON-RPC 请求 ID 限制**：请求 ID 的 JSON 序列化字节数不得超过 256 字节；
   - **完整帧预算限制**：单条完整 JSON-RPC 消息（含协议包装）的 JSON 序列化字节数不得超过 1MiB (`1,048,576` 字节)；
   - **超限安全熔断**：一旦请求 ID 或整帧超过预算，触发错误并在 stderr 记录固定诊断，立即主动关闭传输通道，**坚决不回显超限 ID 或超大载荷**。
 - **并发控制、超时与生命周期**：
-  - **严格并发上限**：最多允许 4 项工具并发执行（`READ_LIMITS.max_concurrent = 4`），超限拒绝并返回 `RESOURCE_LIMIT`；
-  - **执行超时预算**：工具执行硬时限为 15 秒（`READ_LIMITS.timeout_ms = 15000`）；
-  - **主动结算与资源销毁**：底层通过 `AbortController` 联动 SDK `extra.signal` 与内部超时定时器；取消或超时触发时立即销毁 MySQL 会话（`connection.destroy()`）、中断读取流、结算并归还读租约与并发插槽；
-  - **优雅关闭**：`server.close()` 与进程信号（EOF / SIGINT / SIGTERM）联动调用 `tools.close()`，中断所有活动中的 AbortController，确保无悬挂网络套接字；
+  - **严格并发上限**：读取最多允许 4 项工具并发执行（`READ_LIMITS.max_concurrent = 4`），写入最多允许 4 项并发派发（`CHANGE_LIMITS.max_concurrent = 4`），超限拒绝并返回 `RESOURCE_LIMIT`；
+  - **执行超时预算**：只读工具超时为 15 秒（`READ_LIMITS.timeout_ms = 15000`）；写入执行硬时限为 30 秒（`CHANGE_LIMITS.execution_timeout_ms = 30000`）；
+  - **主动结算与资源销毁**：底层通过 `AbortController` 联动 SDK `extra.signal` 与内部超时定时器；取消或超时触发时立即销毁 MySQL 会话（`connection.destroy()`）、中断网络流、结算并归还租约与并发插槽；
+  - **优雅关闭**：`server.close()` 与进程信号（EOF / SIGINT / SIGTERM）联动调用 `tools.close()` 与 `changes.close()`，中断所有活动中的 AbortController，确保无悬挂网络套接字；
   - **stdio 输出洁净**：stdout 仅输出合规的 JSON-RPC 协议帧，所有非致命协议异常仅向 stderr 输出固定脱敏诊断（`'MCP protocol error.\n'`）。
+
+---
+
+## 9. 同进程双通道集成契约 (`createLocalServer`)
+
+在 Phase 4-A 中，Fastify 回环服务与 MCP 服务通过 `createLocalServer` 实现了显式同进程架构组装：
+- **单一审批权威 (Single Authority)**：Fastify 路由挂载的 `ChangeManager` 与 MCP Server 绑定的 `ChangeManager` 为同一单例实例；
+- **状态无缝互通**：MCP 工具 `request_change` 生成的变更请求即刻进入该实例内存并持久化日志，Web 管理控制台可通过 `/api/v1/changes` 实时查看并决策；决策后派发执行，MCP 客户端通过 `get_change_status` 可即时读取状态变迁；
+- **数据精度保持**：执行结果计数 `WriteResult`（如 `affected_rows`、`last_insert_id`）支持安全整数或十进制数字符串，安全覆盖 uint64 边界（最大 `18,446,744,073,709,551,615`），杜绝 JS 浮点溢出精度截断。
 

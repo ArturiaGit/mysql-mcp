@@ -33,7 +33,7 @@ const host = '127.0.0.1:3210';
 const base = { host, origin: `http://${host}` };
 async function fixture(t, options = {}) {
   const storage = options.storage ?? new Storage(); const credentials = options.credentials ?? new Credentials();
-  const server = await createLocalServer({ storage, credentials, ...options });
+  const server = await createLocalServer({ storage, credentials, changeStorage: new Storage(), ...options });
   t.after(() => server.close());
   const request = (method, url, payload, headers = {}) => server.inject({ method, url, headers: { ...base, ...headers }, ...(payload === undefined ? {} : { payload }) });
   const login = async () => {
@@ -256,7 +256,7 @@ for (const data of [
 ]) {
   test(`invalid metadata fails closed (${JSON.stringify(data).slice(0, 70)})`, async () => {
     const storage = new Storage(); storage.data = data;
-    await assert.rejects(createLocalServer({ storage, credentials: new Credentials() }), { code: 'SERVICE_UNAVAILABLE' });
+    await assert.rejects(createLocalServer({ storage, credentials: new Credentials(), changeStorage: new Storage() }), { code: 'SERVICE_UNAVAILABLE' });
     assert.equal(storage.writes, 0);
   });
 }
@@ -286,7 +286,7 @@ test('JSON store atomically persists/reloads, excludes passwords, enforces write
   } finally { await service?.close(); await storage?.close(); await rm(directory, { recursive: true, force: true }); }
 });
 test('real HTTP listener uses only 127.0.0.1 and actual ephemeral port, local login is not printed in test', async t => {
-  let code; const f = await createLocalServer({ port: 0, storage: new Storage(), credentials: new Credentials(), onLocalCode: value => { code = value; } });
+  let code; const f = await createLocalServer({ port: 0, storage: new Storage(), changeStorage: new Storage(), credentials: new Credentials(), onLocalCode: value => { code = value; } });
   t.after(() => f.close()); const address = await f.start(); assert.equal(address.host, '127.0.0.1'); assert.ok(address.port > 0);
   const response = await fetch(`http://${address.host}:${address.port}/api/v1/session`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ local_code: code }) });
   assert.equal(response.status, 200); assert.equal(response.headers.get('cache-control'), 'no-store');

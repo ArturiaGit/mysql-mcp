@@ -6,14 +6,15 @@ export const MAX_SQL_TOKENS = 4096;
 export type AstNode = Record<string, unknown>;
 
 export class SqlPolicyError extends Error {
-  readonly code = 'SQL_NOT_ALLOWED';
-  constructor() {
-    super('SQL is outside the supported safety policy.');
+  readonly code: 'SQL_NOT_ALLOWED' | 'TARGET_MISMATCH';
+  constructor(code: 'SQL_NOT_ALLOWED' | 'TARGET_MISMATCH' = 'SQL_NOT_ALLOWED') {
+    super(code === 'TARGET_MISMATCH' ? 'SQL target does not match the requested database.' : 'SQL is outside the supported safety policy.');
+    this.code = code;
     this.name = 'SqlPolicyError';
     this.stack = `${this.name}: ${this.code}`;
   }
 }
-export function rejectSql(): never { throw new SqlPolicyError(); }
+export function rejectSql(code: 'SQL_NOT_ALLOWED' | 'TARGET_MISMATCH' = 'SQL_NOT_ALLOWED'): never { throw new SqlPolicyError(code); }
 export function isNode(value: unknown): value is AstNode {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -72,11 +73,64 @@ export function inspectSql(sql: string): { text: string; structure: string } {
   return { text: text.join('').trim(), structure: tokens.join(' ') };
 }
 
+// node-sql-parser's MySQL grammar does not support ALTER DATABASE. This bounded
+// adapter recognizes the entire small grammar, never a generic statement prefix.
+function parseAlterDatabase(text: string): AstNode {
+  if (typeof text !== 'string' || Buffer.byteLength(text, 'utf8') > MAX_SQL_BYTES) rejectSql();
+  const tokens: string[] = [];
+  const tokenPattern = /[A-Za-z_][A-Za-z0-9_]*|`[A-Za-z_][A-Za-z0-9_]{0,63}`|=/y;
+  let offset = 0;
+  while (offset < text.length) {
+    const start = offset;
+    while (/[ \t\r\n]/.test(text[offset] ?? '') && offset < text.length) offset++;
+    if (offset === text.length) break;
+    tokenPattern.lastIndex = offset;
+    const match = tokenPattern.exec(text);
+    if (!match || match[0].length > 66 || (tokens.length > 0 && start === offset && match[0] !== '=' && tokens.at(-1) !== '=')) rejectSql();
+    tokens.push(match[0]);
+    if (tokens.length > 16) rejectSql();
+    offset = tokenPattern.lastIndex;
+  }
+  let index = 0;
+  const take = (word: string): boolean => {
+    if (tokens[index]?.toUpperCase() !== word) return false;
+    index++; return true;
+  };
+  const identifier = (quoted: boolean): string => {
+    const raw = tokens[index++];
+    if (raw === undefined) rejectSql();
+    // MySQL permits an omitted db_name. An unquoted option keyword must never
+    // be mistaken for the explicitly bound target (notably DEFAULT).
+    if (quoted && !raw.startsWith('`') && ['DEFAULT', 'CHARACTER', 'CHARSET', 'COLLATE', 'IF'].includes(raw.toUpperCase())) rejectSql();
+    const name = quoted && raw.startsWith('`') ? raw.slice(1, -1) : raw;
+    if (!/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(name)) rejectSql();
+    return name;
+  };
+  if (!take('ALTER') || !take('DATABASE')) rejectSql();
+  const database = identifier(true);
+  const options: AstNode[] = [];
+  const seen = new Set<string>();
+  while (index < tokens.length) {
+    take('DEFAULT');
+    let keyword: string;
+    if (take('CHARACTER')) { if (!take('SET')) rejectSql(); keyword = 'character set'; }
+    else if (take('CHARSET')) keyword = 'character set';
+    else if (take('COLLATE')) keyword = 'collate';
+    else return rejectSql();
+    if (seen.has(keyword)) rejectSql();
+    seen.add(keyword);
+    const symbol = take('=') ? '=' : null;
+    options.push({ keyword, symbol, value: { type: 'default', value: identifier(false) } });
+  }
+  if (options.length < 1 || options.length > 2) rejectSql();
+  return { type: 'alter_database', database, options };
+}
+
 export function parseSql(text: string): AstNode {
   try {
     const parser = new sqlParser.Parser();
     const ast: unknown = parser.astify(text, { database: 'MySQL' });
     if (!isNode(ast)) rejectSql();
     return ast;
-  } catch { return rejectSql(); } // Never expose parser diagnostics or original SQL.
+  } catch { return parseAlterDatabase(text); } // Never expose parser diagnostics or original SQL.
 }
