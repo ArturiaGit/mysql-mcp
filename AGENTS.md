@@ -2,7 +2,7 @@
 
 ## 入口与范围
 
-开始前阅读[需求基线](docs/REQUIREMENTS.md)、[安全约束](docs/PROJECT_CONSTRAINTS.md)、[Git 工作流](docs/GIT_WORKFLOW.md)、[协作交接规范](docs/COLLABORATION_WORKFLOW.md)，并通读[变更管理台账](docs/changes/README.md)下的所有活动未发版变更文档以掌握近期架构演进与避坑警示，再按任务阅读接口、模型和审查规范。事实、用户确认、建议和待验证事项必须区分。
+开始前阅读[需求基线](docs/REQUIREMENTS.md)、[安全约束](docs/PROJECT_CONSTRAINTS.md)、[Git 工作流](docs/GIT_WORKFLOW.md)、[协作交接规范](docs/COLLABORATION_WORKFLOW.md)，通读[变更管理台账](docs/changes/README.md)下的所有活动未发版变更文档以掌握近期架构演进与避坑警示，再按任务阅读接口、模型和审查规范。事实、用户确认、建议和待验证事项必须区分。
 
 只执行用户已授权的任务。默认 Git 授权不等于可以自行开发新功能、连接数据库或修改客户端配置。
 

@@ -19,6 +19,7 @@ GitHub Actions 在对应提交独立运行，上传报告及合成测试日志�
 - [TASK-GOV-010 全栈分工机械门禁验证记录](./enforce-fullstack-division-gates.md)：记录非重叠路径所有权拆分、mode: frontend 状态机支持、E5 策略权限阻断与 E8 规划解除、113 项协作测试与 190 项应用测试全通过。
 - [TASK-APP-004 前端管理控制台与连接管理交互验证记录](./web-connection-management.md)：记录 mode: frontend 模式落地、mysql-mcp/web/ 单页管理应用（HTML/CSS/JS）、高熵码登录/CSRF 驱动、连接列表与表单 CRUD、留空保持密码、安全删除与连接测试模拟，前端 4 项测试通过，全量测试达 392 项。
 - [TASK-APP-005 受限读取与 MCP 工具执行验证记录](./mcp-read-and-tools.md)：记录 5 个受限读取 MCP 工具落地、严格 Schema 校验、AST L0 校验与 LIMIT 哨兵改写、1000行/128列/64KiB单字段/1MiB整帧预算截断、未池化 MySQL 会话与超时主动销毁，通过 307 项应用测试与 509 项全量测试。
+- [TASK-GOV-011 Phase 3 元数据与交接链同步归档验证记录](./sync-task-app-005-metadata.md)：记录 TASK-APP-005 PR #15 元数据回填、docs/changes/ 状态闭环、治理套件与应用测试通过证据。
 
 历史[首次治理记录](./governance-bootstrap.md)保留失败与网络阻塞，并记载当时正常推送、独立 CI 54 项通过、main 保护 API 核实及用户验收确认，以及当时 PR 未合并状态；这些是历史证据语境，不用于推断 TASK-GOV-004 或当前版本已通过。历史状态本次不无依据改完成，业务功能不因此完成。
 
