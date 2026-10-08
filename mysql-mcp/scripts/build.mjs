@@ -35,7 +35,8 @@ try {
     path.join(root, 'tests/sql-policy.test.mjs'),
     path.join(root, 'tests/keyring.test.mjs'),
     path.join(root, 'tests/mcp.test.mjs'),
-    path.join(root, 'tests/server.test.mjs')
+    path.join(root, 'tests/server.test.mjs'),
+    path.join(root, 'tests/tools.test.mjs')
   ], { cwd: root, shell: false, stdio: 'inherit', timeout: 20000 });
   if (smoke.error || smoke.signal || smoke.status !== 0) {
     throw new Error(smoke.error?.message ?? `application tests failed (${smoke.signal ?? smoke.status})`);

@@ -8,39 +8,43 @@ HTTP 拟用 `/api/v1`；监听 `127.0.0.1`，端口待实现确定。JSON 字段
 
 列表采用 `{ items, next_cursor }`，next_cursor 为 null 表示当前列表遍历结束；这与 SQL 返回截断不混用。分页上限实施时锁定。浏览器接口禁止缓存敏感响应，不返回 credential_ref、密码、内部令牌或原生挑战。
 
-## 2. MCP 工具草案
+### 2. MCP 受限读取与元数据工具契约（Phase 3 落地实现）
 
-| 工具 | 必填参数 | data 输出 | 副作用 |
+在 Phase 3 (TASK-APP-005) 中，系统落地了 5 个核心受限读取与元数据探查 MCP 工具，具备严格的参数 Schema 校验、逐请求目标隔离与结果封装：
+
+| 工具名 | 严格参数规范 | data 响应载荷 | 副作用与权限边界 |
 |---|---|---|---|
-| list_connections | 无 | items: connection_id/name/host/port/username/default_database | 无数据库写入 |
-| list_databases | connection_id | items: 数据库名称 | 只读，以账号可见性为准 |
-| list_tables | connection_id, database | items: 表名称及类型 | 只读 |
-| describe_table | connection_id, database, table | columns、indexes 的结构化元数据 | 只读 |
-| query | connection_id, database, sql | QueryResult | 仅允许受限读取 |
-| request_change | connection_id, database, sql, reason | ChangeResult 加 expires_at、confirmation_channel，网页时含 management_url | 创建请求，确认前不写数据库 |
-| get_change_status | request_id | ChangeResult | 仅查当前会话请求 |
+| `list_connections` | `{}`（参数可选或为空对象，无必填） | `{ items: ConnectionView[], next_cursor: null }`（上限 256 项） | 纯内存/文件视图读取，**绝不建立数据库连接**，绝对剔除密码与凭据引用 |
+| `list_databases` | `connection_id: string` (36 字符 UUID v4) | `{ items: string[], next_cursor: null }` | 独立只读会话执行 `SHOW DATABASES`，仅列出当前账号实际可见数据库 |
+| `list_tables` | `connection_id: string`<br>`database: string` (1..64 字符 ASCII 标识符) | `{ items: { name: string, type: 'table' \| 'view' }[], next_cursor: null }` | 查询 `information_schema.TABLES`，返回指定库的基表与视图列表 |
+| `describe_table` | `connection_id: string`<br>`database: string`<br>`table: string` (1..64 字符) | `{ columns: ColumnInfo[], indexes: IndexInfo[] }` | 查询 `information_schema.COLUMNS` 与 `STATISTICS`，目标不存在返回 NOT_FOUND |
+| `query` | `connection_id: string`<br>`database: string`<br>`sql: string` (1..65536 字符) | `QueryResult`（最多 1000 行，128 列，受控截断） | **严格仅限 AST L0 SELECT**，禁写操作、禁多语句、禁用户变量、禁跨库访问 |
+| *`request_change`* | *connection_id, database, sql, reason* | *ChangeResult（规划于 Phase 4）* | *变更请求排队，需人工批准* |
+| *`get_change_status`* | *request_id* | *ChangeResult（规划于 Phase 4）* | *仅查当前会话请求状态* |
 
-connection_id 不接受名称猜测；database 必须明确，不从默认库省略推断。list_connections/list_databases 是元数据例外，无需人为填写 database。建库/删库虽可能没有可选默认库，仍需填写准确目标 database。reason 用于解释用户需求，不能充当审批。
+### 2.1 参数校验与模式强化
+- **严格 JSON Schema 与无额外属性**：所有工具 Schema 显式声明 `additionalProperties: false`；工具分发器（`argumentsFor`）前置拦截任何额外属性（严禁传入 `password`、`credential_ref`、`confirmed`、`max_rows` 等未声明字段）；
+- **参数合法性防线**：拒绝非法 UTF-8 编码、控制字符（`[\x00-\x1f\x7f]`）、空字符串或纯空白；`database` 强制校验正则 `^[A-Za-z_][A-Za-z0-9_]{0,63}$`；
+- **显式目标绑定**：除 `list_connections`（无需目标）和 `list_databases`（仅需 `connection_id`）外，所有数据库调用必须显式提供 `connection_id` 与 `database`，严禁隐式继承默认库；
+- **工具注解**：5 个只读工具均标注 MCP 元数据注解 `{ readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true }`。
 
-MCP 工具不提供 password、confirmed、approval_token 参数，也不提供 approve_change 工具。JSON Schema 应禁止额外属性。重复 request_change 视为新意图，不能自动重试调用；已拿到 request_id 后只查询状态。同一请求的桥接层重传使用服务端会话内去重标识，不创建第二个执行机会。
-
-MCP 基于协商版本的 JSON-RPC/stdio，stdout 只输出协议，日志到 stderr。工具业务失败以 MCP isError 标识并承载同一 code/message；协议格式错误走 JSON-RPC 错误。SDK structuredContent 是否可用须按协商能力处理；文本与结构化结果保持同义，不输出两份矛盾状态。
-
-虚构、非执行示例：
-
-```json
-{
-  "tool": "request_change",
-  "arguments": {
-    "connection_id": "conn_example",
-    "database": "demo_sandbox",
-    "sql": "INSERT INTO demo_notes (title) VALUES ('example')",
-    "reason": "用户明确要求在隔离示例库添加记录"
+### 2.2 响应格式与错误包装
+MCP 工具响应在 `CallToolResult` 的 `content` 中承载序列化 JSON 文本帧：
+- **成功响应** (`isError: false`)：
+  ```json
+  {
+    "content": [{ "type": "text", "text": "{\"ok\":true,\"data\":{...}}" }],
+    "isError": false
   }
-}
-```
-
-这不是现有库表或可直接执行命令，返回 PENDING 也不表示已经插入。
+  ```
+- **业务受控错误** (`isError: true`)：
+  ```json
+  {
+    "content": [{ "type": "text", "text": "{\"ok\":false,\"error\":{\"code\":\"SQL_NOT_ALLOWED\",\"message\":\"SQL is outside the supported read-only policy.\"}}" }],
+    "isError": true
+  }
+  ```
+- **未知工具调用**：若客户端调用未注册工具，服务端直接抛出 JSON-RPC 级 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数内容**，杜绝参数夹带的敏感信息在报错中反弹。
 
 ## 3. 浏览器管理 HTTP 契约（Phase 2-A 落地实现）
 
@@ -131,17 +135,24 @@ PENDING/APPROVED/EXECUTING 是非终态；其余见模型。UNKNOWN 是执行结
 
 ---
 
-## 8. MCP Server 原型实现契约 (`createMcpServer` / `startStdioServer`)
+## 8. MCP Server 服务架构与执行实现 (`createMcpServer` / `startStdioServer` / `ReadToolService`)
 
-- **惰性工厂模式**：
-  - `createMcpServer()`：基于 `@modelcontextprotocol/sdk` 创建独立的 Server 实例，声明 `{ capabilities: { tools: {} } }`；
-  - `tools/list` 响应返回空数组 `{ tools: [] }`，暂未挂载具体数据库工具；
-  - `tools/call` 请求一律抛出 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数对象**，防止参数中夹带的密码或敏感 SQL 泄露到错误回显中。
-- **stdio 协议传输生命周期**：
-  - `startStdioServer()`：基于 `StdioServerTransport` 建立标准 I/O 监听；
-  - 自动注册 `stdin` EOF（`end` 事件）及操作系统的 `SIGINT`、`SIGTERM` 监听，接收到退出信号时触发优雅关闭；
-  - `stdout` 仅允许输出合规的 JSON-RPC 协议帧，严禁混入任何调试文本或堆栈日志。
-- **启动隔离**：
-  - 支持作为独立子进程执行：`node mysql-mcp/dist/mcp/server.js`；
-  - 从主入口 `import { createApplication } from 'mysql-mcp'` 或直接导入聚合包时保持完全惰性，绝不自发启动 HTTP 端口或 stdio 传输通道。
+在 Phase 3 中，MCP Server 演进为具备依赖注入、动态限额与主动取消的生产就绪服务架构：
+
+- **工具暴露与服务分发 (`ReadToolService`)**：
+  - `createMcpServer(options?: McpServerOptions)`：基于 `@modelcontextprotocol/sdk` 创建 Server 实例，挂载 5 个受限读取工具（`list_connections`、`list_databases`、`list_tables`、`describe_table`、`query`）；
+  - **依赖注入契约**：接受可选参数 `{ connections?: ReadConnections; sessionFactory?: ReadSessionFactory; timeoutMs?: number }`；
+  - **直接 stdio 模式防线**：若直接执行 `node mysql-mcp/dist/mcp/server.js` 或调用未注入 `connections` 的 `startStdioServer()`，`tools/list` 正常列出 5 个工具定义，但调用任何数据库工具均安全返回 `{ ok: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Read service is unavailable.' } }`，**坚决不自行猜测或扫描磁盘配置路径**；
+  - **未知工具调用安全**：`tools/call` 请求若未匹配已知只读工具，抛出 `McpError(ErrorCode.MethodNotFound, 'Tool is not available.')`，**严禁回显客户端传入的工具名或参数对象**，杜绝参数泄密。
+- **传输层预算守卫 (`BudgetTransport`)**：
+  - 包装底层 `Transport`，在派发 SDK 与回传响应全链路施加硬上限校验；
+  - **JSON-RPC 请求 ID 限制**：请求 ID 的 JSON 序列化字节数不得超过 256 字节；
+  - **完整帧预算限制**：单条完整 JSON-RPC 消息（含协议包装）的 JSON 序列化字节数不得超过 1MiB (`1,048,576` 字节)；
+  - **超限安全熔断**：一旦请求 ID 或整帧超过预算，触发错误并在 stderr 记录固定诊断，立即主动关闭传输通道，**坚决不回显超限 ID 或超大载荷**。
+- **并发控制、超时与生命周期**：
+  - **严格并发上限**：最多允许 4 项工具并发执行（`READ_LIMITS.max_concurrent = 4`），超限拒绝并返回 `RESOURCE_LIMIT`；
+  - **执行超时预算**：工具执行硬时限为 15 秒（`READ_LIMITS.timeout_ms = 15000`）；
+  - **主动结算与资源销毁**：底层通过 `AbortController` 联动 SDK `extra.signal` 与内部超时定时器；取消或超时触发时立即销毁 MySQL 会话（`connection.destroy()`）、中断读取流、结算并归还读租约与并发插槽；
+  - **优雅关闭**：`server.close()` 与进程信号（EOF / SIGINT / SIGTERM）联动调用 `tools.close()`，中断所有活动中的 AbortController，确保无悬挂网络套接字；
+  - **stdio 输出洁净**：stdout 仅输出合规的 JSON-RPC 协议帧，所有非致命协议异常仅向 stderr 输出固定脱敏诊断（`'MCP protocol error.\n'`）。
 

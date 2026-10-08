@@ -151,6 +151,7 @@ export class ConnectionService {
   private testing = 0;
   private closed = false;
   private readonly busy = new Set<string>();
+  private readonly readers = new Map<string, number>();
   constructor(private readonly storage: MetadataStorage,
     private readonly credentials: ICredentialProvider = new WindowsKeyringProvider(),
     private readonly tester: ConnectionTester = simulatedConnectionTester,
@@ -210,7 +211,7 @@ export class ConnectionService {
     const secret = body['password'] === undefined || body['password'] === '' ? undefined : password(body['password']);
     return this.serial(async () => {
       const old = this.find(id, version);
-      if (this.busy.has(id) || old.version >= Number.MAX_SAFE_INTEGER) throw new ServerError('STATE_CONFLICT');
+      if (this.busy.has(id) || this.readers.has(id) || old.version >= Number.MAX_SAFE_INTEGER) throw new ServerError('STATE_CONFLICT');
       const record: ConnectionRecord = { ...old, ...connectionFields({ ...old, ...body }), version: old.version + 1 };
       await this.cleanup();
       if (secret !== undefined) {
@@ -235,7 +236,7 @@ export class ConnectionService {
     const version = expectedVersion(value);
     return this.serial(async () => {
       const record = this.find(id, version);
-      if (this.busy.has(id)) throw new ServerError('STATE_CONFLICT');
+      if (this.busy.has(id) || this.readers.has(id)) throw new ServerError('STATE_CONFLICT');
       await this.cleanup();
       if (this.data.cleanup_refs.length >= 512) throw new ServerError('RESOURCE_LIMIT');
       await this.commit({ ...this.data, items: this.data.items.filter(r => r.id !== id),
@@ -276,7 +277,7 @@ export class ConnectionService {
     const version = expectedVersion(value);
     const record = await this.serial(async () => {
       const found = this.find(id, version);
-      if (this.busy.has(id)) throw new ServerError('STATE_CONFLICT');
+      if (this.busy.has(id) || this.readers.has(id)) throw new ServerError('STATE_CONFLICT');
       this.busy.add(id);
       return { ...found };
     });
@@ -287,6 +288,27 @@ export class ConnectionService {
       const { id: _id, version: _version, ...metadata } = view(record);
       return { ...metadata, password: secret };
     }, () => { this.busy.delete(id); });
+  }
+  /** Read leases share immutable metadata, never a database session or current database. */
+  async withReadConnection<T>(id: string, signal: AbortSignal,
+    action: (draft: Readonly<ConnectionDraft>) => Promise<T>): Promise<T> {
+    const record = await this.serial(async () => {
+      const found = this.find(id);
+      if (signal.aborted) throw new ServerError('EXECUTION_TIMEOUT');
+      if (this.busy.has(id)) throw new ServerError('STATE_CONFLICT');
+      this.readers.set(id, (this.readers.get(id) ?? 0) + 1);
+      return { ...found };
+    });
+    try {
+      const secret = await this.credentials.getCredential(record.credential_ref);
+      if (signal.aborted) throw new ServerError('EXECUTION_TIMEOUT');
+      if (secret === null) throw new CredentialStoreError();
+      const { id: _id, version: _version, ...metadata } = view(record);
+      return await action(Object.freeze({ ...metadata, password: secret }));
+    } finally {
+      const count = (this.readers.get(id) ?? 1) - 1;
+      if (count === 0) this.readers.delete(id); else this.readers.set(id, count);
+    }
   }
   async close(): Promise<void> { this.closed = true; await this.tail; await this.storage.close?.(); }
 }

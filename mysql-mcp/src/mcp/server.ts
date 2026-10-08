@@ -1,29 +1,43 @@
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { ReadToolService, readTools, type ReadConnections } from './tools.js';
+import type { ReadSessionFactory } from '../sql/driver.js';
+import { BudgetTransport } from './transport.js';
+
+export interface McpServerOptions { connections?: ReadConnections; sessionFactory?: ReadSessionFactory; timeoutMs?: number }
 
 // Deliberately independent of index.ts, which re-exports these factories.
 const SERVER_INFO = Object.freeze({ name: 'mysql-mcp', version: '0.1.0-alpha.0' });
 
-/** Creates an inert, tool-free protocol prototype. No transport is started. */
-export async function createMcpServer(): Promise<Server> {
+/** Creates an inert protocol server; database access requires explicit dependencies. */
+export async function createMcpServer(options: McpServerOptions = {}): Promise<Server> {
   const [{ Server }, { ListToolsRequestSchema, CallToolRequestSchema, McpError, ErrorCode }] =
     await Promise.all([
       import('@modelcontextprotocol/sdk/server/index.js'),
       import('@modelcontextprotocol/sdk/types.js')
     ]);
   const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
-  server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: [] }));
-  server.setRequestHandler(CallToolRequestSchema, () => {
-    // Never echo a supplied name or arguments (which may contain secrets).
-    throw new McpError(ErrorCode.MethodNotFound, 'Tool is not available.');
+  const tools = new ReadToolService(options.connections, options.sessionFactory, options.timeoutMs);
+  const connect = server.connect.bind(server);
+  server.connect = transport => connect(new BudgetTransport(transport));
+  const shutdown = server.close.bind(server);
+  server.close = async () => { tools.close(); await shutdown(); };
+  server.onclose = () => { tools.close(); };
+  server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: readTools() }));
+  server.setRequestHandler(CallToolRequestSchema, (request, extra) => {
+    if (!readTools().some(tool => tool.name === request.params.name)) {
+      // Never echo a supplied name or arguments (which may contain secrets).
+      throw new McpError(ErrorCode.MethodNotFound, 'Tool is not available.');
+    }
+    return tools.call(request.params.name, request.params.arguments, extra.signal);
   });
   return server;
 }
 
 /** Explicit stdio startup; the caller owns the returned server and may close it. */
-export async function startStdioServer(): Promise<Server> {
-  const server = await createMcpServer();
+export async function startStdioServer(options: McpServerOptions = {}): Promise<Server> {
+  const server = await createMcpServer(options);
   const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
   const transport = new StdioServerTransport();
   const close = (): void => { void server.close().catch(() => { process.exitCode = 1; }); };
@@ -32,7 +46,9 @@ export async function startStdioServer(): Promise<Server> {
     process.off('SIGINT', close);
     process.off('SIGTERM', close);
   };
-  server.onclose = cleanup;
+  const onclose = server.onclose;
+  server.onclose = () => { onclose?.(); cleanup(); };
+  server.onerror = () => { process.stderr.write('MCP protocol error.\n'); };
   process.stdin.once('end', close);
   process.once('SIGINT', close);
   process.once('SIGTERM', close);

@@ -119,23 +119,74 @@ sequenceDiagram
 
 ---
 
-## 6. Phase 1-B 落地核心模块与物理边界
+## 6. Phase 3 落地核心模块与物理边界
 
-在 `mysql-mcp/src/` 中，系统已落地三大核心安全与协议原型，严格遵循模块正交性与关注点分离原则：
+在 `mysql-mcp/src/` 中，系统已落地完整的 Phase 3 受限读取与 MCP 工具执行服务层，形成自顶向下的严格防线：
 
 ```text
 mysql-mcp/src/
-├── index.ts               // 顶层导出聚合器（惰性元数据与工厂重新导出，不产生自发网络/服务副作用）
+├── index.ts               // 顶层导出聚合器（惰性重新导出工厂与类型，不产生自发网络/服务副作用）
 ├── security/
 │   └── keyring.ts         // Windows Credential Manager 异步系统凭据封装 (ICredentialProvider / WindowsKeyringProvider)
+├── server/
+│   ├── app.ts             // Fastify 本地回环 HTTP 服务工厂 (createLocalServer)
+│   ├── auth.ts            // 32 字节高熵本地代码认证、内存 Session 与 CSRF 令牌管理
+│   ├── connections.ts     // 原子文件元数据持久化、多读者并发读租约 (withReadConnection) 与测试使用锁
+│   ├── errors.ts          // 服务端错误类与安全消息白名单映射
+│   └── routes.ts          // REST API 路由注册
 ├── sql/
 │   ├── ast.ts             // 词法分号预查、node-sql-parser 解析适配与资源上限硬阈值
-│   └── policy.ts          // L0~L3 风险分级矩阵、白名单校验器、指纹与摘要计算 (evaluateSql)
+│   ├── policy.ts          // L0~L3 风险分级矩阵、白名单校验器、指纹与摘要计算 (evaluateSql)
+│   ├── readonly.ts        // 只读 SQL 校验、LIMIT 1001 哨兵改写与 AST 二次复验 (prepareReadonlySql)
+│   ├── results.ts         // 1000行/128列/64KiB单字段/1MiB整帧预算收集与受控截断 (collectRows, responseBytes)
+│   ├── driver.ts          // 逐请求独立 MySQL 只读会话工厂、流式拉取与 hex 元数据绑定 (mysqlReadSession)
+│   └── read-errors.ts     // 驱动异常安全映射白名单与脱敏错误 (ReadError, readError, databaseError)
 └── mcp/
-    └── server.ts          // @modelcontextprotocol/sdk Stdio Server 原型工厂 (createMcpServer / startStdioServer)
+    ├── server.ts          // MCP Server 工厂 (createMcpServer / startStdioServer)，工具分发与优雅关闭
+    ├── tools.ts           // 5 个受限读取工具定义、严格 Schema 校验与服务分发 (ReadToolService)
+    └── transport.ts       // 传输层预算守卫：请求 ID <= 256B、完整帧 <= 1MiB (BudgetTransport)
 ```
 
-1. **凭据安全模块 (`security/keyring.ts`)**：提供强类型安全异常，屏蔽底层系统堆栈，服务名为 `mysql-mcp:<connection-id>`，用户名统一为 `mysql-mcp`，生产环境绝对无明文后备；
-2. **SQL 策略模块 (`sql/policy.ts` & `sql/ast.ts`)**：纯静态、纯内存 AST 策略校验，在 SQL 接触数据库之前完成 L0~L3 风险阻断，计算结构指纹与准确哈希；
-3. **MCP 通信模块 (`mcp/server.ts`)**：实现标准 stdio 协议帧传输与进程生命周期监听（EOF/SIGINT/SIGTERM），工具未挂载时对未知调用返回标准错误且严格不回显传入参数。
+```mermaid
+sequenceDiagram
+    participant C as AI 客户端 (Stdio / JSON-RPC)
+    participant T as BudgetTransport (帧预算守卫)
+    participant S as ReadToolService (并发与超时控制)
+    participant CS as ConnectionService (读租约与解密)
+    participant P as Policy (prepareReadonlySql)
+    participant D as MySQL 会话 (独立连接/回环/只读事务)
+
+    C->>T: CallToolRequest (tools/call: query / 元数据)
+    T->>T: 校验 request_id <= 256B 与消息大小 <= 1MiB
+    T->>S: 分发工具调用
+    S->>S: 校验活跃并发 <= 4 与超时预算 15s
+    alt query 工具
+        S->>P: 静态策略校验 (AST L0 SELECT) + LIMIT 1001 改写 + 二次复验
+    end
+    S->>CS: withReadConnection (持有读租约, 阻止并发编辑/删除)
+    CS->>CS: 从 Keyring 读取密码, 构造只读连接参数
+    CS->>D: 创建全新独立连接 (仅限回环 127.0.0.1/localhost/::1)
+    D->>D: SET SESSION MAX_EXECUTION_TIME=15000, START TRANSACTION READ ONLY
+    D->>D: 流式拉取结果集 (highWaterMark: 1)
+    S->>S: collectRows: 1000行/128列/64KiB字段/1MiB帧受控截断
+    D->>D: 无论成功或异常立即关闭销毁连接 (无池复用)
+    CS->>CS: 归还读租约计数
+    S-->>T: 返回结构化结果 { ok: true, data: QueryResult } (或脱敏错误)
+    T->>T: 校验完整序列化响应 <= 1MiB
+    T-->>C: JSON-RPC 成功响应 (或 isError: true)
+```
+
+### 7. 架构安全边界与内存/执行局限说明
+
+1. **输出截断不等于底层进程硬内存上限**：
+   - 驱动层（`mysql2`）在将数据包派发给流之前，首先在内部解码接收到的单包/单行；
+   - 本系统所施加的 1000 行、128 列、64KiB 单字段以及 1MiB 编码后完整 MCP 帧上限，属于应用服务层的输出与传输保护预算，**并不构成操作系统进程级别接收外部单包的物理硬内存上限**。
+2. **连接超时销毁不证明远端服务端立即终止执行**：
+   - 当达到 15 秒预算或客户端取消操作时，服务端通过 `connection.destroy()` 立即断开并销毁本地套接字，主动归还并发插槽与读租约；
+   - 尽管会话配置了 `SET SESSION MAX_EXECUTION_TIME`，但在高负载或复杂执行计划下，本地套接字销毁**并不等价于远端 MySQL 服务端内部已立刻停止扫描或完全释放远端资源**。
+3. **零跨库与纯单会话隔离**：
+   - 数据库目标沿用已验证 AST 库名子集（ASCII 标识符且严格大小写匹配）；跨库访问确定性返回 `SQL_NOT_ALLOWED`；
+   - 元数据超限直接返回 `RESOURCE_LIMIT`，坚决不提供假分页或虚假宣称完整。
+4. **回环目标限制**：
+   - 默认 MySQL 适配当前硬性限制仅允许回环地址（`127.0.0.1`、`localhost`、`::1`），远程目标在 TLS 证书策略冻结前直接返回 `SERVICE_UNAVAILABLE`。
 

@@ -2,8 +2,8 @@
 
 - 变更日期：2026-10-07
 - 关联任务：TASK-GOV-010
-- 关联 PR：[#13](https://github.com/ArturiaGit/mysql-mcp/pull/13)（待提交创建）
-- 关联 Commit：待提交
+- 关联 PR：[#13](https://github.com/ArturiaGit/mysql-mcp/pull/13)
+- 关联 Commit：[`dc024af`](https://github.com/ArturiaGit/mysql-mcp/commit/dc024af700cb56cbfa33018fcd4432e342270178) (Squash: [`b6af7e9`](https://github.com/ArturiaGit/mysql-mcp/commit/b6af7e90c5cb89ec1c26e04c675380775b9a0a6f))
 - 责任执行方：Antigravity (Planning & Documentation Delivery) × PI-Desktop (Implementation)
 - 关联功能/需求：G02, G03 / R17
 
