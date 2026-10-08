@@ -139,6 +139,12 @@ TASK-GOV-001 复用 docs/agent-git-workflow 与 PR #1，基线 bf703ad。用户�
 
 ## 19. Phase 3 受限读取及 MCP 协议骨架实现任务
 
-- [Phase 3 受限读取及 MCP 协议骨架实现计划](./mcp-read-and-tools.md)：TASK-APP-005，功能 F07、F08、F09、F10、F11，需求 R04、R05、R06、R07、R08、R14、R16、R17。在 mode: "code" 模式下由 PI-Desktop 落地 5 个受限读取/元数据 MCP 工具（list_connections, list_databases, list_tables, describe_table, query）、动态目标隔离、AST 策略驱动的只读校验、行数/列数/大字段硬阈值截断、错误脱敏模型及后端自动化测试；遵循全栈分工规范，不编写前端界面，不连接外部生产数据库。
+- [Phase 3 受限读取及 MCP 协议骨架实现计划](./mcp-read-and-tools.md)：TASK-APP-005，功能 F07、F08、F09、F10、F11，需求 R04、R05、R06、R07、R08、R14、R16、R17。在 mode: "code" 模式下由 PI-Desktop 落地 5 个受限读取/元数据 MCP 工具（list_connections, list_databases, list_tables, describe_table, query）、动态目标隔离、AST 策略驱动的只读校验、行数/列数/大字段硬阈值截断、错误脱敏模型及后端自动化测试；遵循全栈分工规范，不编写前端界面，不连接外部生产数据库。已合并交付（PR #15）。
 - 任务分支 `feat/mcp-read-and-tools`，main 基线 `e94b44660a7c5a720e74c02cc419111db244b066`。模式为 `mode: "code"`。
+
+## 20. Phase 3 元数据与交接链同步归档任务
+
+- [Phase 3 元数据与交接链同步归档实施计划](./sync-task-app-005-metadata.md)：TASK-GOV-011，功能 G01、G02，需求 R15、R16、R17、R18。用户批准方案 A，执行文档与治理维护同步：在任务台账中回填 TASK-APP-005 的 PR #15 元数据，在 docs/changes/ 中闭环真实 Commit 与 PR 链接，同步实施路线图与规划台账，保持工作区干净自洽，为 Phase 4 确立纯净基线。
+- 任务分支 `docs/sync-task-app-005-metadata`，main 基线 `bcf7866cd838109f14ffb7d03cf9e05654f03fbb`。模式为 `mode: "docs"`（文档-only）。
+
 
