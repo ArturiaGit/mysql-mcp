@@ -62,63 +62,82 @@ interface ConnectionView {
    - **使用中状态互斥**：只要连接仍有活跃的测试锁或只读租约（`readers.get(id) > 0`），对该连接发起的 `PATCH` 编辑或 `DELETE` 删除操作，服务端均直接返回 `409 STATE_CONFLICT` 拒绝执行，杜绝读取进行中凭据被清理或连接配置漂移；
    - **完全隔离的会话生命周期**：读租约仅共享不可变的连接配置草稿与解密凭据，**绝不跨请求共享 MySQL 连接实例或会话状态**；每个请求均建立全新的独立 MySQL 只读会话，查询完毕后立即销毁；
    - **乐观锁并发控制**：编辑或删除时前端必须提供 `expected_version`，与当前记录不一致时返回 `409 STATE_CONFLICT`；
-   - 注：本地人工审批系统尚未实现（规划于 Phase 4），当前阶段不声称已实测“旧审批失效”。
+   - **旧审批失效与版本监听（Phase 4-A 落地实现）**：当连接被更新（version 自增）或删除时，`ConnectionService` 触发监听器，`ChangeManager` 同步将该连接所有处于 `PENDING` 或 `APPROVED` 状态的待批请求直接置为 `INVALIDATED`，彻底杜绝目标连接配置漂移后的脏执行。
 
-## 3. 会话与请求
+## 3. 会话与请求（Phase 4-A 落地实现）
 
 ```typescript
-type ChangeState =
+export const CHANGE_LIMITS = Object.freeze({
+  approval_ttl_ms: 300_000,     // 审批有效期 5 分钟 (300 秒)
+  retention_ms: 300_000,        // 终态摘要保留 5 分钟 (300 秒)
+  execution_timeout_ms: 30_000, // 写执行硬时限 30 秒
+  max_requests: 256,            // 最大请求容量
+  max_sessions: 16,             // 最大活动 MCP 会话数
+  max_concurrent: 4,            // 最大执行并发数
+  max_sql_bytes: 1_048_576,     // 全局 SQL/reason 内存预算 (1MiB)
+  max_queued: 64                // 最大状态队列排队数
+});
+
+export type ChangeState =
   | 'PENDING' | 'APPROVED' | 'EXECUTING'
   | 'SUCCEEDED' | 'FAILED' | 'UNKNOWN'
   | 'REJECTED' | 'CANCELLED' | 'EXPIRED' | 'INVALIDATED';
 
-type ConfirmationChannel = 'native' | 'web';
+export type ConfirmationChannel = 'native' | 'web';
+export type Decision = 'approve' | 'reject' | 'cancel';
 
-interface ChangeRequest {
+export interface ChangeSummary {
   request_id: string;
-  session_id: string;
   connection_id: string;
   connection_version: number;
   database: string;
-  sql: string; // 只在有界内存中保留
-  sql_fingerprint: string;
-  reason: string; // 内存；不能作为批准证据
-  operation: string;
-  risk_codes: string[];
+  operation: string;           // 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE' | 'ALTER' | 'DROP' | 'TRUNCATE'
+  risk_level: 'L1' | 'L2';
+  risk_codes: string[];        // L2 包含 ['HIGH_RISK']
+  sql_fingerprint: string;     // AST 结构规范化 SHA256 指纹
+  exact_sql_digest: string;    // 输入 SQL 原始文本 SHA256 哈希
   confirmation_channel: ConfirmationChannel;
   state: ChangeState;
   created_at: string;
   expires_at: string;
   updated_at: string;
+  result?: WriteResult & { execution_ms: number };
+  error_code?: ServerErrorCode;
+}
+
+export interface WebDecision {
+  decision: Decision;
+  approval_nonce: string;      // 32 字节高熵十六进制，单次消费
+  sql_fingerprint: string;     // 页面审查与提交一致性校验
+  connection_version: number;  // 乐观并发版本号校验
 }
 ```
 
-- session_id 由内部认证建立，不接受模型指定所属会话；浏览器会话与 MCP 会话类型分开。
-- 客户端名称、版本、声明能力用于兼容诊断，不单独作为可信身份。
-- sql_fingerprint 基于准确 SQL 字节形成；持久审计建议使用带本地秘密的 HMAC，避免简单字典猜测业务内容。算法和版本实施时固定。
-- 审批绑定除指纹外还包含目标、连接版本、会话和有效期；不能以 SQL 指纹代替授权。
-- 原生 challenge_id 仅内部桥接可见；浏览器 approval_nonce 仅认证页面可见；两者均单次消费且不进入模型。
-- ApprovalDecision 记录 request_id、channel、decision（approve/reject/cancel）、decided_at、绑定摘要。来自模型的 reason 或 confirmed 不属于 Decision。
+- **数据隔离与安全性**：
+  - **原始 SQL 仅内存保留**：原始 SQL 仅在活动有效期的内存详情及页面审查中可见，**绝不写入 `changes.json` 持久化日志**，列表、MCP 状态与审计中仅保留结构指纹与摘要，杜绝重放风险；
+  - **审批 Nonce 绝不进入模型**：浏览器 `approval_nonce` 仅在认证管理会话的详情接口中单次返回，验证消费后立即销毁；
+  - **原生确认通道限制**：仅在可信本地注入的客户端版本/权限模式通过且无副作用探针（accept/decline/cancel）实测成功时，L1 变更才启用原生确认；L2 高危变更强制走 Web 页面审查；原生拒绝或取消不降级后备。
 
-## 4. 状态机
+## 4. 状态机与持久化日志 (`changes.json`)
 
 | 当前 | 事件 | 下一状态 | 是否派发 SQL |
 |---|---|---|---|
-| PENDING | 有效人工批准 | APPROVED | 否 |
-| PENDING | 人工拒绝 | REJECTED | 否 |
-| PENDING | 人工取消/会话断开 | CANCELLED | 否 |
-| PENDING / APPROVED | 到期 | EXPIRED | 否 |
-| PENDING / APPROVED | 连接变化/删除、服务重启 | INVALIDATED | 否 |
-| APPROVED | 执行前复核通过、记录派发意图 | EXECUTING | 取得一次派发权 |
-| APPROVED | 会话断开或主动取消 | CANCELLED | 否 |
-| APPROVED | 可确定的执行前错误 | FAILED | 否 |
-| EXECUTING | 获得成功完成回执 | SUCCEEDED | 不再派发 |
-| EXECUTING | 确定的错误回执 | FAILED | 不重试 |
-| EXECUTING | 超时/断连/进程崩溃且提交结果不能确定 | UNKNOWN | 不重试 |
+| PENDING | 有效人工批准 (approve) | APPROVED | 否 |
+| PENDING | 人工拒绝 (reject) | REJECTED | 否（零派发） |
+| PENDING | 人工取消 (cancel) / 会话断开 | CANCELLED | 否（零派发） |
+| PENDING / APPROVED | 到期 (超过 5 分钟) | EXPIRED | 否（零派发） |
+| PENDING / APPROVED | 连接版本变化、连接删除、服务重启 | INVALIDATED | 否（零派发） |
+| APPROVED | 执行前复核通过、取得唯一派发权 | EXECUTING | 取得单次派发权 |
+| APPROVED | 会话断开或主动取消 | CANCELLED | 否（零派发） |
+| APPROVED | 可确定的执行前错误 | FAILED | 否（零派发） |
+| EXECUTING | 获得确定性成功回执 | SUCCEEDED | 不再派发 |
+| EXECUTING | 确定性数据库错误回执 | FAILED | **不自动重试** |
+| EXECUTING | 超时/断线/崩溃且提交结果无法确定 | UNKNOWN | **坚决不重试**（需人工核查） |
 
-终态不可重新批准或返回 PENDING。FAILED 不承诺数据库没有部分效果，尤其是非事务表；需返回安全的效果说明。EXECUTING 后取消不直接改成 CANCELLED，应根据实际结果记 SUCCEEDED/FAILED/UNKNOWN。
-
-审批记录持久化不保存可重放的 SQL。重启对旧执行意图保守标 UNKNOWN；旧待审批请求失效。重连会话不能通过猜 ID 获取别人的结果；旧请求摘要可由认证管理页面查看，MCP 跨会话恢复机制不在首期承诺内。
+- **落盘时机与崩溃一致性**：
+  - 状态流转前执行原子写入单写者存储（`schema_version: 1`）；
+  - 派发执行前必须先将状态置为 `EXECUTING` 并持久化落盘；若执行回执持久化失败，保守标记为 `UNKNOWN`；
+  - **服务重启恢复策略**：重启加载旧日志时，处于 `EXECUTING` 的旧记录保守转换为 `UNKNOWN`（`error_code: 'DB_ERROR'`）；旧的非终态（PENDING / APPROVED）一律转换为 `INVALIDATED`；重启不重放任何 SQL。
 
 ## 5. 结果与审计（Phase 3 落地模型）
 
@@ -194,19 +213,26 @@ export interface QueryResult {
   }
   ```
 
-### 5.3 变更结果草案（Phase 4）
+### 5.3 变更执行与状态查询结果模型（Phase 4-A 落地实现）
+
 ```typescript
-interface ChangeResult {
-  request_id: string;
-  state: ChangeState;
-  affected_rows?: string;
-  insert_id?: string;
-  error_code?: string;
-  effect_note?: string;
+export interface WriteResult {
+  affected_rows: number | string;       // 受影响行数（支持安全整数或十进制字符串以承载 uint64）
+  last_insert_id: number | string;      // 最新自增 ID（支持安全整数或十进制字符串以承载 uint64）
+  warning_count: number;                // 告警数量 (0..65535)
+}
+
+export interface ChangeStatusResult {
+  request_id: string;                   // 变更请求 UUID
+  state: ChangeState;                   // 当前十状态之一
+  updated_at: string;                   // 最新更新时间戳
+  result?: WriteResult & { execution_ms: number }; // 成功回执 (SUCCEEDED)
+  error_code?: ServerErrorCode;         // 脱敏错误码 (FAILED / UNKNOWN)
+  effect_note?: string;                 // 终态安全效果说明（不承诺回滚/不可自动重试）
 }
 ```
 
-审计最小字段：event_id、request_id、session_id 的非秘密标识、connection_id、database、operation、sql_fingerprint、channel、state、时间、error_code 和必要执行摘要。目标库名同样是敏感元数据，应限制访问。日志不要保存原始 SQL 或业务结果；错误消息先脱敏。
+审计最小字段：`request_id`、`session_id`、`connection_id`、`connection_version`、`database`、`operation`、`risk_level`、`risk_codes`、`sql_fingerprint`、`exact_sql_digest`、`confirmation_channel`、`state`、时间戳、`error_code` 和必要执行回执。目标库名同样是受控元数据。持久化日志绝不保存原始 SQL 或业务明文结果；错误消息先行脱敏。
 
 ## 6. 演进规则
 

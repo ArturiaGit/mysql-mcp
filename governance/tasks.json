@@ -405,6 +405,43 @@
       ],
       "plan_path": "docs/plans/sync-task-app-005-metadata.md",
       "mode": "docs",
+      "pr": 16,
+      "scope_changes": [],
+      "governance_change": true
+    },
+    {
+      "id": "TASK-APP-006",
+      "kind": "new",
+      "status": "in_progress",
+      "feature_ids": ["F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21"],
+      "branch": "feat/controlled-change-approval",
+      "base_commit": "817a701eda4e149890be4f2bf1bd4781d706ab7f",
+      "authorization": "用户批准 Phase 4-A 受控写入审批与状态机后端实现：在 mode: \"code\" 下由 PI-Desktop 落地 2 个变更管理 MCP 工具（request_change, get_change_status）、10 状态变更生命周期引擎（PENDING/APPROVED/EXECUTING/SUCCEEDED/FAILED/UNKNOWN/REJECTED/CANCELLED/EXPIRED/INVALIDATED）、Fastify 审批与决策 HTTP 路由（GET /api/v1/changes, GET /api/v1/changes/:request_id, POST /api/v1/changes/:request_id/decision）、单次 Nonce 挑战与 5 分钟超时清理、原生确认探针与 Web 审批后备、DML/DDL AST 策略拦截与非重试 UNKNOWN 故障语义，及后端自动化测试；遵循全栈分工规范，不编写前端界面，不连接外部生产数据库。",
+      "allowed_paths": [
+        "mysql-mcp/src/",
+        "mysql-mcp/tests/",
+        "mysql-mcp/scripts/",
+        "docs/",
+        "governance/"
+      ],
+      "plan_path": "docs/plans/controlled-change-approval.md",
+      "mode": "code",
+      "build_checks": [
+        {
+          "id": "app-build",
+          "kind": "build",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/build.mjs"],
+          "timeout_ms": 60000
+        },
+        {
+          "id": "app-compile",
+          "kind": "compile",
+          "command": "node",
+          "args": ["mysql-mcp/scripts/compile.mjs"],
+          "timeout_ms": 60000
+        }
+      ],
       "pr": null,
       "scope_changes": [],
       "governance_change": true

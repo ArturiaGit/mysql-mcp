@@ -6,6 +6,11 @@ import { ConnectionService, JsonMetadataStorage, type MetadataStorage, type Conn
 import type { ICredentialProvider } from '../security/keyring.js';
 import { ServerError, sanitizeError } from './errors.js';
 import { registerRoutes } from './routes.js';
+import { ChangeManager } from '../changes/manager.js';
+import type { ChangeStorage } from '../changes/journal.js';
+import type { WriteSessionFactory } from '../sql/write-driver.js';
+import { registerChangeRoutes } from './changes.js';
+import { createMcpServer, type McpServerOptions } from '../mcp/server.js';
 
 export interface LocalServerOptions {
   port?: number;
@@ -15,6 +20,10 @@ export interface LocalServerOptions {
   tester?: ConnectionTester;
   testTimeoutMs?: number;
   now?: () => number;
+  changeStorage?: ChangeStorage;
+  changeFile?: string;
+  writeSessionFactory?: WriteSessionFactory;
+  changeTimeoutMs?: number;
   onLocalCode?: (code: string) => void;
 }
 function metadataFile(): string {
@@ -30,6 +39,12 @@ export async function createLocalServer(options: LocalServerOptions = {}) {
   const connections = new ConnectionService(storage, options.credentials, options.tester, options.testTimeoutMs);
   try { await connections.initialize(); }
   catch (error) { await storage.close?.().catch(() => {}); throw error; }
+  const changes = new ChangeManager({ connections,
+    storage: options.changeStorage ?? new JsonMetadataStorage(options.changeFile ?? path.join(path.dirname(options.metadataFile ?? metadataFile()), 'changes.json')),
+    sessionFactory: options.writeSessionFactory, timeoutMs: options.changeTimeoutMs, now: options.now,
+    managementUrl: () => `http://127.0.0.1:${port}` });
+  try { await changes.initialize(); }
+  catch (error) { await changes.close().catch(() => {}); await connections.close(); throw error; }
   const auth = new LocalAuth(options.now);
   const app = Fastify({ logger: false, bodyLimit: 16 * 1024,
     requestTimeout: 10_000, connectionTimeout: 10_000, routerOptions: { maxParamLength: 128 }, trustProxy: false });
@@ -56,12 +71,15 @@ export async function createLocalServer(options: LocalServerOptions = {}) {
     reply.code(safe.status).send(safe.body);
   });
   app.setNotFoundHandler(async () => { throw new ServerError('NOT_FOUND'); });
-  app.addHook('onClose', async () => { auth.clear(); await connections.close(); });
+  app.addHook('onClose', async () => { auth.clear(); await changes.close(); await connections.close(); });
   registerRoutes(app, auth, connections);
+  registerChangeRoutes(app, auth, changes);
   let started = false;
   return Object.freeze({
     inject: app.inject.bind(app),
     issueLocalCode: (): string => auth.issueLocalCode(),
+    // Explicit same-process composition: both entrances share one approval authority.
+    createMcpServer: (mcp: Omit<McpServerOptions, 'connections' | 'changes'> = {}) => createMcpServer({ ...mcp, connections, changes }),
     async start(): Promise<{ host: '127.0.0.1'; port: number }> {
       if (started) throw new ServerError('STATE_CONFLICT');
       // No caller-supplied listen options or raw Fastify instance escape this wrapper.

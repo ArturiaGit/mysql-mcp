@@ -4,8 +4,14 @@ import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { ReadToolService, readTools, type ReadConnections } from './tools.js';
 import type { ReadSessionFactory } from '../sql/driver.js';
 import { BudgetTransport } from './transport.js';
+import { ChangeToolService, changeTools } from './change-tools.js';
+import type { ChangeManager } from '../changes/manager.js';
+import { nativeEligible, probeNative, type NativeApprovalOptions } from './native.js';
 
-export interface McpServerOptions { connections?: ReadConnections; sessionFactory?: ReadSessionFactory; timeoutMs?: number }
+export interface McpServerOptions {
+  connections?: ReadConnections; sessionFactory?: ReadSessionFactory; timeoutMs?: number;
+  changes?: ChangeManager; nativeApproval?: NativeApprovalOptions;
+}
 
 // Deliberately independent of index.ts, which re-exports these factories.
 const SERVER_INFO = Object.freeze({ name: 'mysql-mcp', version: '0.1.0-alpha.0' });
@@ -19,18 +25,41 @@ export async function createMcpServer(options: McpServerOptions = {}): Promise<S
     ]);
   const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
   const tools = new ReadToolService(options.connections, options.sessionFactory, options.timeoutMs);
+  const changes = new ChangeToolService(options.changes);
+  const probe = new AbortController();
+  let nativeIdentity: string | undefined;
+  const identity = (): string => JSON.stringify({ client: server.getClientVersion(), capabilities: server.getClientCapabilities(), mode: options.nativeApproval?.permissionMode });
+  server.oninitialized = () => {
+    const client = server.getClientVersion();
+    if (!changes.session || !client || !server.getClientCapabilities()?.elicitation || !nativeEligible(client.name, client.version, options.nativeApproval)) return;
+    const expected = identity();
+    const timer = setTimeout(() => probe.abort(), 60_000);
+    const elicit = (params: Parameters<typeof server.elicitInput>[0], signal: AbortSignal) =>
+      server.elicitInput(params, { signal, timeout: 60_000 });
+    void probeNative(elicit, probe.signal).then(verified => {
+      if (verified && !probe.signal.aborted && identity() === expected) {
+        nativeIdentity = expected;
+        options.changes?.setNativeElicitor(changes.session!, (params, signal) => {
+          if (identity() !== nativeIdentity) return Promise.reject(new Error('Native approval eligibility changed.'));
+          return elicit(params, signal);
+        });
+      }
+    }).catch(() => {}).finally(() => clearTimeout(timer));
+  };
   const connect = server.connect.bind(server);
   server.connect = transport => connect(new BudgetTransport(transport));
   const shutdown = server.close.bind(server);
-  server.close = async () => { tools.close(); await shutdown(); };
-  server.onclose = () => { tools.close(); };
-  server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: readTools() }));
+  server.close = async () => { probe.abort(); changes.close(); tools.close(); await shutdown(); };
+  server.onclose = () => { probe.abort(); changes.close(); tools.close(); };
+  server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: [...readTools(), ...changeTools()] }));
   server.setRequestHandler(CallToolRequestSchema, (request, extra) => {
-    if (!readTools().some(tool => tool.name === request.params.name)) {
+    if (![...readTools(), ...changeTools()].some(tool => tool.name === request.params.name)) {
       // Never echo a supplied name or arguments (which may contain secrets).
       throw new McpError(ErrorCode.MethodNotFound, 'Tool is not available.');
     }
-    return tools.call(request.params.name, request.params.arguments, extra.signal);
+    return changeTools().some(tool => tool.name === request.params.name)
+      ? changes.call(request.params.name, request.params.arguments, extra.signal)
+      : tools.call(request.params.name, request.params.arguments, extra.signal);
   });
   return server;
 }

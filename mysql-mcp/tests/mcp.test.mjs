@@ -90,7 +90,7 @@ test('MCP factory is explicit, independent and does not connect a transport', as
   }
 });
 
-test('REAL SDK stdio: initialize, ping, five tools, safe refusal, clean stdout and shutdown', { timeout: 25000 }, async () => {
+test('REAL SDK stdio: initialize, ping, seven tools, safe refusal, clean stdout and shutdown', { timeout: 25000 }, async () => {
   const transport = new ObservedStdioTransport({
     command: process.execPath, args: [serverPath], cwd: root,
     env: childEnvironment(), stderr: 'pipe'
@@ -109,7 +109,7 @@ test('REAL SDK stdio: initialize, ping, five tools, safe refusal, clean stdout a
     assert.deepEqual(client.getServerCapabilities(), { tools: {} });
     assert.deepEqual(await bounded(client.ping()), {});
     const listed = await bounded(client.listTools());
-    assert.deepEqual(listed.tools.map(tool => tool.name), ['list_connections', 'list_databases', 'list_tables', 'describe_table', 'query']);
+    assert.deepEqual(listed.tools.map(tool => tool.name), ['list_connections', 'list_databases', 'list_tables', 'describe_table', 'query', 'request_change', 'get_change_status']);
     for (const tool of listed.tools) assert.equal(tool.inputSchema.additionalProperties, false);
     const invalid = await bounded(client.callTool({ name: 'query', arguments: { password: 'SYNTHETIC_SECRET_MARKER' } }));
     assert.equal(invalid.isError, true);
