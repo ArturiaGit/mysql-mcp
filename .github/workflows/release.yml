@@ -1,0 +1,73 @@
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+    with:
+      require_frontend: true
+  security:
+    uses: ./.github/workflows/security.yml
+    permissions:
+      contents: read
+      security-events: write
+  package:
+    needs: [verify, security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Require a main commit and version-matching tag
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          [[ "$GITHUB_REF_NAME" == "v$(node -p 'require("./package.json").version')" ]]
+      - run: npm install --global pnpm@10.32.1
+      - run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: '0'
+      - run: pnpm build && pnpm --filter @mysql-mcp/admin-ui build
+      - name: Package application builds and runtime manifests
+        run: |
+          mkdir -p release
+          tar -czf release/mysql-mcp.tar.gz package.json pnpm-lock.yaml pnpm-workspace.yaml compose.yaml \
+            docs/sql/001_metadata_schema.sql apps/*/dist apps/*/package.json packages/*/package.json \
+            packages/core-engine/dist packages/shared-types/dist
+      - uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0.22.2
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: release/sbom.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: release
+          path: release/
+          if-no-files-found: error
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release
+          path: release
+      - name: Publish the verified tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes -- "$GITHUB_REF_NAME" release/mysql-mcp.tar.gz release/sbom.cdx.json

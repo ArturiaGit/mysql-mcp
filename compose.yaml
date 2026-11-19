@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the environment or local .env}
+      MYSQL_DATABASE: ${METADATA_DB_NAME:-mysql_mcp_metadata}
+      MYSQL_USER: ${METADATA_DB_USER:?Set METADATA_DB_USER in the environment or local .env}
+      MYSQL_PASSWORD: ${METADATA_DB_PASSWORD:?Set METADATA_DB_PASSWORD in the environment or local .env}
+    ports:
+      - '127.0.0.1:${METADATA_DB_PORT:-3306}:3306'
+    volumes:
+      - metadata_data:/var/lib/mysql
+      - ./docs/sql/001_metadata_schema.sql:/docker-entrypoint-initdb.d/001_metadata_schema.sql:ro
+    healthcheck:
+      # TCP distinguishes final mysqld from the init-only socket server; check schema without mutating it.
+      test: ['CMD-SHELL', 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql --protocol=TCP -h 127.0.0.1 -u "$$MYSQL_USER" -D "$$MYSQL_DATABASE" -NBe "SELECT 1 FROM sys_system_settings LIMIT 1" >/dev/null']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+volumes:
+  metadata_data:

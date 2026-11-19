@@ -1,0 +1,58 @@
+name: Security
+on:
+  pull_request:
+  push:
+    branches: ['**']
+  workflow_call:
+  schedule:
+    - cron: '43 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm install --global pnpm@10.32.1
+      - run: pnpm audit --audit-level=high
+  codeql:
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          config: |
+            paths: [apps, packages, scripts/m0]
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          output: codeql-results
+      - name: Fail on CodeQL findings
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          paths = list(Path('codeql-results').rglob('*.sarif'))
+          if not paths:
+              raise SystemExit('No CodeQL SARIF output')
+          findings = sum(len(run.get('results', [])) for path in paths
+                         for run in json.loads(path.read_text(encoding='utf-8'))['runs'])
+          print(f'CodeQL findings: {findings}')
+          raise SystemExit(int(findings > 0))
+          PY

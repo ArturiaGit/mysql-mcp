@@ -1,0 +1,9 @@
+{
+  "name": "@mysql-mcp/core-ast",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "node-sql-parser": "5.4.0"
+  }
+}
