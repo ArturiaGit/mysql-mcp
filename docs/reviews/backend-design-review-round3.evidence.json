@@ -1,0 +1,486 @@
+{
+  "review": "round-3",
+  "reviewedAt": "2026-11-08T10:19:53.488Z",
+  "specSha256": "0fbde9416c55d3c1a8771e13e12fe49b93efbcd3c2efed03d652eb3c9f626c3d",
+  "environment": {
+    "node": "v22.22.0",
+    "mysql2": "3.24.6",
+    "parser": "5.4.0",
+    "fastify": "5.12.8",
+    "typescript": "5.9.3",
+    "nodeForge": "1.3.1",
+    "ipaddr": "2.5.0"
+  },
+  "tests": [
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders WHERE EXISTS (SELECT 1 FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders WHERE id IN (SELECT id FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders o JOIN customers c ON c.id=(SELECT MAX(id) FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.customers",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT (SELECT MAX(id) FROM secret_salary) AS n FROM orders",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_union_limit",
+      "invariantHolds": true,
+      "sql": "(SELECT * FROM orders LIMIT 1) UNION ALL SELECT * FROM orders",
+      "allowed": false,
+      "error": "ERR_AST_LIMIT_FAIL_CLOSED"
+    },
+    {
+      "name": "original_union_limit",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders UNION ALL SELECT * FROM orders LIMIT 1",
+      "allowed": true,
+      "rewritten": "SELECT * FROM `orders` UNION ALL SELECT * FROM `orders` LIMIT 1"
+    },
+    {
+      "name": "original_low_role_quota",
+      "invariantHolds": true,
+      "quotas": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 2,
+        "maxInflightConcurrency": 1
+      }
+    },
+    {
+      "name": "original_utf8_cell_limit",
+      "invariantHolds": true,
+      "inputBytes": 120000,
+      "outputBytes": 65536,
+      "wasTruncated": true
+    },
+    {
+      "name": "original_utf8_cell_limit",
+      "invariantHolds": true,
+      "inputBytes": 80000,
+      "outputBytes": 65534,
+      "wasTruncated": true
+    },
+    {
+      "name": "original_http_disconnect",
+      "invariantHolds": true,
+      "abortedBeforeDisconnect": false,
+      "abortedAfterDisconnect": true
+    },
+    {
+      "name": "original_audit_double_failure",
+      "invariantHolds": true,
+      "error": "ENOSPC simulated",
+      "queueLength": 1,
+      "totalUnflushed": 1,
+      "reserveRejected": true
+    },
+    {
+      "name": "original_highrisk_slot",
+      "invariantHolds": true,
+      "totalUnflushed": 1
+    },
+    {
+      "name": "original_highrisk_strict",
+      "invariantHolds": true,
+      "error": "ERR_AUDIT_STORAGE_UNAVAILABLE",
+      "fallbackWrites": 1
+    },
+    {
+      "name": "new_stale_reload_clears_new_tombstone",
+      "invariantHolds": true,
+      "invalidatedBeforeOldReload": true,
+      "invalidatedAfterOldReload": true,
+      "currentVersion": 3,
+      "oldSnapshotAllowed": false
+    },
+    {
+      "name": "new_transport_directionality",
+      "invariantHolds": true,
+      "serverReceived": "CLIENT_COMMAND",
+      "driverReceived": "SERVER_GREETING"
+    },
+    {
+      "name": "original_pool_ssrf_wiring",
+      "invariantHolds": true,
+      "guardCalls": 2,
+      "configuredHost": "db.example",
+      "streamConfigured": true,
+      "maxAllowedPacketPresent": false
+    },
+    {
+      "name": "new_tls_transport_metadata",
+      "invariantHolds": true,
+      "streamWasReplaced": true,
+      "endpointOnTransport": true,
+      "endpointOnCurrentStream": true,
+      "resetOnCurrentStream": true
+    },
+    {
+      "name": "new_audit_shutdown_wait",
+      "invariantHolds": true,
+      "stopReturned": false,
+      "totalUnflushedAtObservation": 1,
+      "isFlushing": true
+    },
+    {
+      "name": "new_runtime_entityid_normalizer",
+      "invariantHolds": true,
+      "unsafeNumber": 9007199254740992
+    },
+    {
+      "name": "original_canonical_self_operation_guard",
+      "invariantHolds": true,
+      "target": "1",
+      "operator": "1",
+      "normalizedTarget": "1",
+      "error": "ERR_SELF_OPERATION_FORBIDDEN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_leading_zero_entityid_guard",
+      "invariantHolds": true,
+      "target": "01",
+      "operator": "1",
+      "normalizedTarget": "1",
+      "error": "ERR_SELF_OPERATION_FORBIDDEN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_leading_zero_entityid_guard",
+      "invariantHolds": true,
+      "target": "01",
+      "operator": "2",
+      "normalizedTarget": "1",
+      "error": "ERR_LAST_SUPER_ADMIN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_ssh_forward_target_guard",
+      "invariantHolds": true,
+      "guardHosts": [
+        "169.254.169.254",
+        "bastion.example"
+      ],
+      "forwardTarget": {
+        "host": "203.0.113.8",
+        "port": 80
+      },
+      "hostVerifierConfigured": true,
+      "pinnedBastion": "203.0.113.8"
+    },
+    {
+      "name": "new_ssh_hostkey_required",
+      "invariantHolds": true,
+      "hostVerifierConfigured": true,
+      "openedWithoutHostFingerprint": true
+    },
+    {
+      "name": "new_result_memory_ownership",
+      "invariantHolds": true,
+      "countedBeforeEnd": 20,
+      "countedAfterEnd": 20,
+      "retainedRows": 1
+    },
+    {
+      "name": "new_webhook_lookup_contract",
+      "invariantHolds": true,
+      "error": {
+        "code": "ECONNREFUSED",
+        "message": "connect ECONNREFUSED 127.0.0.1:9"
+      }
+    },
+    {
+      "name": "new_qualified_dual_extraction",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM app.`dual`",
+      "tables": [
+        {
+          "database": "app",
+          "table": "dual",
+          "fullName": "app.dual",
+          "hasExplicitDb": true
+        }
+      ],
+      "isKnownNoTableQuery": false
+    },
+    {
+      "name": "r3_result_memory_lease_idempotent_release",
+      "invariantHolds": true,
+      "countedAfterRelease": 0
+    },
+    {
+      "name": "r3_ssh_prohibited_forward_target_actually_rejected",
+      "invariantHolds": true,
+      "error": "ERR_SSRF_PROHIBITED"
+    },
+    {
+      "name": "r3_quoted_unqualified_dual",
+      "invariantHolds": false,
+      "sql": "SELECT * FROM `dual`",
+      "astFrom": [
+        {
+          "db": null,
+          "table": "dual",
+          "as": null
+        }
+      ],
+      "extracted": {
+        "tables": [],
+        "isKnownNoTableQuery": true
+      },
+      "safetyDenied": false,
+      "rewritten": "SELECT * FROM `dual` LIMIT 10"
+    },
+    {
+      "name": "r3_bare_dual_known_no_table",
+      "invariantHolds": false,
+      "sql": "SELECT 1 FROM DUAL",
+      "astFrom": [
+        {
+          "type": "dual"
+        }
+      ],
+      "extracted": {
+        "tables": [],
+        "isKnownNoTableQuery": false
+      }
+    },
+    {
+      "name": "r3_bootstrap_active_profiles_wiring",
+      "invariantHolds": false,
+      "configuredActiveProfiles": 1,
+      "registryProfileCount": 1,
+      "bootPoolCount": 0,
+      "controlWithExplicitConfigs": 1,
+      "listened": [
+        "gateway",
+        "admin"
+      ],
+      "metadataQueries": [
+        "SELECT id, status, auth_version FROM sys_users",
+        "SELECT id, status, version FROM sys_profiles"
+      ]
+    },
+    {
+      "name": "r3_shutdown_pending_highrisk_write",
+      "invariantHolds": false,
+      "stopReturned": true,
+      "totalUnflushed": 1,
+      "activeFlushPromisePresent": false
+    },
+    {
+      "name": "r3_shutdown_preexisting_reservation",
+      "invariantHolds": false,
+      "stopReturned": true,
+      "totalUnflushed": 1
+    },
+    {
+      "name": "r3_ssh_config_generation_trust",
+      "invariantHolds": false,
+      "connects": [
+        {
+          "clientId": 1,
+          "host": "203.0.113.1"
+        }
+      ],
+      "forwards": [
+        {
+          "clientId": 1,
+          "host": "198.51.100.7",
+          "port": 3306
+        },
+        {
+          "clientId": 1,
+          "host": "198.51.100.7",
+          "port": 3306
+        }
+      ],
+      "verifierResults": [
+        true
+      ],
+      "requestedSecondBastion": "bastion-b.example",
+      "secondUsedClientId": 1
+    },
+    {
+      "name": "r3_missing_ssh_fingerprint_actually_rejected",
+      "invariantHolds": true,
+      "error": "HOSTKEY_REJECTED",
+      "forwardAttempted": false,
+      "verifierResult": false
+    },
+    {
+      "name": "r3_kill_uses_original_endpoint_port",
+      "invariantHolds": false,
+      "provideEndpoint": true,
+      "originalEndpoint": {
+        "logicalHost": "original.example",
+        "pinnedIp": "203.0.113.11",
+        "port": 3306,
+        "useSsh": false
+      },
+      "mutableConfigPort": 3307,
+      "tcp": [
+        {
+          "host": "203.0.113.11",
+          "port": 3307
+        }
+      ],
+      "guardCalls": [],
+      "sql": [
+        "KILL QUERY 123"
+      ],
+      "error": null
+    },
+    {
+      "name": "r3_kill_requires_verified_lease",
+      "invariantHolds": false,
+      "provideEndpoint": false,
+      "originalEndpoint": {
+        "logicalHost": "original.example",
+        "pinnedIp": "203.0.113.11",
+        "port": 3306,
+        "useSsh": false
+      },
+      "mutableConfigPort": 3307,
+      "tcp": [
+        {
+          "host": "203.0.113.99",
+          "port": 3307
+        }
+      ],
+      "guardCalls": [
+        "changed.example"
+      ],
+      "sql": [
+        "KILL QUERY 123"
+      ],
+      "error": null
+    },
+    {
+      "name": "r3_tls_strict_control_accepts_matching_trusted_certificate",
+      "invariantHolds": true,
+      "requestedHost": "wrong.example",
+      "driverResult": {
+        "accepted": true,
+        "authorized": true,
+        "authorizationError": null
+      }
+    },
+    {
+      "name": "r3_tls_wrong_hostname_cannot_be_ignored",
+      "invariantHolds": false,
+      "trustedCa": true,
+      "verifyIdentity": true,
+      "rejectUnauthorized": false,
+      "driverResult": {
+        "accepted": true,
+        "authorized": false,
+        "authorizationError": "ERR_TLS_CERT_ALTNAME_INVALID"
+      }
+    },
+    {
+      "name": "r3_tls_strict_control_rejects_wrong_hostname",
+      "invariantHolds": true,
+      "driverResult": {
+        "accepted": false,
+        "error": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "authorized": false,
+        "authorizationError": "ERR_TLS_CERT_ALTNAME_INVALID"
+      }
+    },
+    {
+      "name": "r3_tls_cannot_disable_certificate_verification",
+      "invariantHolds": false,
+      "configuredSsl": {
+        "rejectUnauthorized": false,
+        "verifyIdentity": true
+      },
+      "certificate": "self-signed; SAN wrong.example; requested host db.example",
+      "insecureDriverResult": {
+        "accepted": true,
+        "authorized": false,
+        "authorizationError": "DEPTH_ZERO_SELF_SIGNED_CERT"
+      }
+    },
+    {
+      "name": "r3_tls_strict_control_rejects_untrusted_certificate",
+      "invariantHolds": true,
+      "secureDriverResult": {
+        "accepted": false,
+        "error": "DEPTH_ZERO_SELF_SIGNED_CERT",
+        "authorized": false,
+        "authorizationError": "DEPTH_ZERO_SELF_SIGNED_CERT"
+      }
+    },
+    {
+      "name": "r3_auth_min_version_overshoots_committed_db",
+      "invariantHolds": false,
+      "committedDbVersion": 3,
+      "publishedAfterA": 3,
+      "registryVersion": 4,
+      "invalidatedAfterBothReloads": true,
+      "boundary": "Controlled transaction notification/read ordering; no real DB concurrency executed."
+    },
+    {
+      "name": "r3_tls_metadata_independent_of_cwd",
+      "invariantHolds": false,
+      "childStatus": 0,
+      "dependencyImportSucceeded": true,
+      "patchInstalled": false,
+      "endpointPreserved": false,
+      "resetPreserved": false
+    }
+  ],
+  "baseline": {
+    "total": 27,
+    "holds": 27,
+    "violated": 0
+  },
+  "extended": {
+    "total": 18,
+    "holds": 6,
+    "violated": 12
+  },
+  "summary": {
+    "total": 45,
+    "holds": 33,
+    "violated": 12
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "environment": {
+    "node": "v24.16.0",
+    "mysql2": "3.24.6",
+    "parser": "5.4.0",
+    "fastify": "5.12.8"
+  },
+  "tests": [
+    {
+      "name": "scope_extraction",
+      "sql": "SELECT * FROM orders WHERE EXISTS (SELECT 1 FROM secret_salary)",
+      "tables": [
+        "app.orders"
+      ],
+      "secretTableFound": false
+    },
+    {
+      "name": "scope_extraction",
+      "sql": "SELECT * FROM orders WHERE id IN (SELECT id FROM secret_salary)",
+      "tables": [
+        "app.orders"
+      ],
+      "secretTableFound": false
+    },
+    {
+      "name": "scope_extraction",
+      "sql": "SELECT * FROM orders o JOIN customers c ON c.id = (SELECT MAX(id) FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.customers"
+      ],
+      "secretTableFound": false
+    },
+    {
+      "name": "scope_extraction",
+      "sql": "SELECT (SELECT MAX(id) FROM secret_salary) AS n FROM orders",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ],
+      "secretTableFound": true
+    },
+    {
+      "name": "union_limit",
+      "sql": "(SELECT * FROM orders LIMIT 1) UNION ALL SELECT * FROM orders",
+      "rewritten": "(SELECT * FROM `orders` LIMIT 1) UNION ALL SELECT * FROM `orders`",
+      "accepted": true
+    },
+    {
+      "name": "union_limit",
+      "sql": "SELECT * FROM orders UNION ALL SELECT * FROM orders LIMIT 1",
+      "accepted": false,
+      "error": "ERR_AST_LIMIT_FAIL_CLOSED"
+    },
+    {
+      "name": "quota_merge",
+      "input": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 2,
+        "maxInflightConcurrency": 1
+      },
+      "actual": {
+        "defaultLimit": 50,
+        "maxLimit": 500,
+        "maxTimeoutMs": 15000,
+        "userQpmLimit": 60,
+        "maxInflightConcurrency": 5
+      }
+    },
+    {
+      "name": "pool_ssrf_ssh",
+      "guardCalls": 0,
+      "configuredHost": "blocked.example",
+      "streamConfigured": false,
+      "sshRequested": true
+    },
+    {
+      "name": "mysql_packet_option",
+      "warnings": [
+        "Ignoring invalid configuration option passed to Connection: maxAllowedPacket. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection"
+      ],
+      "actualConfigMaxAllowedPacket": null
+    },
+    {
+      "name": "mysql_tls_contract",
+      "servernameSelection": "const servername = Net.isIP(this.config.host)\n      ? undefined\n      : this.config.host;",
+      "sslServernameRead": false,
+      "verifyIdentityOptIn": true
+    },
+    {
+      "name": "cell_byte_limit",
+      "inputBytes": 120000,
+      "claimedLimitBytes": 65536,
+      "outputBytes": 98338,
+      "truncated": false
+    },
+    {
+      "name": "audit_double_failure",
+      "error": "ENOSPC simulated",
+      "totalUnflushedAfterFailure": 0,
+      "queueLength": 0
+    },
+    {
+      "name": "audit_highrisk_accounting",
+      "databaseWriteStillPending": true,
+      "totalUnflushed": 0
+    },
+    {
+      "name": "audit_highrisk_fallback",
+      "databaseAvailable": false,
+      "fallbackWrites": 1,
+      "highriskCommitResolved": true
+    },
+    {
+      "name": "bigint_rounding",
+      "ids": [
+        "9007199254740992",
+        "9007199254740993"
+      ],
+      "asNumbers": [
+        9007199254740992,
+        9007199254740992
+      ],
+      "collides": true
+    },
+    {
+      "name": "http_disconnect",
+      "abortedBeforeDisconnect": true,
+      "abortedAfterDisconnect": true,
+      "requestCloseEvents": 1
+    },
+    {
+      "name": "shutdown_order",
+      "httpCloseResolvedBeforeActiveHandlerReleased": false,
+      "canReachCancellationAfterAwaitClose": false
+    }
+  ]
+}

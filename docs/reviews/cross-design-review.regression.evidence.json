@@ -1,0 +1,152 @@
+{
+  "review": "round-8-bounded",
+  "reviewedAt": "2026-11-10T14:04:44.119Z",
+  "specPath": "D:\\E\\PersonalProjects\\mysql-mcp\\docs\\BACKEND_ARCHITECTURE_SPEC.md",
+  "specSha256": "2cbb317bffda809d9be26bae04b4e88088337b58f5ad229165f159ccd898e79a",
+  "specBytes": 239740,
+  "specLines": 5284,
+  "scope": [
+    "BE-R7-01",
+    "BE-R7-02"
+  ],
+  "fullBaselineExecuted": false,
+  "environment": {
+    "node": "v22.22.0",
+    "typescript": "5.9.3",
+    "mysql2": "3.24.6",
+    "nodeTypes": "26.6.6"
+  },
+  "tests": [
+    {
+      "name": "r7_replay_lease_repeat_seal",
+      "invariantHolds": true,
+      "scenario": "repeat-seal",
+      "acknowledgedFallbackIds": [
+        "r7-A",
+        "r7-B",
+        "r7-C"
+      ],
+      "replayed": 1,
+      "mysqlDurableIds": [
+        "r7-A"
+      ],
+      "fallbackIds": [
+        "r7-C",
+        "r7-B"
+      ],
+      "lostEventIds": [],
+      "sealedA": "audit-fallback-2026-11-10.jsonl.1794319484307-1.sealed.jsonl",
+      "sealedB": "audit-fallback-2026-11-10.jsonl.1794319484395-2.sealed.jsonl",
+      "redirectAfterFirst": "audit-fallback-2026-11-10.jsonl.1794319484307-1.sealed.jsonl",
+      "redirectAfterSecond": "audit-fallback-2026-11-10.jsonl.1794319484395-2.sealed.jsonl",
+      "readObservations": [],
+      "remainingFiles": [
+        "audit-fallback-2026-11-10.jsonl",
+        "audit-fallback-2026-11-10.jsonl.1794319484395-2.sealed.jsonl"
+      ],
+      "totalUnflushed": 0,
+      "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r7-lease-Wxr7c1",
+      "boundary": "Public audit methods with real filesystem; only MySQL replay is paused. Two rotations re-use one active pathname."
+    },
+    {
+      "name": "r7_replay_lease_seal_before_snapshot",
+      "invariantHolds": true,
+      "scenario": "seal-before-snapshot",
+      "acknowledgedFallbackIds": [
+        "r7-A",
+        "r7-B"
+      ],
+      "replayed": 1,
+      "mysqlDurableIds": [
+        "r7-B"
+      ],
+      "fallbackIds": [
+        "r7-A"
+      ],
+      "lostEventIds": [],
+      "sealedA": "audit-fallback-2026-11-10.jsonl.1794319484623-1.sealed.jsonl",
+      "sealedB": null,
+      "redirectAfterFirst": "audit-fallback-2026-11-10.jsonl.1794319484623-1.sealed.jsonl",
+      "redirectAfterSecond": null,
+      "readObservations": [
+        {
+          "path": "audit-fallback-2026-11-10.jsonl",
+          "ids": [
+            "r7-B"
+          ]
+        },
+        {
+          "path": "audit-fallback-2026-11-10.jsonl.1794319484623-1.sealed.jsonl",
+          "ids": [
+            "r7-A"
+          ]
+        },
+        {
+          "path": "audit-fallback-2026-11-10.jsonl",
+          "ids": [
+            "r7-B"
+          ]
+        },
+        {
+          "path": "audit-fallback-2026-11-10.jsonl",
+          "ids": [
+            "r7-B"
+          ]
+        }
+      ],
+      "remainingFiles": [
+        "audit-fallback-2026-11-10.jsonl.1794319484623-1.sealed.jsonl"
+      ],
+      "totalUnflushed": 0,
+      "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r7-lease-SA0W8n",
+      "boundary": "Real filesystem with a barrier before the first snapshot read opens the path; no bytes forged. Rotation and replacement append complete before the actual snapshot read. MySQL outcomes controlled."
+    },
+    {
+      "name": "r7_two_seals_then_explicit_sealed_replay_control",
+      "invariantHolds": true,
+      "replayedA": 1,
+      "replayedB": 1,
+      "mysqlDurableIds": [
+        "control-A",
+        "control-B"
+      ],
+      "activeIds": [
+        "control-C"
+      ],
+      "boundary": "No overlapping active-path replay: seal generations independently, then replay immutable paths. Real filesystem, controlled MySQL."
+    },
+    {
+      "name": "r7_limiter_module_semantic_typecheck",
+      "invariantHolds": true,
+      "diagnostics": [],
+      "boundary": "Entire extracted limiter/loop-breaker block checked by real TS 5.9.3 strict semantics; actual Node crypto typings. Only local AppError and EntityId imports replaced. Not a whole-project build."
+    }
+  ],
+  "retiredControls": [
+    {
+      "name": "r7_limiter_without_undeclared_property_control",
+      "reason": "Counterfactual removal control is no longer needed after the real source removed the offending expression. Not counted as an executed observation."
+    }
+  ],
+  "sourceAssembly": {
+    "parts": [
+      "part1_intro.md",
+      "part2_adr.md",
+      "part3_monorepo.md",
+      "part4_database_and_dal.md",
+      "part5_control_plane_security.md",
+      "part6_data_plane_pipeline.md",
+      "part7_ast_and_mcp_tools.md",
+      "part8_core_engine_pool.md",
+      "part9_security_ssrf_crypto.md",
+      "part10_audit_and_stats.md",
+      "part11_api_matrix_and_testing.md"
+    ],
+    "byteExactMatch": true
+  },
+  "summary": {
+    "total": 4,
+    "holds": 4,
+    "violated": 0
+  }
+}

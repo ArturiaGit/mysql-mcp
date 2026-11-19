@@ -1,0 +1,148 @@
+{
+  "review_date": "2026-11-09",
+  "scope": [
+    "API-R1-03: password-policy GET-only L3 exemption"
+  ],
+  "baseline": "Fourth-round report text; closed items not reopened and prior evidence not overwritten.",
+  "inputs": [
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "bytes": 140023,
+      "sha256": "268FCC0BE8869962300EF98971B25355BDE9ADC0BE3864681AA6A2EABE112EBE"
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "bytes": 231349,
+      "sha256": "182C1149CB230A5B6E9143C4248E0A59FB276B8E426B9D3A62D553440D7C1C7D"
+    },
+    {
+      "path": "docs/reviews/API_CONTRACT_REVIEW_ROUND4.md",
+      "bytes": 8097,
+      "sha256": "6FDA87A9013510B6993DE7D09C406EA732A13CFE05C8EB6AB017F0EC0016DABF"
+    }
+  ],
+  "static_observations": {
+    "password_policy_absent_from_public_paths": true,
+    "password_policy_absent_from_path_only_l3_allowlist": true,
+    "method_specific_get_exemption_present": true,
+    "api_explicitly_prohibits_put_exemption": true
+  },
+  "verification_boundary": {
+    "source": "Current backend section 5.5 documented fourTierSecurityGuard; control flow unchanged.",
+    "adaptations": "Remove import/export, erase TypeScript syntax, supply AppError stand-in and fixed Date.now.",
+    "fixed_time_utc": "2026-11-09T00:00:00.000Z",
+    "real_http_handler_or_mysql_execution": false,
+    "full_build_or_semantic_typecheck": false,
+    "put_body": {
+      "passwordExpiresDays": null
+    }
+  },
+  "guard_probes": [
+    {
+      "name": "expired_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "expired",
+      "expected": "ALLOW",
+      "expected_status": null,
+      "actual": "ALLOW",
+      "actual_status": null,
+      "matches_expected": true
+    },
+    {
+      "name": "expired_policy_put",
+      "method": "PUT",
+      "route": "/api/v1/auth/password-policy",
+      "account": "expired",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "expected_status": 403,
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "actual_status": 403,
+      "matches_expected": true
+    },
+    {
+      "name": "forced_change_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "forced",
+      "expected": "ALLOW",
+      "expected_status": null,
+      "actual": "ALLOW",
+      "actual_status": null,
+      "matches_expected": true
+    },
+    {
+      "name": "forced_change_policy_put",
+      "method": "PUT",
+      "route": "/api/v1/auth/password-policy",
+      "account": "forced",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "expected_status": 403,
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "actual_status": 403,
+      "matches_expected": true
+    },
+    {
+      "name": "anonymous_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "anonymous",
+      "expected": "ERR_AUTH_UNAUTHORIZED",
+      "expected_status": 401,
+      "actual": "ERR_AUTH_UNAUTHORIZED",
+      "actual_status": 401,
+      "matches_expected": true
+    },
+    {
+      "name": "pending_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "pending",
+      "expected": "ERR_AUTH_ACCOUNT_PENDING",
+      "expected_status": 403,
+      "actual": "ERR_AUTH_ACCOUNT_PENDING",
+      "actual_status": 403,
+      "matches_expected": true
+    },
+    {
+      "name": "fresh_policy_put",
+      "method": "PUT",
+      "route": "/api/v1/auth/password-policy",
+      "account": "fresh",
+      "expected": "ALLOW",
+      "expected_status": null,
+      "actual": "ALLOW",
+      "actual_status": null,
+      "matches_expected": true
+    },
+    {
+      "name": "expired_business",
+      "method": "GET",
+      "route": "/api/v1/pats",
+      "account": "expired",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "expected_status": 403,
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "actual_status": 403,
+      "matches_expected": true
+    },
+    {
+      "name": "expired_change_password",
+      "method": "POST",
+      "route": "/api/v1/auth/change-password",
+      "account": "expired",
+      "expected": "ALLOW",
+      "expected_status": null,
+      "actual": "ALLOW",
+      "actual_status": null,
+      "matches_expected": true
+    }
+  ],
+  "summary": {
+    "guard_observations": 9,
+    "guard_expectations_met": 9,
+    "static_checks_met": true,
+    "protected_sources_and_prior_review_files_unchanged": true,
+    "recorded_review_decision_not_automated_proof": "API-R1-03 resolved at document level; no remaining issue within this final residual scope."
+  }
+}

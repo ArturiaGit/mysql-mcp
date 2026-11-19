@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-12",
+  "timezone": "Asia/Shanghai",
+  "runtime": "v22.22.0",
+  "typescript": "5.9.3",
+  "sources": [
+    {
+      "path": "docs/ARCHITECTURE_SPEC.md",
+      "sha256": "21614af8cadc8f92172779cd6106d12009084ed8b4b2ba5fbcbc738cbc4a4d22"
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "sha256": "a81c356a5d59536225437d9e48b1a31df5446612c5d76db6e2435c13da5d54c3"
+    },
+    {
+      "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+      "sha256": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0"
+    },
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "sha256": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e"
+    },
+    {
+      "path": "docs/DATABASE_DESIGN_SPEC.md",
+      "sha256": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd"
+    },
+    {
+      "path": "docs/sql/001_metadata_schema.sql",
+      "sha256": "655fae957076927283141b15cd7d90afb77e9bc6b278b3ef70f7d76fe6e6f7c2"
+    },
+    {
+      "path": "docs/contracts/readiness.types.ts",
+      "sha256": "f40baa341a7deca4b611e461f8c4538277dcbc09f183cfb2df0286fb17f4625f"
+    },
+    {
+      "path": "docs/contracts/readiness.fixtures.json",
+      "sha256": "8c361a9a2dc4aefa38239409c034c558c8a3f531a8f9c941e17a37bebace6589"
+    },
+    {
+      "path": "docs/contracts/endpoint-trace.json",
+      "sha256": "7e508d351d3bc9d2cc0a147a73b40c3a0f197adea5ff497852efb25c3b832323"
+    }
+  ],
+  "tests": [
+    {
+      "name": "RD-01 shared allocation SQL and complete revision lifecycle",
+      "passed": true,
+      "detail": {
+        "states": [
+          {
+            "counter": 1,
+            "revision": 1
+          },
+          {
+            "counter": 2,
+            "revision": 2
+          },
+          {
+            "counter": 3,
+            "revision": 3
+          },
+          {
+            "counter": 4,
+            "revision": 4
+          }
+        ],
+        "boundary": "SQL-guided sequential model; not database concurrency"
+      }
+    },
+    {
+      "name": "RD-02 UTC parser, serialization, milliseconds and display boundary",
+      "passed": true,
+      "detail": {
+        "driver": "3.24.6",
+        "iso": "2026-11-12T08:00:00.123Z",
+        "sql": "'2026-11-12 08:00:00.123'",
+        "display": "16:00:00",
+        "boundary": "real mysql2 decoder/SQL encoder and Intl; no server/browser"
+      }
+    },
+    {
+      "name": "RD-02 await UTC initialization; destroy failed connection; initialize each borrow",
+      "passed": true
+    },
+    {
+      "name": "RD-02 nontransaction executor initializes and releases; startup wiring uses safe entrypoints",
+      "passed": true
+    },
+    {
+      "name": "RD-03 single physical schema and original constraints retained",
+      "passed": true
+    },
+    {
+      "name": "RD-04 actual contract fixture compiles; mapper round-trip; no secret/read-only write leak",
+      "passed": true,
+      "detail": {
+        "typescript": "5.9.3",
+        "username": "mcp_readonly_user",
+        "diagnostics": 0
+      }
+    },
+    {
+      "name": "RD-05 generated request signatures and negative type mutations",
+      "passed": true
+    },
+    {
+      "name": "RD-06 exact 47 method/path coverage and implementation trace",
+      "passed": true
+    },
+    {
+      "name": "RD-07 extracted guard: role/users/bindings lock order; last admin and self protection",
+      "passed": true,
+      "detail": {
+        "boundary": "documented guard on controlled current-read rows; not an InnoDB scheduler"
+      }
+    },
+    {
+      "name": "RD-09 bootstrap snippet strict typecheck with actual mysql2 types",
+      "passed": true
+    },
+    {
+      "name": "RD-09 first empty initialization and ordinary restart preserve identity/configuration",
+      "passed": true
+    },
+    {
+      "name": "RD-09 missing marker, nonempty PENDING and absent active super-admin never create identity",
+      "passed": true
+    },
+    {
+      "name": "RD-09 audit rollback and post-commit secret delivery failure do not reissue admin",
+      "passed": true
+    },
+    {
+      "name": "RD-08 unsigned decisions remain explicit and are not represented as approved",
+      "passed": true
+    },
+    {
+      "name": "Generated parts, request types, fixtures and endpoint trace have no drift",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 15,
+    "total": 15
+  },
+  "boundaries": {
+    "realMysql": false,
+    "realHttp": false,
+    "browser": false,
+    "wholeProjectBuild": false,
+    "productSignoff": false,
+    "method": "extracted snippets, actual TS compiler/mysql2 decoder, controlled SQL responses and sequential model"
+  }
+}

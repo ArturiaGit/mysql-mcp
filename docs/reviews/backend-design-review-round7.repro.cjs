@@ -1,0 +1,561 @@
+/**
+ * Observational review harness for the fenced TypeScript examples in the design.
+ * Executes trusted local document examples with controlled dependency stubs.
+ * No production database is contacted. HTTP, TCP, and real TLS probes bind only to loopback.
+ * SSH, query execution, management SQL, and server startup use controlled dependency stubs.
+ * Install dependencies into a separate temp prefix; set NODE_PATH to its node_modules.
+ * This records observations; exit 0 does NOT mean the design passed security review.
+ */
+const fs = require('node:fs');
+const path = require('node:path');
+const ts = require('typescript');
+const {Parser} = require('node-sql-parser');
+const {EventEmitter} = require('node:events');
+const http = require('node:http');
+const assert = require('node:assert/strict');
+const docPath = path.resolve(process.argv[2] || path.resolve(__dirname, '../BACKEND_ARCHITECTURE_SPEC.md'));
+const doc = fs.readFileSync(docPath, 'utf8');
+class AppError extends Error { constructor(p) { super(p.message); Object.assign(this,p); } }
+function load(marker, overrides={}) {
+  const start = doc.indexOf('// '+marker);
+  assert(start >= 0,marker);
+  const end = doc.indexOf('\n```',start);
+  const source=doc.slice(start,end);
+  const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+  const m={exports:{}};
+  new Function('require','module','exports',js)(id => {
+    if(id in overrides)return overrides[id];
+    if(id==='@mysql-mcp/core-engine'||id==='./app-error')return {AppError};
+    return require(id);
+  },m,m.exports);
+  return m.exports;
+}
+const net = require('node:net');
+const {PassThrough} = require('node:stream');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const results={review:'round-7',reviewedAt:new Date().toISOString(),specSha256:require('node:crypto').createHash('sha256').update(doc).digest('hex'),environment:{node:process.version,mysql2:require('mysql2/package.json').version,parser:require('node-sql-parser/package.json').version,fastify:require('fastify/package.json').version},tests:[]};
+const add=(name,expected,data)=>{const invariantHolds=!!expected;results.tests.push({name,invariantHolds,...structuredClone(data)});};
+const streamModule=load('packages/core-engine/src/streaming-executor.ts');
+const {RegistryHub,SnapshotBuilder,normalizeEntityId}=load('packages/core-engine/src/registry-hub.ts');
+const {assertSnapshotValidBeforeExecutionSync}=load('apps/gateway/src/pipeline/05-execution-audit.step.ts');
+const {ScopeExtractor}=load('packages/core-ast/src/scope-extractor.ts');
+const {AstValidator}=load('packages/core-ast/src/ast-validator.ts');
+const {LimitRewriter}=load('packages/core-ast/src/limit-rewriter.ts');
+const p=new Parser();
+const makeSnapshot=()=>SnapshotBuilder.buildSnapshot({requestId:'q_review',user:{id:'1',username:'review',status:'ACTIVE',mustChangePassword:false,authVersion:1,roleIds:['1']},pat:{id:'1',expiresAt:null,isRevoked:false},roles:[{id:'1',roleName:'RESTRICTED',defaultLimit:5,maxLimit:10,maxTimeoutMs:1000,userQpmLimit:2,maxInflightConcurrency:1}],userSpecificQpmLimit:null,profile:{id:'1',name:'test',defaultDatabase:'app',capacityQpm:300,maxPoolSize:10,maxInflightConcurrency:30,queueTimeoutMs:3000,status:'ACTIVE'},dbAclRows:[],tableAclRows:[],globalPolicyVersion:1});
+(async()=>{
+for(const sql of [
+'SELECT * FROM orders WHERE EXISTS (SELECT 1 FROM secret_salary)',
+'SELECT * FROM orders WHERE id IN (SELECT id FROM secret_salary)',
+'SELECT * FROM orders o JOIN customers c ON c.id=(SELECT MAX(id) FROM secret_salary)',
+'SELECT (SELECT MAX(id) FROM secret_salary) AS n FROM orders',
+]){const refs=ScopeExtractor.extractPhysicalTables(p.astify(sql,{database:'MySQL'}),'app');const tables=refs.tables.map(t=>t.fullName);add('original_acl_subquery',tables.includes('app.secret_salary'),{sql,tables});}
+for(const [sql,shouldAllow] of [
+['(SELECT * FROM orders LIMIT 1) UNION ALL SELECT * FROM orders',false],
+['SELECT * FROM orders UNION ALL SELECT * FROM orders LIMIT 1',true],
+]){let allowed=true,rewritten,error;try{rewritten=LimitRewriter.enforceSafeLimit(p.astify(sql,{database:'MySQL'}),10,20)}catch(e){allowed=false;error=e.code}add('original_union_limit',allowed===shouldAllow,{sql,allowed,rewritten,error});}
+const snap=makeSnapshot();add('original_low_role_quota',JSON.stringify(snap.quotas)===JSON.stringify({defaultLimit:5,maxLimit:10,maxTimeoutMs:1000,userQpmLimit:2,maxInflightConcurrency:1}),{quotas:snap.quotas});
+for(const input of ['汉'.repeat(40000),'😀'.repeat(20000)]){const r=streamModule.truncateUtf8CellSafe(input);add('original_utf8_cell_limit',Buffer.byteLength(r.value)<=65536&&r.wasTruncated&&!r.value.includes('\uFFFD'),{inputBytes:Buffer.byteLength(input),outputBytes:Buffer.byteLength(r.value),wasTruncated:r.wasTruncated});}
+const {buildStreamableHttpInvocation}=load('apps/gateway/src/adapters/streamable-http.adapter.ts');
+const fastify=require('fastify');const app=fastify();let signal,cleanup,enteredResolve,doneResolve;const entered=new Promise(r=>enteredResolve=r),done=new Promise(r=>doneResolve=r);
+app.post('/mcp',async(req,reply)=>{const inv=buildStreamableHttpInvocation(req,reply);signal=inv.abortSignal;cleanup=inv.cleanupListeners;enteredResolve();await sleep(100);doneResolve();return {ok:true};});await app.listen({host:'127.0.0.1',port:0});const client=http.request({host:'127.0.0.1',port:app.server.address().port,path:'/mcp',method:'POST',headers:{'Content-Type':'application/json'}},res=>res.resume());client.on('error',()=>{});client.end(JSON.stringify({id:1,params:{name:'execute_query',arguments:{sql:'SELECT 1'}}}));await entered;await sleep(15);const before=signal.aborted;client.destroy();await sleep(25);const after=signal.aborted;add('original_http_disconnect',!before&&after,{abortedBeforeDisconnect:before,abortedAfterDisconnect:after});await done;cleanup();await app.close();
+const {AuditEngine}=load('packages/core-engine/src/audit-engine.ts',{'node:fs':{promises:{mkdir:async()=>{},appendFile:async()=>{throw new Error('ENOSPC simulated')}}},'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+const cfg={maxUnflushedEvents:10000,batchSize:200,flushIntervalMs:500,emergencyLogDir:'unused'};
+const engine=new AuditEngine({query:async()=>{throw new Error('DB_DOWN simulated')}},cfg);let slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:'q_test',sqlText:'SELECT 1',isHighRisk:false});let err;try{await engine.flushBatch()}catch(e){err=e.message}let reserveRejected=false;try{await engine.reserveSlotOrBackpressure()}catch{reserveRejected=true}add('original_audit_double_failure',engine.queue.length===1&&engine.totalUnflushedCount===1&&reserveRejected,{error:err,queueLength:engine.queue.length,totalUnflushed:engine.totalUnflushedCount,reserveRejected});
+const engine2=new AuditEngine({query:()=>new Promise(()=>{})},cfg);slot=await engine2.reserveSlotOrBackpressure();void slot.commit({queryInstanceId:'q_hr_pending',sqlText:'SELECT 1',isHighRisk:true});add('original_highrisk_slot',engine2.totalUnflushedCount===1,{totalUnflushed:engine2.totalUnflushedCount});
+let fallbackWrites=0;const {AuditEngine:AEFallback}=load('packages/core-engine/src/audit-engine.ts',{'node:fs':{promises:{mkdir:async()=>{},appendFile:async()=>{fallbackWrites++}}},'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});const e3=new AEFallback({query:async()=>{throw new Error('DB_DOWN simulated')}},cfg);slot=await e3.reserveSlotOrBackpressure();let hrError;try{await slot.commit({queryInstanceId:'q_hr_failed',sqlText:'SELECT 1',isHighRisk:true})}catch(e){hrError=e.code}add('original_highrisk_strict',hrError==='ERR_AUDIT_STORAGE_UNAVAILABLE',{error:hrError,fallbackWrites});
+// Counterexample: reload A read committed ACTIVE v2; a later freeze marks v3 before A publishes v2.
+let oldReloadResolve;const hub=new RegistryHub({query:()=>new Promise(r=>oldReloadResolve=r)});hub.userAuthVersions.set('1',{version:1,status:'ACTIVE'});hub.markUserInvalidatedSync('1');const oldReload=hub.reloadUserAuthFromDb('1');hub.markUserInvalidatedSync('1');const beforeReload=hub.isUserInvalidated('1');oldReloadResolve([[{status:'ACTIVE',auth_version:2}]]);await oldReload;const previousCommittedSnapshot={...makeSnapshot(),authVersion:2};let oldSnapshotAllowed=true;try{assertSnapshotValidBeforeExecutionSync(previousCommittedSnapshot,hub,new AbortController().signal)}catch{oldSnapshotAllowed=false}add('new_stale_reload_clears_new_tombstone',hub.isUserInvalidated('1')&&!oldSnapshotAllowed,{invalidatedBeforeOldReload:beforeReload,invalidatedAfterOldReload:hub.isUserInvalidated('1'),currentVersion:hub.getUserAuthVersion('1'),oldSnapshotAllowed});
+// Exact new bridge transport, with only mysql2 pool construction replaced; real loopback TCP.
+const peers=[];const serverReceived=[];const server=net.createServer(sock=>{peers.push(sock);sock.on('error',()=>{});sock.on('data',b=>serverReceived.push(b.toString()));sock.write('SERVER_GREETING');});await new Promise(r=>server.listen(0,'127.0.0.1',r));let poolOptions;let guardCalls=0;const {ManagedProfilePool}=load('packages/core-engine/src/pool-manager.ts',{'mysql2':{createPool:opts=>{poolOptions=opts;return {getConnection(){},end:cb=>cb()}}}});new ManagedProfilePool('1',{name:'test',host:'db.example',port:server.address().port,username:'u',passwordEncrypted:'encrypted',defaultDatabase:'app',maxPoolSize:1,queueTimeoutMs:1000},{decrypt:()=>'<test-password>'},{resolveAndValidateHost:async()=>{guardCalls++;return '127.0.0.1'}});const bridge=poolOptions.stream();const driverReceived=[];bridge.on('data',b=>driverReceived.push(b.toString()));bridge.on('error',()=>{});await sleep(40);bridge.write('CLIENT_COMMAND');await sleep(40);add('new_transport_directionality',!serverReceived.join('').includes('SERVER_GREETING')&&!driverReceived.join('').includes('CLIENT_COMMAND'),{serverReceived:serverReceived.join(''),driverReceived:driverReceived.join('')});add('original_pool_ssrf_wiring',guardCalls>=2&&typeof poolOptions.stream==='function'&&!('maxAllowedPacket' in poolOptions),{guardCalls,configuredHost:poolOptions.host,streamConfigured:typeof poolOptions.stream==='function',maxAllowedPacketPresent:'maxAllowedPacket' in poolOptions});bridge.destroy();for(const peer of peers)peer.destroy();await new Promise(r=>server.close(r));
+// ssl configuration preserves hostname, but driver TLS upgrade replaces the stream object.
+const mysqlRoot=path.dirname(require.resolve('mysql2/package.json'));const BaseConnection=require(path.join(mysqlRoot,'lib/base/connection.js'));const tls=require('node:tls');const oldConnect=tls.connect;const transport=new PassThrough();transport.__verified_endpoint={logicalHost:'db.example',pinnedIp:'203.0.113.5',port:3306,useSsh:false};transport.__resetWireByteCounter=()=>{};const tlsStream=new PassThrough();const fakeConn={config:{host:'db.example',port:3306,ssl:{rejectUnauthorized:true,verifyIdentity:true}},stream:transport,packetParser:{execute(){}},_handleNetworkError(){}};try{tls.connect=()=>tlsStream;BaseConnection.prototype.startTLS.call(fakeConn,()=>{});}finally{tls.connect=oldConnect;}add('new_tls_transport_metadata',!!fakeConn.stream.__verified_endpoint&&typeof fakeConn.stream.__resetWireByteCounter==='function',{streamWasReplaced:fakeConn.stream!==transport,endpointOnTransport:!!transport.__verified_endpoint,endpointOnCurrentStream:!!fakeConn.stream.__verified_endpoint,resetOnCurrentStream:typeof fakeConn.stream.__resetWireByteCounter==='function'});transport.destroy();tlsStream.destroy();
+// stopAndFlushAll must await an already running flusher, not just return from its re-entry guard.
+let dbResolve;const stopEngine=new AuditEngine({query:()=>new Promise(r=>dbResolve=r)},cfg);slot=await stopEngine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:'q_shutdown',sqlText:'SELECT 1',isHighRisk:false});const background=stopEngine.flushBatch();let stopped=false;const stopPromise=stopEngine.stopAndFlushAll().then(()=>stopped=true);await sleep(25);add('new_audit_shutdown_wait',!stopped||stopEngine.totalUnflushedCount===0,{stopReturned:stopped,totalUnflushedAtObservation:stopEngine.totalUnflushedCount,isFlushing:stopEngine.isFlushing});dbResolve([{}]);await Promise.all([background,stopPromise]);
+// Runtime duplicate normalizer must reject already imprecise number inputs just like toEntityId.
+const unsafe=Number('9007199254740993');let accepted;try{accepted=normalizeEntityId(unsafe)}catch{}add('new_runtime_entityid_normalizer',accepted===undefined,{unsafeNumber:unsafe,normalizerAccepted:accepted});
+// Leading-zero string aliases pass validation but skip string-identity security guards.
+const {toEntityId}=load('packages/shared-types/src/entities.ts');
+for(const [target,operator] of [['1','1'],['01','1'],['01','2']]){
+  const seen={sql:[],tombstones:[],cancelledUsers:[],reloads:[]};
+  const conn={query:async(sql,params)=>{seen.sql.push({sql,params});return sql.includes('SELECT u.id')?[[{id:'1'}]]:[{affectedRows:1}]}};
+  const {UserService}=load('apps/admin-api/src/services/user.service.ts',{'@mysql-mcp/shared-types':{toEntityId},'../repositories/base.repository':{withTransaction:async(_pool,work)=>work(conn)}});
+  const svc=new UserService({}, {markUserInvalidatedSync:id=>seen.tombstones.push(id),reloadUserAuthFromDb:async id=>seen.reloads.push(id)}, {cancelQueriesByUser:id=>seen.cancelledUsers.push(id)});
+  let error;try{await svc.updateUserStatus(target,'DISABLED',operator)}catch(e){error=e.code||e.message}
+  const update=seen.sql.find(q=>q.sql.includes('UPDATE sys_users'));
+  add(target==='1'?'original_canonical_self_operation_guard':'new_leading_zero_entityid_guard',target==='1'?error==='ERR_SELF_OPERATION_FORBIDDEN':!!error,{target,operator,normalizedTarget:toEntityId(target),error:error??null,updateIssued:!!update,updateId:update?.params[1],tombstones:seen.tombstones,cancelledUsers:seen.cancelledUsers,modelBoundary:'SQL is recorded by a stub; no real MySQL UPDATE was executed.'});
+}
+// Exact SSH implementation, controlled client: no real SSH connection is opened.
+const sshObserved={guardHosts:[],forwardTarget:null,hostVerifierConfigured:false};class FakeSsh extends EventEmitter{connect(opts){sshObserved.hostVerifierConfigured=typeof opts.hostVerifier==='function';sshObserved.pinnedBastion=opts.host;queueMicrotask(()=>this.emit('ready'));return this}forwardOut(_s,_p,host,port,cb){sshObserved.forwardTarget={host,port};cb(null,new PassThrough())}end(){}}
+const {SshTunnelManager}=load('packages/core-engine/src/ssh-tunnel.ts',{'ssh2':{Client:FakeSsh}});const ssh=new SshTunnelManager({decrypt:()=>'<test-private-key>'},{resolveAndValidateHost:async host=>{sshObserved.guardHosts.push(host);return '203.0.113.8'}});const ch=await ssh.openTunnelStream('1',{use_ssh:true,host:'bastion.example',username:'u',private_key_encrypted:'cipher'},'169.254.169.254',80);add('new_ssh_forward_target_guard',sshObserved.guardHosts.includes('169.254.169.254'),sshObserved);add('new_ssh_hostkey_required',sshObserved.hostVerifierConfigured,{hostVerifierConfigured:sshObserved.hostVerifierConfigured,openedWithoutHostFingerprint:true});ch.destroy();await ssh.closeAllTunnels();
+// Returned rows still occupy memory even after the end handler has zeroed accounting.
+const tracker=new streamModule.UserMemoryBudgetTracker();const es=new EventEmitter();const qconn={query:()=>({stream:()=>es})};const pending=streamModule.executeStreamingQueryWithBudget(qconn,'SELECT 1',[],1000,{userId:'1',tracker});es.emit('data',['retained payload']);const countedBefore=tracker.userBytes.get('1');es.emit('end');const retained=await pending;add('new_result_memory_ownership',tracker.userBytes.get('1')>0,{countedBeforeEnd:countedBefore,countedAfterEnd:tracker.userBytes.get('1')??0,retainedRows:retained.rows.length});
+// Node net's custom lookup receives {all:true} under default auto family selection.
+const {NotificationService}=load('apps/admin-api/src/services/notification.service.ts');let lookupAll;const notifyService=new NotificationService({resolveAndValidateHost:async()=> '127.0.0.1'});let notifyError;const nativeNetCreate=net.createConnection;try{await notifyService.sendWebhookMessage('DINGTALK','https://review-probe.invalid:9/hook','Review','Local-only probe')}catch(e){notifyError={code:e.code,message:e.message}}add('new_webhook_lookup_contract',notifyError?.code!=='ERR_INVALID_IP_ADDRESS',{error:notifyError});
+// Explicit schema must take precedence over the special unqualified dummy DUAL.
+const dualSql='SELECT * FROM app.`dual`';const dualRef=ScopeExtractor.extractPhysicalTables(p.astify(dualSql,{database:'MySQL'}),'app');add('new_qualified_dual_extraction',dualRef.tables.some(t=>t.fullName==='app.dual'),{sql:dualSql,tables:dualRef.tables,isKnownNoTableQuery:dualRef.isKnownNoTableQuery});
+// Preserve the 27 round-2 observations, then exercise new boundary cases.
+results.baseline={total:results.tests.length,holds:results.tests.filter(t=>t.invariantHolds).length,violated:results.tests.filter(t=>!t.invariantHolds).length};
+results.environment.typescript=require('typescript/package.json').version;
+results.environment.nodeForge=require('node-forge/package.json').version;
+results.environment.ipaddr=require('ipaddr.js/package.json').version;
+// A lease can be explicitly released exactly once after its consumer finishes.
+retained.releaseMemoryLease();retained.releaseMemoryLease();
+add('r3_result_memory_lease_idempotent_release',(tracker.userBytes.get('1')??0)===0,{countedAfterRelease:tracker.userBytes.get('1')??0});
+{
+  const {SsrfGuard}=load('packages/security/src/ssrf-guard.ts');
+  const guard=new SsrfGuard('');let error;
+  const {SshTunnelManager}=load('packages/core-engine/src/ssh-tunnel.ts',{'ssh2':{Client:class{constructor(){throw new Error('Unexpected SSH connection attempt')}}}});
+  try{await new SshTunnelManager({decrypt:()=>''},guard).openTunnelStream('1',{use_ssh:true},'169.254.169.254',80)}catch(e){error=e.code||e.message}
+  add('r3_ssh_prohibited_forward_target_actually_rejected',error==='ERR_SSRF_PROHIBITED',{error});
+}
+
+{
+  const sql='SELECT * FROM `dual`';
+  const ast=p.astify(sql,{database:'MySQL'});
+  const extracted=ScopeExtractor.extractPhysicalTables(ast,'app',0);
+  let denied=false;try{AstValidator.validateReadOnlyAndSafety(sql,ast,extracted.tables)}catch{denied=true}
+  const rewritten=LimitRewriter.enforceSafeLimit(ast,10,20);
+  add('r3_quoted_unqualified_dual',extracted.tables.some(t=>t.fullName==='app.dual'),{sql,astFrom:ast.from,extracted,safetyDenied:denied,rewritten});
+  const bareAst=p.astify('SELECT 1 FROM DUAL',{database:'MySQL'});const bare=ScopeExtractor.extractPhysicalTables(bareAst,'app',0);add('r3_bare_dual_known_no_table',bare.isKnownNoTableQuery,{sql:'SELECT 1 FROM DUAL',astFrom:bareAst.from,extracted:bare});
+}
+{
+  const poolModule=load('packages/core-engine/src/pool-manager.ts',{'mysql2':{createPool:opts=>{return {getConnection(){},end:cb=>cb()}}}});
+  let capturedRuntime;const listened=[];
+  const activeCfg={id:'1',name:'active',host:'db.example',port:3306,username:'u',passwordEncrypted:'cipher',defaultDatabase:'app',maxPoolSize:1,queueTimeoutMs:1000};
+  const metadataQueries=[];const metadata={query:async(sql)=>{metadataQueries.push(sql);return [sql.includes('sys_profiles')?[{...activeCfg,status:'ACTIVE',version:1}]:[{id:'1',status:'ACTIVE',auth_version:1}]]},end:async()=>{}};
+  class EmptyComponent{};
+  const fakeServer=name=>({listen:async()=>{listened.push(name)},close:async()=>{}});
+  const config={GATEWAY_MASTER_KEYS:'{}',ALLOWED_OUTBOUND_IPS:'',DB_HOST:'metadata',PORT_GATEWAY:8080,PORT_ADMIN:8081};
+  const beforeSignals={SIGINT:process.listeners('SIGINT'),SIGTERM:process.listeners('SIGTERM')};
+  const boot=load('apps/gateway/src/bootstrap-host.ts',{
+    '@mysql-mcp/core-engine':{createMetadataPool:()=>metadata,RegistryHub,SshTunnelManager:EmptyComponent,AdminMaintenanceChannel:EmptyComponent,PoolManager:poolModule.PoolManager,QueryLifecycleCoordinator:EmptyComponent,AuditEngine:class{startBackgroundFlusher(){}},MetricsCollector:EmptyComponent},
+    '@mysql-mcp/security':{CryptoKeyring:{fromEnvJson:()=>({decrypt:()=>'<test-password>'})},SsrfGuard:class{async resolveAndValidateHost(){return '203.0.113.10'}}},
+    './server':{buildGatewayServer:async ctx=>{capturedRuntime=ctx;return fakeServer('gateway')}},
+    '@mysql-mcp/admin-api':{BootstrapService:class{async ensureSystemInitialized(){}},buildAdminServer:async()=>fakeServer('admin')},
+    './config/env':{loadEnvConfig:()=>config},
+  });
+  try{await boot.startSingleProcessHost();}finally{for(const sig of ['SIGINT','SIGTERM'])for(const listener of process.listeners(sig))if(!beforeSignals[sig].includes(listener))process.removeListener(sig,listener);}
+  const bootPoolCount=capturedRuntime.poolManager.pools.size;
+  const control=new poolModule.PoolManager({}, {decrypt:()=>'<test-password>'},{resolveAndValidateHost:async()=> '203.0.113.10'},{});
+  await control.warmUpActiveProfiles([activeCfg]);
+  add('r3_bootstrap_active_profiles_wiring',bootPoolCount===1,{configuredActiveProfiles:1,registryProfileCount:capturedRuntime.registryHub.profileStates.size,bootPoolCount,controlWithExplicitConfigs:control.pools.size,listened,metadataQueries});
+  await control.closeAllPools();
+}
+{
+  const ownCfg={maxUnflushedEvents:10,batchSize:10,flushIntervalMs:1000,emergencyLogDir:'<stubbed>'};
+  let writeResolve;const engine=new AuditEngine({query:()=>new Promise(r=>writeResolve=r)},ownCfg);
+  const slot=await engine.reserveSlotOrBackpressure();
+  const write=slot.commit({queryInstanceId:'r3_hr_shutdown',sqlText:'SELECT 1',isHighRisk:true});
+  let stopReturned=false;const stop=engine.stopAndFlushAll().then(()=>stopReturned=true);
+  await sleep(20);
+  add('r3_shutdown_pending_highrisk_write',!stopReturned,{stopReturned,totalUnflushed:engine.totalUnflushedCount,activeFlushPromisePresent:engine.activeFlushPromise!==null});
+  writeResolve([{}]);await Promise.all([stop,write]);
+  const engine2=new AuditEngine({query:async()=>[{}]},ownCfg);
+  const preReserved=await engine2.reserveSlotOrBackpressure();
+  let returned2=false;const stop2=engine2.stopAndFlushAll().then(()=>returned2=true);
+  await sleep(10);
+  add('r3_shutdown_preexisting_reservation',!returned2,{stopReturned:returned2,totalUnflushed:engine2.totalUnflushedCount});
+  await preReserved.commit({queryInstanceId:'r3_late_commit',sqlText:'SELECT 1',isHighRisk:false});await engine2.flushBatch();await stop2;
+}
+{
+  const observations={connects:[],forwards:[],verifierResults:[]};let nextId=0;
+  const hashA='a'.repeat(64),hashB='b'.repeat(64);
+  class FakeVerifiedSsh extends EventEmitter{
+    constructor(){super();this.clientId=++nextId;}
+    connect(opts){const hash=opts.host==='203.0.113.1'?hashA:hashB;const accepted=typeof opts.hostVerifier==='function'&&opts.hostVerifier(hash);observations.connects.push({clientId:this.clientId,host:opts.host});observations.verifierResults.push(accepted);queueMicrotask(()=>this.emit(accepted?'ready':'error',accepted?undefined:new Error('HOSTKEY_REJECTED')));return this;}
+    forwardOut(_src,_port,host,port,cb){observations.forwards.push({clientId:this.clientId,host,port});cb(null,new PassThrough());}
+    end(){this.emit('close');}
+  }
+  const {SshTunnelManager}=load('packages/core-engine/src/ssh-tunnel.ts',{'ssh2':{Client:FakeVerifiedSsh}});
+  const keyring={decrypt:()=>'<test-private-key>'};const guards={resolveAndValidateHost:async h=>h==='bastion-a.example'?'203.0.113.1':h==='bastion-b.example'?'203.0.113.2':'198.51.100.7'};
+  const configA={use_ssh:true,host:'bastion-a.example',username:'u',private_key_encrypted:'cipher-a',host_fingerprint_sha256:hashA};
+  const configB={...configA,host:'bastion-b.example',private_key_encrypted:'cipher-b',host_fingerprint_sha256:hashB};
+  const manager=new SshTunnelManager(keyring,guards);
+  const a=await manager.openTunnelStreamWithMeta('1',configA,'db.example',3306);
+  const b=await manager.openTunnelStreamWithMeta('1',configB,'db.example',3306);
+  add('r3_ssh_config_generation_trust',observations.connects.length===2,{...observations,requestedSecondBastion:configB.host,secondUsedClientId:observations.forwards[1].clientId});
+  a.stream.destroy();b.stream.destroy();await manager.closeAllTunnels();
+  const fresh=new SshTunnelManager(keyring,guards);const before=observations.forwards.length;let error;
+  try{await fresh.openTunnelStream('2',{...configA,host_fingerprint_sha256:undefined},'db.example',3306)}catch(e){error=e.message}
+  add('r3_missing_ssh_fingerprint_actually_rejected',!!error&&observations.forwards.length===before,{error,forwardAttempted:observations.forwards.length!==before,verifierResult:observations.verifierResults.at(-1)});
+  await fresh.closeAllTunnels();
+}
+{
+  const {PinnedDuplexTransport}=load('packages/core-engine/src/pool-manager.ts');
+  for(const provideEndpoint of [true,false]){
+    const seen={tcp:[],guardCalls:[],sql:[]};let capturedTransport;
+    const fakeNet={connect:opts=>{seen.tcp.push(opts);const stream=new PassThrough();stream.setNoDelay=()=>{};return stream;}};
+    const fakeMysql={createConnection:opts=>{capturedTransport=opts.stream();return {connect:cb=>queueMicrotask(()=>cb(null)),query:(sql,cb)=>{seen.sql.push(sql);cb(null)},destroy:()=>capturedTransport.destroy()}}};
+    const {AdminMaintenanceChannel}=load('packages/core-engine/src/admin-channel.ts',{'mysql2':fakeMysql,'node:net':fakeNet,'./pool-manager':{PinnedDuplexTransport}});
+    const channel=new AdminMaintenanceChannel({decrypt:()=>'<test-password>'},{resolveAndValidateHost:async h=>{seen.guardCalls.push(h);return '203.0.113.99'}});
+    const endpoint={logicalHost:'original.example',pinnedIp:'203.0.113.11',port:3306,useSsh:false};
+    let error;try{await channel.killQuery({profileId:'1',host:'changed.example',port:3307,username:'u',passwordEncrypted:'cipher',verifiedEndpoint:provideEndpoint?endpoint:undefined},123)}catch(e){error=e.message}
+    add(provideEndpoint?'r3_kill_uses_original_endpoint_port':'r3_kill_requires_verified_lease',provideEndpoint?seen.tcp[0]?.port===endpoint.port:!!error&&seen.tcp.length===0,{provideEndpoint,originalEndpoint:endpoint,mutableConfigPort:3307,...seen,error:error??null});
+  }
+}
+{
+  let capturedPoolOptions;
+  const {ManagedProfilePool}=load('packages/core-engine/src/pool-manager.ts',{'mysql2':{createPool:opts=>{capturedPoolOptions=opts;return {getConnection(){},end:cb=>cb()}}}});
+  new ManagedProfilePool('1',{name:'tls',host:'db.example',port:3306,username:'u',passwordEncrypted:'cipher',defaultDatabase:'app',maxPoolSize:1,queueTimeoutMs:1000,tlsConfig:{rejectUnauthorized:false}},{decrypt:()=>'<test-password>'},{resolveAndValidateHost:async()=> '127.0.0.1'});
+  // Real loopback TLS exchange, not a MySQL protocol session. Certificate/key exist only in memory.
+  const forge=require('node-forge');const tls=require('node:tls');
+  const keys=forge.pki.rsa.generateKeyPair(2048);const cert=forge.pki.createCertificate();cert.publicKey=keys.publicKey;cert.serialNumber='01';cert.validity.notBefore=new Date(Date.now()-60000);cert.validity.notAfter=new Date(Date.now()+86400000);const dn=[{name:'commonName',value:'wrong.example'}];cert.setSubject(dn);cert.setIssuer(dn);cert.setExtensions([{name:'subjectAltName',altNames:[{type:2,value:'wrong.example'}]}]);cert.sign(keys.privateKey,forge.md.sha256.create());
+  const peers=new Set();const server=tls.createServer({key:forge.pki.privateKeyToPem(keys.privateKey),cert:forge.pki.certificateToPem(cert)},socket=>{peers.add(socket);socket.on('error',()=>{})});server.on('tlsClientError',()=>{});server.on('connection',socket=>{peers.add(socket);socket.on('error',()=>{})});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  const BaseConnection=require(path.join(path.dirname(require.resolve('mysql2/package.json')),'lib/base/connection.js'));
+  async function tryDriverTls(ssl,host='db.example'){const raw=net.connect({host:'127.0.0.1',port:server.address().port});raw.on('error',()=>{});await new Promise((r,j)=>raw.once('connect',r).once('error',j));const fake={config:{host,port:server.address().port,ssl},stream:raw,packetParser:{execute(){}},_handleNetworkError(){}};let deadline;const result=await new Promise(resolve=>{deadline=setTimeout(()=>resolve({accepted:false,code:'PROBE_DEADLINE'}),2500);BaseConnection.prototype.startTLS.call(fake,err=>resolve({accepted:!err,error:err?.code||err?.message,authorized:fake.stream.authorized,authorizationError:fake.stream.authorizationError}));});clearTimeout(deadline);fake.stream.destroy();raw.destroy();return result;}
+  const insecure=await tryDriverTls(capturedPoolOptions.ssl);const secure=await tryDriverTls({...capturedPoolOptions.ssl,rejectUnauthorized:true});
+  const trustedCa=forge.pki.certificateToPem(cert);
+  const wrongHost=await tryDriverTls({...capturedPoolOptions.ssl,ca:trustedCa});
+  const wrongHostStrict=await tryDriverTls({...capturedPoolOptions.ssl,ca:trustedCa,rejectUnauthorized:true});
+  const valid=await tryDriverTls({...capturedPoolOptions.ssl,ca:trustedCa,rejectUnauthorized:true},'wrong.example');
+  add('r3_tls_strict_control_accepts_matching_trusted_certificate',valid.accepted&&valid.authorized,{requestedHost:'wrong.example',driverResult:valid});
+  add('r3_tls_wrong_hostname_cannot_be_ignored',!wrongHost.accepted,{trustedCa:true,verifyIdentity:true,rejectUnauthorized:false,driverResult:wrongHost});
+  add('r3_tls_strict_control_rejects_wrong_hostname',!wrongHostStrict.accepted,{driverResult:wrongHostStrict});
+  add('r3_tls_cannot_disable_certificate_verification',capturedPoolOptions.ssl.rejectUnauthorized===true&&!insecure.accepted,{configuredSsl:capturedPoolOptions.ssl,certificate:'self-signed; SAN wrong.example; requested host db.example',insecureDriverResult:insecure});
+  add('r3_tls_strict_control_rejects_untrusted_certificate',!secure.accepted,{secureDriverResult:secure});
+  for(const peer of peers)peer.destroy();await new Promise(r=>server.close(r));
+}
+{
+  let dbVersion=3;const hub=new RegistryHub({query:async()=>[[{status:'ACTIVE',auth_version:dbVersion}]]});
+  hub.userAuthVersions.set('1',{version:1,status:'ACTIVE'});
+  hub.markUserInvalidatedSync('1'); // Notification A for committed DB v2.
+  await hub.reloadUserAuthFromDb('1'); // SELECT sees B's already committed DB v3 before notification B.
+  const publishedAfterA=hub.getUserAuthVersion('1');
+  hub.markUserInvalidatedSync('1'); // Delayed COMMIT completion/notification B for DB v3.
+  await hub.reloadUserAuthFromDb('1');
+  add('r3_auth_min_version_overshoots_committed_db',!hub.isUserInvalidated('1')&&hub.getUserAuthVersion('1')===3,{committedDbVersion:dbVersion,publishedAfterA,registryVersion:hub.getUserAuthVersion('1'),invalidatedAfterBothReloads:hub.isUserInvalidated('1'),boundary:'Controlled transaction notification/read ordering; no real DB concurrency executed.'});
+}
+{
+  // Dependency import succeeds from its own module location; process.cwd() deliberately has no node_modules.
+  const cp=require('node:child_process');const os=require('node:os');const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'mysql-mcp-r3-cwd-'));const childPath=path.join(scratch,'cwd-probe.cjs');
+  const child=`const {createRequire}=require('node:module');const depRequire=createRequire(${JSON.stringify(require.resolve('typescript/package.json'))});const fs=require('node:fs');const path=require('node:path');const ts=depRequire('typescript');const doc=fs.readFileSync(${JSON.stringify(docPath)},'utf8');const marker='// packages/core-engine/src/pool-manager.ts';const start=doc.indexOf(marker);const src=doc.slice(start,doc.indexOf('\\n'+'\x60\x60\x60',start));const js=ts.transpileModule(src,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;const m={exports:{}};class AppError extends Error{};new Function('require','module','exports',js)(id=>id==='./app-error'?{AppError}:depRequire(id),m,m.exports);const Base=depRequire(path.join(path.dirname(depRequire.resolve('mysql2/package.json')),'lib/base/connection.js'));const {PassThrough}=require('node:stream');const tls=require('node:tls');const original=tls.connect;const raw=new PassThrough();raw.__verified_endpoint={logicalHost:'db.example',pinnedIp:'203.0.113.1',port:3306,useSsh:false};raw.__resetWireByteCounter=()=>{};const fake={config:{host:'db.example',port:3306,ssl:{rejectUnauthorized:true,verifyIdentity:true}},stream:raw,packetParser:{execute(){}},_handleNetworkError(){}};const upgraded=new PassThrough();try{tls.connect=()=>upgraded;Base.prototype.startTLS.call(fake,()=>{});}finally{tls.connect=original;}console.log(JSON.stringify({dependencyImportSucceeded:true,patchInstalled:!!Base.prototype.startTLS.__mcp_meta_patched,endpointPreserved:!!fake.stream.__verified_endpoint,resetPreserved:typeof fake.stream.__resetWireByteCounter==='function'}));raw.destroy();upgraded.destroy();`;
+  fs.writeFileSync(childPath,child);const env={...process.env};delete env.NODE_PATH;const proc=cp.spawnSync(process.execPath,[childPath],{cwd:scratch,env,encoding:'utf8',timeout:10000});
+  let data;try{data=JSON.parse(proc.stdout.trim())}catch{data={stdout:proc.stdout,stderr:proc.stderr}}
+  add('r3_tls_metadata_independent_of_cwd',proc.status===0&&data.endpointPreserved&&data.resetPreserved,{childStatus:proc.status,...data,stderr:proc.stderr||undefined});
+}
+
+// ---- Round 4: new boundary probes. All DB/SSH operations remain controlled stubs. ----
+const generatorPath=path.resolve(path.dirname(docPath),'../scripts/combine_be_spec.js');
+const partNames=[...fs.readFileSync(generatorPath,'utf8').matchAll(/"(part\d+[^"\n]*\.md)"/g)].map(m=>m[1]);
+const assembled=partNames.map(p=>fs.readFileSync(path.join(path.dirname(generatorPath),'be_parts',p),'utf8').trim()).join('\n\n---\n\n');
+results.sourceAssembly={parts:partNames,byteExactMatch:Buffer.from(assembled).equals(fs.readFileSync(docPath))};
+assert(results.sourceAssembly.byteExactMatch,'source fragments and reviewed body differ');
+results.previousRounds={total:results.tests.length,holds:results.tests.filter(t=>t.invariantHolds).length,violated:results.tests.filter(t=>!t.invariantHolds).length};
+for (const [name,sql,expected] of [
+  ['r4_quoted_identifier_identity','SELECT * FROM ` orders`',['app. orders']],
+  ['r4_cte_name_must_not_shadow_different_physical_identifier','WITH salary AS (SELECT 1) SELECT * FROM orders JOIN ` salary` ON 1=1',['app.orders','app. salary']],
+  ['r4_exact_cte_alias_control','WITH salary AS (SELECT 1) SELECT * FROM orders JOIN salary ON 1=1',['app.orders']],
+]) {
+  const ast=p.astify(sql,{database:'MySQL'});
+  const refs=ScopeExtractor.extractPhysicalTables(ast,'app',0);
+  let validationError=null;try{AstValidator.validateReadOnlyAndSafety(sql,ast,refs.tables)}catch(e){validationError=e.code||e.message}
+  const rewritten=LimitRewriter.enforceSafeLimit(ast,5,10);
+  const actual=refs.tables.map(t=>t.fullName);
+  add(name,actual.length===expected.length&&expected.every(t=>actual.includes(t)),{sql,parserFrom:ast.from,expectedPhysicalReferences:expected,extractedPhysicalReferences:actual,validationError,rewritten,boundary:'Actual locked parser/extractor/validator/rewriter. No MySQL query or production ACL evaluator executed.'});
+}
+{
+  let bastionLookups=0,clientCount=0;const calls=[];
+  class Fake extends EventEmitter {
+    connect(opts){clientCount++;calls.push({host:opts.host});queueMicrotask(()=>this.emit('ready'));return this}
+    forwardOut(_src,_port,host,port,cb){cb(null,new PassThrough())}
+    end(){}
+  }
+  const {SshTunnelManager:Manager}=load('packages/core-engine/src/ssh-tunnel.ts',{'ssh2':{Client:Fake}});
+  const manager=new Manager({decrypt:()=>'<test-key>'},{resolveAndValidateHost:async host=>{
+    if(host==='bastion.example'&&++bastionLookups===1) throw Object.assign(new Error('simulated transient DNS EAI_AGAIN'),{code:'EAI_AGAIN'});
+    return '203.0.113.8';
+  }});
+  const config={use_ssh:true,host:'bastion.example',username:'u',private_key_encrypted:'cipher',host_fingerprint_sha256:'fp'};
+  const errors=[];let recovered=false;
+  for(let i=0;i<2;i++)try{const channel=await manager.openTunnelStream('1',config,'db.example',3306);channel.destroy();recovered=true;errors.push(null)}catch(e){errors.push(e.code||e.message)}
+  add('r4_ssh_transient_preconnect_failure_can_retry',recovered&&bastionLookups===2,{bastionLookups,clientCount,errors,recovered,cachedClientEntries:manager.activeClients.size,boundary:'Exact manager with controlled DNS and ssh2 client; no actual SSH.'});
+  await manager.closeAllTunnels();
+  const control=new Manager({decrypt:()=>'<test-key>'},{resolveAndValidateHost:async()=> '203.0.113.8'});
+  const clientsBeforeControl=clientCount;
+  const ch=await control.openTunnelStream('1',config,'db.example',3306);ch.destroy();
+  add('r4_ssh_ready_control',clientCount-clientsBeforeControl===1,{clientCount,clientsBeforeControl,controlClientDelta:clientCount-clientsBeforeControl,calls,reviewHarnessCorrection:'Round-4 control shared a counter with the preceding recovery test; compare the delta, not total===1.'});await control.closeAllTunnels();
+}
+{
+  const sourceFor=marker=>{const start=doc.indexOf('// '+marker);assert(start>=0);return doc.slice(start,doc.indexOf('\n```',start))};
+  const registryAst=ts.createSourceFile('registry-hub.ts',sourceFor('packages/core-engine/src/registry-hub.ts'),ts.ScriptTarget.Latest,true);
+  const poolAst=ts.createSourceFile('pool-manager.ts',sourceFor('packages/core-engine/src/pool-manager.ts'),ts.ScriptTarget.Latest,true);
+  const getMethod=(ast,cls,method)=>ast.statements.find(n=>ts.isClassDeclaration(n)&&n.name.text===cls).members.find(n=>n.name?.getText(ast)===method);
+  const getConfig=getMethod(registryAst,'RegistryHub','getActiveProfileConfigs');
+  const warmUp=getMethod(poolAst,'PoolManager','warmUpActiveProfiles');
+  const returnType=getConfig.type.getText(registryAst),parameterType=warmUp.parameters[0].type.getText(poolAst);
+  const exactCall='await poolManager.warmUpActiveProfiles(registryHub.getActiveProfileConfigs());';
+  assert(doc.includes(exactCall));
+  const fixture='interface SshProfileConfig { use_ssh:boolean }\ndeclare const registryHub:{getActiveProfileConfigs(): '+returnType+'};\ndeclare const poolManager:{warmUpActiveProfiles(activeProfileConfigs?: '+parameterType+'):Promise<void>};\nasync function bootstrap(){'+exactCall+'}\n';
+  const options={strict:true,noEmit:true,target:ts.ScriptTarget.ES2022,types:[],skipLibCheck:true};
+  const fixturePath=path.join(require('node:os').tmpdir(),'mysql-mcp-r4-signature.ts');
+  const host=ts.createCompilerHost(options);const originalGetSourceFile=host.getSourceFile.bind(host);
+  host.getSourceFile=(file,lang,...args)=>path.normalize(file)===path.normalize(fixturePath)?ts.createSourceFile(file,fixture,lang,true):originalGetSourceFile(file,lang,...args);
+  const program=ts.createProgram([fixturePath],options,host);
+  assert(program.getSourceFiles().some(f=>path.normalize(f.fileName)===path.normalize(fixturePath)),'signature fixture must be loaded');
+  const diagnostics=ts.getPreEmitDiagnostics(program).filter(d=>d.file&&path.normalize(d.file.fileName)===path.normalize(fixturePath)).map(d=>({code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,'\n')}));
+  add('r4_bootstrap_config_signature_typechecks',diagnostics.length===0,{registryReturnType:returnType,warmUpParameterType:parameterType,exactCall,diagnostics,fixture,boundary:'Actual TypeScript semantic check of verbatim extracted signatures and call. Not a full-project tsc build.'});
+}
+{
+  // Real temporary filesystem; controlled MySQL outcomes and deterministic interleaving.
+  const tempDir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r4-replay-'));
+  let phase='seed',resumeReplay,signalReplayStarted;
+  const replayStarted=new Promise(r=>signalReplayStarted=r),replayGate=new Promise(r=>resumeReplay=r);
+  const mysqlDurableIds=[];
+  const {AuditEngine:Engine}=load('packages/core-engine/src/audit-engine.ts',{'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+  const engine=new Engine({query:async(_sql,params)=>{
+    const ids=params[0].map(row=>row[0]);
+    if(phase==='seed'||ids.includes('r4-B'))throw new Error('controlled MySQL unavailable for fallback event');
+    if(ids.includes('r4-A')){signalReplayStarted();await replayGate;mysqlDurableIds.push(...ids);return [{}]}
+    throw new Error('unexpected query');
+  }},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:tempDir});
+  const submit=async id=>{const slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:id,userId:'1',profileId:'1',sqlText:'SELECT 1',isHighRisk:false});await engine.flushBatch()};
+  await submit('r4-A');const logPath=path.join(tempDir,fs.readdirSync(tempDir)[0]);
+  phase='replay';const replay=engine.replayEmergencyLogsToDb(logPath);await replayStarted;
+  await submit('r4-B');
+  const idsBeforeUnlink=fs.readFileSync(logPath,'utf8').trim().split('\n').map(l=>JSON.parse(l).queryInstanceId);
+  resumeReplay();const replayCount=await replay;
+  const fileStillExists=fs.existsSync(logPath);
+  const remainingFiles=fs.readdirSync(tempDir);
+  const fallbackIds=remainingFiles.flatMap(f=>fs.readFileSync(path.join(tempDir,f),'utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l).queryInstanceId));
+  add('r4_replay_must_not_delete_concurrent_append',mysqlDurableIds.includes('r4-B')||fallbackIds.includes('r4-B'),{idsInFileBeforeReplayUnlink:idsBeforeUnlink,replayCount,mysqlDurableIds,fileStillExists,remainingFiles,fallbackIds,totalUnflushed:engine.totalUnflushedCount,tempDir,boundary:'Real filesystem and exact AuditEngine methods; MySQL insert outcomes are stubbed.'});
+  await engine.stopAndFlushAll();
+  const controlDir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r4-replay-control-'));
+  const controlFile=path.join(controlDir,'sealed.jsonl');
+  fs.writeFileSync(controlFile,JSON.stringify({queryInstanceId:'control',sqlText:'SELECT 1',isHighRisk:false})+'\n');
+  const controlIds=[];const control=new Engine({query:async(_sql,params)=>{controlIds.push(...params[0].map(row=>row[0]));return [{}]}},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:controlDir});
+  const count=await control.replayEmergencyLogsToDb(controlFile);
+  add('r4_sealed_file_replay_control',count===1&&controlIds.includes('control')&&!fs.existsSync(controlFile),{count,mysqlDurableIds:controlIds,fileStillExists:fs.existsSync(controlFile),boundary:'Control with no concurrent append; real filesystem, stubbed MySQL.'});
+  await control.stopAndFlushAll();
+}
+results.newRound={total:results.tests.length-results.previousRounds.total,holds:results.tests.slice(results.previousRounds.total).filter(t=>t.invariantHolds).length,violated:results.tests.slice(results.previousRounds.total).filter(t=>!t.invariantHolds).length};
+
+// ---- Round 5: extend the corrected 53-observation regression baseline. ----
+results.round4Baseline={total:results.tests.length,holds:results.tests.filter(t=>t.invariantHolds).length,violated:results.tests.filter(t=>!t.invariantHolds).length};
+for(const scenario of ['unlink-after-last-read','rewrite-after-last-read']) {
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r5-replay-'));
+  let filePath,readCount=0,signalLatest,resumeLatest,signalDb,resumeDb;
+  const latestReadStarted=new Promise(r=>signalLatest=r),latestReadGate=new Promise(r=>resumeLatest=r);
+  const replayDbStarted=new Promise(r=>signalDb=r),replayDbGate=new Promise(r=>resumeDb=r);
+  let phase='seed';const dbIds=[],completedFallbackIds=[];
+  // Pause AFTER the real second read takes its snapshot, BEFORE cleanup uses it.
+  // readFile, appendFile, writeFile and unlink still operate on real temporary files.
+  const facade={...fs,promises:{...fs.promises,readFile:async(...args)=>{
+    const buffer=await fs.promises.readFile(...args);
+    if(filePath&&String(args[0])===filePath&&++readCount===2){signalLatest();await latestReadGate}
+    return buffer;
+  }}};
+  const {AuditEngine:Engine}=load('packages/core-engine/src/audit-engine.ts',{'node:fs':facade,'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+  const engine=new Engine({query:async(_sql,params)=>{
+    const ids=params[0].map(row=>row[0]);
+    if(phase==='seed'||ids.some(id=>id!==scenario+'-A'))throw new Error('controlled fallback DB failure');
+    signalDb();await replayDbGate;dbIds.push(...ids);return [{}];
+  }},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:dir});
+  const submit=async label=>{const id=scenario+'-'+label;const slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:id,userId:'1',profileId:'1',sqlText:'SELECT 1',isHighRisk:false});await engine.flushBatch();completedFallbackIds.push(id)};
+  await submit('A');filePath=path.join(dir,fs.readdirSync(dir)[0]);phase='replay';
+  const replay=engine.replayEmergencyLogsToDb(filePath);await replayDbStarted;
+  if(scenario.startsWith('rewrite'))await submit('B');
+  resumeDb();await latestReadStarted;
+  const lateLabel=scenario.startsWith('rewrite')?'C':'B';await submit(lateLabel);
+  const idsBeforeCleanup=fs.readFileSync(filePath,'utf8').trim().split('\n').map(l=>JSON.parse(l).queryInstanceId);
+  resumeLatest();const replayCount=await replay;
+  const files=fs.readdirSync(dir);
+  const fallbackIds=files.flatMap(f=>fs.readFileSync(path.join(dir,f),'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l).queryInstanceId));
+  const lost=completedFallbackIds.filter(id=>!dbIds.includes(id)&&!fallbackIds.includes(id));
+  add('r5_replay_'+scenario.replaceAll('-','_'),lost.length===0,{scenario,replayReads:readCount,idsBeforeCleanup,replayCount,mysqlDurableIds:dbIds,fallbackIds,lostEventIds:lost,totalUnflushed:engine.totalUnflushedCount,temporaryDirectory:dir,boundary:'Exact AuditEngine with real filesystem. A scheduling barrier pauses after final real read; MySQL success/failure is controlled. No production DB.'});
+  await engine.stopAndFlushAll();
+}
+{
+  const {AgentLoopBreaker}=load('packages/core-engine/src/dual-bucket-limiter.ts');const breaker=new AgentLoopBreaker();
+  const sql='SELECT missing_column FROM orders';let simulatedFailures=0,blocked=false,errorCode=null;
+  const fakeExecute=async()=>{simulatedFailures++;throw Object.assign(new Error('controlled ER_BAD_FIELD_ERROR'),{code:'ER_BAD_FIELD_ERROR'})};
+  for(let i=0;i<10;i++)try{await breaker.executeWithBreaker({userId:'1',profileId:'1',sql},fakeExecute)}catch(e){if(e.code==='ERR_AGENT_LOOP_DETECTED'){blocked=true;errorCode=e.code;break}}
+  const methods=['checkBeforeExecution','recordOutcome','recordFailure','recordSuccess','executeWithBreaker'].filter(n=>typeof breaker[n]==='function');
+  add('r5_loop_breaker_can_build_failure_state',blocked&&errorCode==='ERR_AGENT_LOOP_DETECTED'&&simulatedFailures===3,{attemptedFailures:simulatedFailures,blocked,errorCode,publishedInstanceMethods:methods,stateEntries:breaker.states.size,expectedDefaultThreshold:3,boundary:'Migrated to the new public executeWithBreaker API, which feeds actual controlled work failures back to the state machine. No manually injected state in this observation.'});
+  // Prove that the existing rejection branch works only if state is externally injected.
+  breaker.states.set('1:1',{lastFingerprint:AgentLoopBreaker.computeSqlFingerprint(sql),count:3,firstErrorAt:Date.now(),blockedUntil:Date.now()+30000});
+  let seededCode;try{breaker.checkBeforeExecution('1','1',sql)}catch(e){seededCode=e.code}
+  add('r5_loop_breaker_seeded_state_control',seededCode==='ERR_AGENT_LOOP_DETECTED',{errorCode:seededCode,boundary:'Test-only injection into transpiled private Map; not a supported production integration mechanism.'});
+}
+{
+  const start=doc.indexOf('// packages/core-engine/src/registry-hub.ts');assert(start>=0);
+  const source=doc.slice(start,doc.indexOf('\n```',start));
+  const fixture="class AppError extends Error { constructor(p:{message?:string;[key:string]:unknown}){super(p.message);Object.assign(this,p)} }\n"+source.replace(/^import .*;\r?\n/gm,'');
+  const options={strict:true,noEmit:true,target:ts.ScriptTarget.ES2022,types:[],skipLibCheck:true};
+  const fixturePath=path.join(require('node:os').tmpdir(),'mysql-mcp-r5-registry-body.ts');
+  const host=ts.createCompilerHost(options),original=host.getSourceFile.bind(host);
+  host.getSourceFile=(file,language,...args)=>path.normalize(file)===path.normalize(fixturePath)?ts.createSourceFile(file,fixture,language,true):original(file,language,...args);
+  const program=ts.createProgram([fixturePath],options,host);assert(program.getSourceFiles().some(f=>path.normalize(f.fileName)===path.normalize(fixturePath)));
+  const diagnostics=ts.getPreEmitDiagnostics(program).filter(d=>d.file&&path.normalize(d.file.fileName)===path.normalize(fixturePath)).map(d=>({code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,'\n')}));
+  add('r5_registry_full_body_semantic_typecheck',diagnostics.length===0,{diagnostics,boundary:'Actual TS 5.9.3 strict check of entire extracted Registry/Snapshot body; imported AppError replaced by minimal local type. Not a full monorepo build.'});
+}
+{
+  const snapshot=SnapshotBuilder.buildSnapshot({requestId:'r5-acl',user:{id:'1',username:'u',status:'ACTIVE',mustChangePassword:false,authVersion:1,roleIds:['1']},pat:{id:'1',expiresAt:null,isRevoked:false},roles:[{id:'1',roleName:'RESTRICTED',defaultLimit:5,maxLimit:10,maxTimeoutMs:1000,userQpmLimit:2,maxInflightConcurrency:1}],userSpecificQpmLimit:null,profile:{id:'1',name:'p',defaultDatabase:'app',capacityQpm:100,maxPoolSize:10,maxInflightConcurrency:5,queueTimeoutMs:3000,status:'ACTIVE'},dbAclRows:[{roleId:'01',profileId:'00',databaseName:'app',isAllowed:true},{roleId:'2',profileId:'1',databaseName:'foreign',isAllowed:true},{roleId:'2',profileId:'0',databaseName:'app',isAllowed:false},{roleId:'1',profileId:'2',databaseName:'other-profile',isAllowed:true}],tableAclRows:[{roleId:'01',profileId:'00',ruleType:'WHITELIST',tablePattern:'app.orders'},{roleId:'2',profileId:'1',ruleType:'WHITELIST',tablePattern:'app.secret'},{roleId:'2',profileId:'0',ruleType:'BLACKLIST',tablePattern:'app.orders'}],globalPolicyVersion:1});
+  add('r5_acl_filters_foreign_role_and_profile_rows',JSON.stringify(snapshot.dbAcl)==='{"denies":[],"allows":["app"]}'&&JSON.stringify(snapshot.tableAcl)==='{"blacklists":[],"whitelists":["app.orders"]}',{activeRoleIds:snapshot.activeRoleIds,dbAcl:snapshot.dbAcl,tableAcl:snapshot.tableAcl,boundary:'Exact SnapshotBuilder with role list already restricted to the user; does not prove upstream roles-to-user association.'});
+}
+{
+  const {SshTunnelManager:Manager}=load('packages/core-engine/src/ssh-tunnel.ts',{'ssh2':{Client:class extends EventEmitter {
+    connect(){queueMicrotask(()=>this.emit('ready'));return this}
+    forwardOut(_a,_b,_c,_d,cb){cb(null,new PassThrough())}
+    end(){}
+  }}});
+  let calls=0,first=true;const manager=new Manager({decrypt:()=>'<key>'},{resolveAndValidateHost:async host=>{
+    if(host==='bastion.example'){calls++;if(first){await sleep(5);throw new Error('controlled DNS failure')}}
+    return '203.0.113.8';
+  }});const config={use_ssh:true,host:'bastion.example',username:'u',private_key_encrypted:'cipher',host_fingerprint_sha256:'fp'};
+  const failures=await Promise.allSettled([manager.openTunnelStream('1',config,'db.example',3306),manager.openTunnelStream('1',config,'db.example',3306)]);
+  const callsAfterFailure=calls,cacheAfterFailure=manager.activeClients.size;first=false;
+  const channel=await manager.openTunnelStream('1',config,'db.example',3306);channel.destroy();
+  add('r5_ssh_concurrent_failure_evicted_and_retry_shared',failures.every(r=>r.status==='rejected')&&callsAfterFailure===1&&cacheAfterFailure===0&&calls===2,{initialResults:failures.map(r=>r.status),callsAfterFailure,cacheAfterFailure,totalBastionCalls:calls,boundary:'Controlled guard and ssh2. No real SSH handshake.'});
+  await manager.closeAllTunnels();
+}
+results.round5Extension={total:results.tests.length-results.round4Baseline.total,holds:results.tests.slice(results.round4Baseline.total).filter(t=>t.invariantHolds).length,violated:results.tests.slice(results.round4Baseline.total).filter(t=>!t.invariantHolds).length};
+
+// ---- Round 6: rotation leases and loop-breaker window semantics. ----
+results.round5Baseline={total:results.tests.length,holds:results.tests.filter(t=>t.invariantHolds).length,violated:results.tests.filter(t=>!t.invariantHolds).length};
+{
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r6-rotation-'));
+  let phase='seed',signalReplay,resumeReplay;const started=new Promise(r=>signalReplay=r),gate=new Promise(r=>resumeReplay=r);
+  const mysqlIds=[];
+  const {AuditEngine:Engine}=load('packages/core-engine/src/audit-engine.ts',{'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+  const engine=new Engine({query:async(_sql,params)=>{
+    const ids=params[0].map(row=>row[0]);
+    if(phase==='seed'||ids.includes('r6-B'))throw new Error('controlled fallback DB failure');
+    signalReplay();await gate;mysqlIds.push(...ids);return [{}];
+  }},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:dir});
+  const submit=async(id,sqlText)=>{const slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:id,userId:'1',profileId:'1',sqlText,isHighRisk:false});await engine.flushBatch()};
+  await submit('r6-A',"SELECT '"+'A'.repeat(2048)+"'");
+  const active=path.join(dir,fs.readdirSync(dir)[0]),initialBytes=fs.statSync(active).size;
+  phase='replay';const replay=engine.replayEmergencyLogsToDb(active);await started;
+  const sealed=await engine.sealActiveEmergencyLog(active);assert(sealed&&fs.existsSync(sealed));
+  await submit('r6-B','SELECT 2');
+  const replacementBytes=fs.statSync(active).size;
+  const activeIdsBeforeCleanup=fs.readFileSync(active,'utf8').trim().split('\n').map(l=>JSON.parse(l).queryInstanceId);
+  resumeReplay();const replayed=await replay;
+  const remaining=fs.readdirSync(dir),fallbackIds=remaining.flatMap(f=>fs.readFileSync(path.join(dir,f),'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l).queryInstanceId));
+  add('r6_rotation_cannot_retarget_inflight_replay',mysqlIds.includes('r6-B')||fallbackIds.includes('r6-B'),{initialBytes,replacementBytes,activeIdsBeforeCleanup,replayed,mysqlDurableIds:mysqlIds,fallbackIds,remainingFiles:remaining,activeFileExists:fs.existsSync(active),totalUnflushed:engine.totalUnflushedCount,temporaryDirectory:dir,boundary:'Exact public AuditEngine methods; real append/rename/read/unlink. Controlled MySQL pauses old-file replay while public seal rotates the pathname and a writer creates a replacement.'});
+  await engine.stopAndFlushAll();
+}
+{
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r6-sealed-control-'));let phase='fallback';const mysqlIds=[];
+  const {AuditEngine:Engine}=load('packages/core-engine/src/audit-engine.ts',{'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+  const engine=new Engine({query:async(_sql,params)=>{if(phase==='fallback')throw new Error('controlled DB unavailable');mysqlIds.push(...params[0].map(row=>row[0]));return [{}]}},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:dir});
+  const submit=async id=>{const slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:id,userId:'1',profileId:'1',sqlText:'SELECT 1',isHighRisk:false});await engine.flushBatch()};
+  await submit('sealed-A');const active=path.join(dir,fs.readdirSync(dir)[0]);const sealed=await engine.sealActiveEmergencyLog(active);await submit('active-B');phase='replay';const count=await engine.replayEmergencyLogsToDb(sealed);
+  const activeIds=fs.readFileSync(active,'utf8').trim().split('\n').map(l=>JSON.parse(l).queryInstanceId);
+  add('r6_seal_then_replay_sealed_control',count===1&&mysqlIds.includes('sealed-A')&&activeIds.includes('active-B')&&!fs.existsSync(sealed),{count,mysqlDurableIds:mysqlIds,activeIds,sealedExists:fs.existsSync(sealed),boundary:'Positive control: seal before starting replay and replay sealed path only; real filesystem, stubbed MySQL.'});await engine.stopAndFlushAll();
+}
+{
+  const {AgentLoopBreaker:Breaker}=load('packages/core-engine/src/dual-bucket-limiter.ts');const b=new Breaker();const sql='SELECT missing_column FROM orders',base=1000000;
+  const offsets=[0,29000,31000,32000],states=[];
+  for(const offset of offsets){b.checkBeforeExecution('1','1',sql,'s',base+offset);b.recordFailure('1','1',sql,{sessionId:'s',errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:base+offset});states.push({...b.states.get('1:1:s')})}
+  const checkAt=base+32001;let code=null;try{b.checkBeforeExecution('1','1',sql,'s',checkAt)}catch(e){code=e.code}
+  const failuresInLastWindow=offsets.filter(t=>base+t>=checkAt-30000).length;
+  add('r6_loop_breaker_true_sliding_window',code==='ERR_AGENT_LOOP_DETECTED',{windowMs:30000,threshold:3,failureOffsetsMs:offsets,checkOffsetMs:32001,failuresInLastWindow,stateAfterEachFailure:states,errorCode:code,boundary:'Public recordFailure/checkBeforeExecution with explicit deterministic now values; no injected state or real query.'});
+}
+{
+  const {AgentLoopBreaker:Breaker}=load('packages/core-engine/src/dual-bucket-limiter.ts'),b=new Breaker(),sql='SELECT bad FROM orders',now=1000000;
+  for(let i=0;i<3;i++)b.recordFailure('1','1',sql,{sessionId:'session-A',errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:now+i});
+  let blockedA=false,blockedB=false;try{b.checkBeforeExecution('1','1',sql,'session-A',now+3)}catch{blockedA=true}try{b.checkBeforeExecution('1','1',sql,'session-B',now+3)}catch{blockedB=true}
+  add('r6_loop_breaker_session_isolation_control',blockedA&&!blockedB,{blockedA,blockedB});
+}
+{
+  const {AgentLoopBreaker:Breaker}=load('packages/core-engine/src/dual-bucket-limiter.ts'),b=new Breaker(),sqlA='SELECT bad_a FROM orders',sqlB='SELECT bad_b FROM orders',now=1000000;
+  for(let i=0;i<2;i++)b.recordFailure('1','1',sqlA,{errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:now+i});b.recordSuccess('1','1',sqlA);const entriesAfterSuccess=b.states.size;
+  for(let i=0;i<2;i++)b.recordFailure('1','1',sqlA,{errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:now+i+2});b.recordFailure('1','1',sqlB,{errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:now+4});
+  const state={...b.states.get('1:1')};add('r6_loop_breaker_success_and_different_sql_reset_control',entriesAfterSuccess===0&&state.count===1&&state.lastFingerprint===Breaker.computeSqlFingerprint(sqlB),{entriesAfterSuccess,state});
+}
+{
+  const {AgentLoopBreaker:Breaker}=load('packages/core-engine/src/dual-bucket-limiter.ts'),b=new Breaker(),sql='SELECT bad FROM orders',now=1000000;
+  for(let i=0;i<2;i++)b.recordFailure('1','1',sql,{errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:now+i});
+  const codes=['ERR_QUERY_CANCELED','ERR_CONCURRENCY_LIMIT','ERR_RATE_LIMIT_USER','ERR_RATE_LIMIT_PROFILE','ERR_POOL_QUEUE_TIMEOUT','ERR_AUDIT_BUFFER_FULL','ERR_MEMORY_BUDGET_EXCEEDED'];
+  for(const code of codes)b.recordFailure('1','1',sql,{errorCategoryOrCode:code,now:now+2});
+  const state={...b.states.get('1:1')};add('r6_loop_breaker_ignored_error_control',state.count===2&&state.blockedUntil===0,{codes,state});
+}
+{
+  const {AgentLoopBreaker:Breaker}=load('packages/core-engine/src/dual-bucket-limiter.ts'),b=new Breaker(),sql='SELECT bad FROM orders',now=1000000;
+  for(let i=0;i<2;i++)b.recordFailure('1','1',sql,{threshold:2,windowSec:10,errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:now+i});
+  let blocked=false,expired=false;try{b.checkBeforeExecution('1','1',sql,undefined,now+2)}catch(e){blocked=e.code==='ERR_AGENT_LOOP_DETECTED'}try{b.checkBeforeExecution('1','1',sql,undefined,now+10001);expired=true}catch{}
+  add('r6_loop_breaker_configured_threshold_and_cooldown_control',blocked&&expired&&b.states.size===0,{threshold:2,windowSec:10,blockedBeforeExpiry:blocked,allowedAtExpiry:expired,stateEntries:b.states.size});
+}
+{
+  const {AgentLoopBreaker:Breaker}=load('packages/core-engine/src/dual-bucket-limiter.ts'),b=new Breaker(3,30,2);
+  for(const user of ['1','2','3'])b.recordFailure(user,'1','SELECT bad FROM orders',{errorCategoryOrCode:'ER_BAD_FIELD_ERROR',now:1000000});
+  add('r6_loop_breaker_bounded_capacity_control',b.states.size===2,{maxTrackedKeys:2,stateEntries:b.states.size,keys:[...b.states.keys()]});
+}
+results.round6Extension={total:results.tests.length-results.round5Baseline.total,holds:results.tests.slice(results.round5Baseline.total).filter(t=>t.invariantHolds).length,violated:results.tests.slice(results.round5Baseline.total).filter(t=>!t.invariantHolds).length};
+
+// ---- Round 7: replay-lease ownership at both acquisition and repeated rotation. ----
+results.round6Baseline={total:results.tests.length,holds:results.tests.filter(t=>t.invariantHolds).length,violated:results.tests.filter(t=>!t.invariantHolds).length};
+for(const scenario of ['repeat-seal','seal-before-snapshot']) {
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r7-lease-'));
+  let phase='seed',active,signalDb,resumeDb,signalRead,resumeRead,firstRead=true;
+  const dbStarted=new Promise(r=>signalDb=r),dbGate=new Promise(r=>resumeDb=r);
+  const readStarted=new Promise(r=>signalRead=r),readGate=new Promise(r=>resumeRead=r);
+  const reads=[],mysqlIds=[],acknowledged=[];
+  const facade=scenario==='seal-before-snapshot'?{...fs,promises:{...fs.promises,readFile:async(...args)=>{
+    if(firstRead&&String(args[0])===active){firstRead=false;signalRead();await readGate}
+    const buffer=await fs.promises.readFile(...args);
+    reads.push({path:path.basename(String(args[0])),ids:buffer.toString('utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l).queryInstanceId)});
+    return buffer;
+  }}}:fs;
+  const {AuditEngine:Engine}=load('packages/core-engine/src/audit-engine.ts',{'node:fs':facade,'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+  const expectedReplayId=scenario==='repeat-seal'?'r7-A':'r7-B';
+  const engine=new Engine({query:async(_sql,params)=>{
+    const ids=params[0].map(row=>row[0]);
+    if(phase==='seed'||ids.some(id=>id!==expectedReplayId))throw new Error('controlled DB fallback');
+    if(scenario==='repeat-seal'){signalDb();await dbGate}
+    mysqlIds.push(...ids);return [{}];
+  }},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:dir});
+  const submit=async(id,long=false)=>{const slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:id,userId:'1',profileId:'1',sqlText:long?"SELECT '"+'x'.repeat(2048)+"'":'SELECT 1',isHighRisk:false});await engine.flushBatch();acknowledged.push(id)};
+  await submit('r7-A',scenario==='repeat-seal');active=path.join(dir,fs.readdirSync(dir)[0]);phase='replay';
+  const replay=engine.replayEmergencyLogsToDb(active);let sealedA,sealedB,redirectAfterFirst,redirectAfterSecond;
+  if(scenario==='repeat-seal') {
+    await dbStarted;sealedA=await engine.sealActiveEmergencyLog(active);redirectAfterFirst=engine.replayingSealedRedirects.get(path.resolve(active));
+    await submit('r7-B');sealedB=await engine.sealActiveEmergencyLog(active);redirectAfterSecond=engine.replayingSealedRedirects.get(path.resolve(active));
+    await submit('r7-C');resumeDb();
+  } else {
+    await readStarted;sealedA=await engine.sealActiveEmergencyLog(active);redirectAfterFirst=engine.replayingSealedRedirects.get(path.resolve(active));
+    phase='seed';await submit('r7-B',true);phase='replay';resumeRead();
+  }
+  const replayed=await replay;
+  const remainingFiles=fs.readdirSync(dir),fallbackIds=remainingFiles.flatMap(f=>fs.readFileSync(path.join(dir,f),'utf8').split('\n').filter(Boolean).map(l=>JSON.parse(l).queryInstanceId));
+  const lost=acknowledged.filter(id=>!mysqlIds.includes(id)&&!fallbackIds.includes(id));
+  add('r7_replay_lease_'+scenario.replaceAll('-','_'),lost.length===0,{scenario,acknowledgedFallbackIds:acknowledged,replayed,mysqlDurableIds:mysqlIds,fallbackIds,lostEventIds:lost,sealedA:path.basename(sealedA),sealedB:sealedB?path.basename(sealedB):null,redirectAfterFirst:redirectAfterFirst?path.basename(redirectAfterFirst):null,redirectAfterSecond:redirectAfterSecond?path.basename(redirectAfterSecond):null,readObservations:reads,remainingFiles,totalUnflushed:engine.totalUnflushedCount,temporaryDirectory:dir,boundary:scenario==='repeat-seal'?'Public audit methods with real filesystem; only MySQL replay is paused. Two rotations re-use one active pathname.':'Real filesystem with a barrier before the first snapshot read opens the path; no bytes forged. Rotation and replacement append complete before the actual snapshot read. MySQL outcomes controlled.'});
+  await engine.stopAndFlushAll();
+}
+{
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'mysql-mcp-r7-sealed-control-'));let phase='fallback';const dbIds=[];
+  const {AuditEngine:Engine}=load('packages/core-engine/src/audit-engine.ts',{'@mysql-mcp/security':{Masker:{maskSqlText:s=>s}}});
+  const engine=new Engine({query:async(_sql,params)=>{if(phase==='fallback')throw new Error('controlled DB fallback');dbIds.push(...params[0].map(row=>row[0]));return [{}]}},{maxUnflushedEvents:100,batchSize:100,flushIntervalMs:10000,emergencyLogDir:dir});
+  const submit=async id=>{const slot=await engine.reserveSlotOrBackpressure();await slot.commit({queryInstanceId:id,sqlText:'SELECT 1',isHighRisk:false});await engine.flushBatch()};
+  await submit('control-A');const active=path.join(dir,fs.readdirSync(dir)[0]);const sealedA=await engine.sealActiveEmergencyLog(active);
+  await submit('control-B');const sealedB=await engine.sealActiveEmergencyLog(active);await submit('control-C');phase='replay';
+  const replayedA=await engine.replayEmergencyLogsToDb(sealedA),replayedB=await engine.replayEmergencyLogsToDb(sealedB);
+  const activeIds=fs.readFileSync(active,'utf8').trim().split('\n').map(l=>JSON.parse(l).queryInstanceId);
+  add('r7_two_seals_then_explicit_sealed_replay_control',replayedA===1&&replayedB===1&&dbIds.includes('control-A')&&dbIds.includes('control-B')&&activeIds.includes('control-C'),{replayedA,replayedB,mysqlDurableIds:dbIds,activeIds,boundary:'No overlapping active-path replay: seal generations independently, then replay immutable paths. Real filesystem, controlled MySQL.'});await engine.stopAndFlushAll();
+}
+{
+  const marker='// packages/core-engine/src/dual-bucket-limiter.ts',start=doc.indexOf(marker);assert(start>=0);
+  const original=doc.slice(start,doc.indexOf('\n```',start));
+  const fixture=original.replace("import { AppError } from './app-error';","class AppError extends Error {constructor(p:{message?:string;[key:string]:unknown}){super(p.message);Object.assign(this,p)}}").replace("import type { EntityId } from './registry-hub';","type EntityId = string;");
+  const typesRoot=path.dirname(path.dirname(require.resolve('@types/node/package.json')));
+  const options={strict:true,noEmit:true,target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,moduleResolution:ts.ModuleResolutionKind.Node10,esModuleInterop:true,skipLibCheck:true,types:['node'],typeRoots:[typesRoot]};
+  const fixturePath=path.join(path.dirname(path.dirname(require.resolve('typescript/package.json'))),'r7-limiter-fixture.ts');
+  const diagnose=source=>{
+    const host=ts.createCompilerHost(options),get=host.getSourceFile.bind(host);
+    host.getSourceFile=(file,language,...args)=>path.normalize(file)===path.normalize(fixturePath)?ts.createSourceFile(file,source,language,true):get(file,language,...args);
+    const program=ts.createProgram([fixturePath],options,host);assert(program.getSourceFiles().some(f=>path.normalize(f.fileName)===path.normalize(fixturePath)));
+    return ts.getPreEmitDiagnostics(program).filter(d=>d.file&&path.normalize(d.file.fileName)===path.normalize(fixturePath)).map(d=>({code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,'\n'),documentLine:doc.slice(0,start).split('\n').length+d.file.getLineAndCharacterOfPosition(d.start).line}));
+  };
+  const diagnostics=diagnose(fixture);
+  results.environment.nodeTypes=require('@types/node/package.json').version;
+  add('r7_limiter_module_semantic_typecheck',diagnostics.length===0,{diagnostics,boundary:'Entire extracted limiter/loop-breaker block checked by real TS 5.9.3 strict semantics; actual Node crypto typings. Only local AppError and EntityId imports replaced. Not a whole-project build.'});
+  const needle='prev.now !== undefined || ';assert(fixture.includes(needle));
+  const controlDiagnostics=diagnose(fixture.replace(needle,''));
+  add('r7_limiter_without_undeclared_property_control',controlDiagnostics.length===0,{diagnostics:controlDiagnostics,inMemoryControlOnly:true,removedExpression:needle.trim(),boundary:'Control changes only an in-memory copy, not the design. Confirms that the undeclared property causes the semantic error.'});
+}
+results.round7Extension={total:results.tests.length-results.round6Baseline.total,holds:results.tests.slice(results.round6Baseline.total).filter(t=>t.invariantHolds).length,violated:results.tests.slice(results.round6Baseline.total).filter(t=>!t.invariantHolds).length};
+
+results.regression=results.round6Baseline;results.extension=results.round7Extension;delete results.round6Baseline;delete results.round7Extension;results.harnessCorrections=[{observation:"r4_ssh_ready_control",kind:"inherited correction",reason:"Compare own client-count delta, not a counter shared with a preceding successful recovery."},{observation:"r5_loop_breaker_can_build_failure_state",kind:"public API migration",oldInvocation:"checkBeforeExecution then unreported work failure",newInvocation:"executeWithBreaker(params, failingWork)",reason:"v1.5.0 adds outcome feedback; the old missing-interface probe must now feed outcomes through the new public API. Still requires exactly 3 work failures before subsequent rejection."}];delete results.baseline;delete results.round4Baseline;delete results.round5Extension;delete results.round5Baseline;delete results.round6Extension;delete results.previousRounds;delete results.newRound;results.summary={total:results.tests.length,holds:results.tests.filter(t=>t.invariantHolds).length,violated:results.tests.filter(t=>!t.invariantHolds).length};const output=process.env.REVIEW_EVIDENCE_FILE||path.join(__dirname,'backend-design-review-round7.evidence.json');fs.writeFileSync(output,JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results,null,2));
+})().catch(e=>{console.error(e);process.exitCode=1});

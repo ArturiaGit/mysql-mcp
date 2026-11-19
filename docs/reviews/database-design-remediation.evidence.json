@@ -1,0 +1,220 @@
+{
+  "date": "2026-11-12",
+  "timezone": "Asia/Shanghai",
+  "runtime": "v24.16.0",
+  "scope": "Document code, mapping fixture and token bucket; not actual Repository or HTTP handlers",
+  "boundaries": {
+    "realMySQL": false,
+    "realRepository": false,
+    "realHTTP": false,
+    "automaticCacheInvalidation": false,
+    "sourceCode": "complete current TypeScript blocks with native type erasure",
+    "clock": "frozen to test burst deterministically"
+  },
+  "sources": {
+    "docs/DATABASE_DESIGN_SPEC.md": "30efbddd375e1765f156746837d7a4d7f6a51df77e399b2b5b7f7bb2230f5df8",
+    "docs/BACKEND_ARCHITECTURE_SPEC.md": "6dbaa390d253bfa90fb04eba66dc05cb09f11a941c36a4225c68d2747d4ae127",
+    "docs/API_CONTRACT_SPEC.md": "3bf1a1429d6b4abb43d6b7e3a86fe7acaeba450df9dff17f956fcf44e043496b",
+    "docs/FRONTEND_ARCHITECTURE_SPEC.md": "3fb10fc54273a3c067de8fb27f7e555e0f434ae59e809b9c17de3d7911c80ddf",
+    "docs/sql/001_metadata_schema.sql": "64b46b9f0afd9ff76441f506398f2f0e207ebc30e59ea21fa2ea3b249e9c308f",
+    "scripts/validate_database_design.py": "a3f483d92fadf83d975e3bf92da37b12fb83cbf8d65725000a96ec29251c9e97"
+  },
+  "sourceHashesUnchanged": true,
+  "observations": [
+    {
+      "id": "DB-R1-01 USER=1/GLOBAL=500 reaches bucket",
+      "passed": true,
+      "actual": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 30,
+        "userBurstCapacity": 1,
+        "maxInflightConcurrency": 2,
+        "loopBreakerThreshold": 3,
+        "loopBreakerWindowSec": 30
+      }
+    },
+    {
+      "id": "DB-R1-01 USER=20/GLOBAL=10 is not min-capped",
+      "passed": true,
+      "actual": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 30,
+        "userBurstCapacity": 20,
+        "maxInflightConcurrency": 2,
+        "loopBreakerThreshold": 3,
+        "loopBreakerWindowSec": 30
+      }
+    },
+    {
+      "id": "DB-R1-01 update reloads both values and clamps existing bucket",
+      "passed": true,
+      "actual": {
+        "before": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 60,
+          "userBurstCapacity": 20,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        },
+        "after": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 30,
+          "userBurstCapacity": 1,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        }
+      }
+    },
+    {
+      "id": "DB-R1-01 deletion reloads role QPM and GLOBAL burst",
+      "passed": true,
+      "actual": {
+        "before": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 30,
+          "userBurstCapacity": 1,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        },
+        "after": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 60,
+          "userBurstCapacity": 500,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        }
+      }
+    },
+    {
+      "id": "DB-R1-02 GLOBAL QPM change does not replace role quota",
+      "passed": true,
+      "actual": {
+        "before": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 60,
+          "userBurstCapacity": 10,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        },
+        "after": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 60,
+          "userBurstCapacity": 20,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        }
+      }
+    },
+    {
+      "id": "DB-R1-02 multi-role maximum without inflating smaller quotas",
+      "passed": true,
+      "actual": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 30,
+        "userBurstCapacity": 10,
+        "maxInflightConcurrency": 2,
+        "loopBreakerThreshold": 3,
+        "loopBreakerWindowSec": 30
+      }
+    },
+    {
+      "id": "DB-R1-02 unlimited role and USER override priority",
+      "passed": true,
+      "actual": "unlimited role wins among roles; USER still has higher priority"
+    },
+    {
+      "id": "Profile protection remains for unlimited USER QPM",
+      "passed": true,
+      "actual": "second same-instant request blocked by Profile bucket"
+    },
+    {
+      "id": "Empty roles remain default deny",
+      "passed": true,
+      "actual": "403"
+    },
+    {
+      "id": "Compatibility fallback is GLOBAL only without usable role QPM",
+      "passed": true,
+      "actual": "synthetic legacy fixture; valid current database roles always have QPM"
+    },
+    {
+      "id": "USER burst does not override GLOBAL breaker settings",
+      "passed": true,
+      "actual": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 30,
+        "userBurstCapacity": 1,
+        "maxInflightConcurrency": 2,
+        "loopBreakerThreshold": 3,
+        "loopBreakerWindowSec": 30
+      }
+    },
+    {
+      "id": "Explicit revised API and frontend inheritance contracts",
+      "passed": true,
+      "actual": "configuration DTO remains nullable; dashboard displays effective quota"
+    },
+    {
+      "id": "Original static checks plus critical route semantics",
+      "passed": true,
+      "actual": "PASS: 1067 static/model assertions; 14 tables; 136 columns; 45 indexes; 7 foreign keys; 47 mapped endpoints; 3 JSON examples.\r\nNOT RUN: MySQL parsing/execution, CHECK enforcement, multi-connection concurrency, migration, restore, or performance tests."
+    },
+    {
+      "id": "Generation fragments match all three changed specifications",
+      "passed": true,
+      "actual": [
+        {
+          "doc": "BACKEND_ARCHITECTURE_SPEC.md",
+          "matches": true
+        },
+        {
+          "doc": "API_CONTRACT_SPEC.md",
+          "matches": true
+        },
+        {
+          "doc": "FRONTEND_ARCHITECTURE_SPEC.md",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "id": "Snapshot block strict TypeScript semantic check",
+      "passed": true,
+      "actual": {
+        "typescript": "5.9.3",
+        "diagnostics": [],
+        "adaptation": "Only AppError import replaced with typed stub; not a whole-project build"
+      }
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 15
+  }
+}

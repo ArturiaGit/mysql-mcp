@@ -1,0 +1,931 @@
+{
+  "review": "round-6",
+  "reviewedAt": "2026-11-08T12:23:27.898Z",
+  "specSha256": "a5775c232d0fff0c3c1851c22674847b054d7243ecd9eb9b960ee22fade0c598",
+  "environment": {
+    "node": "v22.22.0",
+    "mysql2": "3.24.6",
+    "parser": "5.4.0",
+    "fastify": "5.12.8",
+    "typescript": "5.9.3",
+    "nodeForge": "1.3.1",
+    "ipaddr": "2.5.0"
+  },
+  "tests": [
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders WHERE EXISTS (SELECT 1 FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders WHERE id IN (SELECT id FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders o JOIN customers c ON c.id=(SELECT MAX(id) FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.customers",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT (SELECT MAX(id) FROM secret_salary) AS n FROM orders",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_union_limit",
+      "invariantHolds": true,
+      "sql": "(SELECT * FROM orders LIMIT 1) UNION ALL SELECT * FROM orders",
+      "allowed": false,
+      "error": "ERR_AST_LIMIT_FAIL_CLOSED"
+    },
+    {
+      "name": "original_union_limit",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders UNION ALL SELECT * FROM orders LIMIT 1",
+      "allowed": true,
+      "rewritten": "SELECT * FROM `orders` UNION ALL SELECT * FROM `orders` LIMIT 1"
+    },
+    {
+      "name": "original_low_role_quota",
+      "invariantHolds": true,
+      "quotas": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 2,
+        "maxInflightConcurrency": 1
+      }
+    },
+    {
+      "name": "original_utf8_cell_limit",
+      "invariantHolds": true,
+      "inputBytes": 120000,
+      "outputBytes": 65536,
+      "wasTruncated": true
+    },
+    {
+      "name": "original_utf8_cell_limit",
+      "invariantHolds": true,
+      "inputBytes": 80000,
+      "outputBytes": 65534,
+      "wasTruncated": true
+    },
+    {
+      "name": "original_http_disconnect",
+      "invariantHolds": true,
+      "abortedBeforeDisconnect": false,
+      "abortedAfterDisconnect": true
+    },
+    {
+      "name": "original_audit_double_failure",
+      "invariantHolds": true,
+      "error": "ENOSPC simulated",
+      "queueLength": 1,
+      "totalUnflushed": 1,
+      "reserveRejected": true
+    },
+    {
+      "name": "original_highrisk_slot",
+      "invariantHolds": true,
+      "totalUnflushed": 1
+    },
+    {
+      "name": "original_highrisk_strict",
+      "invariantHolds": true,
+      "error": "ERR_AUDIT_STORAGE_UNAVAILABLE",
+      "fallbackWrites": 1
+    },
+    {
+      "name": "new_stale_reload_clears_new_tombstone",
+      "invariantHolds": true,
+      "invalidatedBeforeOldReload": true,
+      "invalidatedAfterOldReload": true,
+      "currentVersion": 1,
+      "oldSnapshotAllowed": false
+    },
+    {
+      "name": "new_transport_directionality",
+      "invariantHolds": true,
+      "serverReceived": "CLIENT_COMMAND",
+      "driverReceived": "SERVER_GREETING"
+    },
+    {
+      "name": "original_pool_ssrf_wiring",
+      "invariantHolds": true,
+      "guardCalls": 2,
+      "configuredHost": "db.example",
+      "streamConfigured": true,
+      "maxAllowedPacketPresent": false
+    },
+    {
+      "name": "new_tls_transport_metadata",
+      "invariantHolds": true,
+      "streamWasReplaced": true,
+      "endpointOnTransport": true,
+      "endpointOnCurrentStream": true,
+      "resetOnCurrentStream": true
+    },
+    {
+      "name": "new_audit_shutdown_wait",
+      "invariantHolds": true,
+      "stopReturned": false,
+      "totalUnflushedAtObservation": 1,
+      "isFlushing": true
+    },
+    {
+      "name": "new_runtime_entityid_normalizer",
+      "invariantHolds": true,
+      "unsafeNumber": 9007199254740992
+    },
+    {
+      "name": "original_canonical_self_operation_guard",
+      "invariantHolds": true,
+      "target": "1",
+      "operator": "1",
+      "normalizedTarget": "1",
+      "error": "ERR_SELF_OPERATION_FORBIDDEN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_leading_zero_entityid_guard",
+      "invariantHolds": true,
+      "target": "01",
+      "operator": "1",
+      "normalizedTarget": "1",
+      "error": "ERR_SELF_OPERATION_FORBIDDEN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_leading_zero_entityid_guard",
+      "invariantHolds": true,
+      "target": "01",
+      "operator": "2",
+      "normalizedTarget": "1",
+      "error": "ERR_LAST_SUPER_ADMIN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_ssh_forward_target_guard",
+      "invariantHolds": true,
+      "guardHosts": [
+        "169.254.169.254",
+        "bastion.example"
+      ],
+      "forwardTarget": {
+        "host": "203.0.113.8",
+        "port": 80
+      },
+      "hostVerifierConfigured": true,
+      "pinnedBastion": "203.0.113.8"
+    },
+    {
+      "name": "new_ssh_hostkey_required",
+      "invariantHolds": true,
+      "hostVerifierConfigured": true,
+      "openedWithoutHostFingerprint": true
+    },
+    {
+      "name": "new_result_memory_ownership",
+      "invariantHolds": true,
+      "countedBeforeEnd": 20,
+      "countedAfterEnd": 20,
+      "retainedRows": 1
+    },
+    {
+      "name": "new_webhook_lookup_contract",
+      "invariantHolds": true,
+      "error": {
+        "code": "ECONNREFUSED",
+        "message": "connect ECONNREFUSED 127.0.0.1:9"
+      }
+    },
+    {
+      "name": "new_qualified_dual_extraction",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM app.`dual`",
+      "tables": [
+        {
+          "database": "app",
+          "table": "dual",
+          "fullName": "app.dual",
+          "hasExplicitDb": true
+        }
+      ],
+      "isKnownNoTableQuery": false
+    },
+    {
+      "name": "r3_result_memory_lease_idempotent_release",
+      "invariantHolds": true,
+      "countedAfterRelease": 0
+    },
+    {
+      "name": "r3_ssh_prohibited_forward_target_actually_rejected",
+      "invariantHolds": true,
+      "error": "ERR_SSRF_PROHIBITED"
+    },
+    {
+      "name": "r3_quoted_unqualified_dual",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM `dual`",
+      "astFrom": [
+        {
+          "db": null,
+          "table": "dual",
+          "as": null
+        }
+      ],
+      "extracted": {
+        "tables": [
+          {
+            "database": "app",
+            "table": "dual",
+            "fullName": "app.dual",
+            "hasExplicitDb": false
+          }
+        ],
+        "isKnownNoTableQuery": false
+      },
+      "safetyDenied": false,
+      "rewritten": "SELECT * FROM `dual` LIMIT 10"
+    },
+    {
+      "name": "r3_bare_dual_known_no_table",
+      "invariantHolds": true,
+      "sql": "SELECT 1 FROM DUAL",
+      "astFrom": [
+        {
+          "type": "dual"
+        }
+      ],
+      "extracted": {
+        "tables": [],
+        "isKnownNoTableQuery": true
+      }
+    },
+    {
+      "name": "r3_bootstrap_active_profiles_wiring",
+      "invariantHolds": true,
+      "configuredActiveProfiles": 1,
+      "registryProfileCount": 1,
+      "bootPoolCount": 1,
+      "controlWithExplicitConfigs": 1,
+      "listened": [
+        "gateway",
+        "admin"
+      ],
+      "metadataQueries": [
+        "SELECT id, status, auth_version FROM sys_users",
+        "SELECT * FROM sys_profiles"
+      ]
+    },
+    {
+      "name": "r3_shutdown_pending_highrisk_write",
+      "invariantHolds": true,
+      "stopReturned": false,
+      "totalUnflushed": 1,
+      "activeFlushPromisePresent": false
+    },
+    {
+      "name": "r3_shutdown_preexisting_reservation",
+      "invariantHolds": true,
+      "stopReturned": false,
+      "totalUnflushed": 1
+    },
+    {
+      "name": "r3_ssh_config_generation_trust",
+      "invariantHolds": true,
+      "connects": [
+        {
+          "clientId": 1,
+          "host": "203.0.113.1"
+        },
+        {
+          "clientId": 2,
+          "host": "203.0.113.2"
+        }
+      ],
+      "forwards": [
+        {
+          "clientId": 1,
+          "host": "198.51.100.7",
+          "port": 3306
+        },
+        {
+          "clientId": 2,
+          "host": "198.51.100.7",
+          "port": 3306
+        }
+      ],
+      "verifierResults": [
+        true,
+        true
+      ],
+      "requestedSecondBastion": "bastion-b.example",
+      "secondUsedClientId": 2
+    },
+    {
+      "name": "r3_missing_ssh_fingerprint_actually_rejected",
+      "invariantHolds": true,
+      "error": "HOSTKEY_REJECTED",
+      "forwardAttempted": false,
+      "verifierResult": false
+    },
+    {
+      "name": "r3_kill_uses_original_endpoint_port",
+      "invariantHolds": true,
+      "provideEndpoint": true,
+      "originalEndpoint": {
+        "logicalHost": "original.example",
+        "pinnedIp": "203.0.113.11",
+        "port": 3306,
+        "useSsh": false
+      },
+      "mutableConfigPort": 3307,
+      "tcp": [
+        {
+          "host": "203.0.113.11",
+          "port": 3306
+        }
+      ],
+      "guardCalls": [],
+      "sql": [
+        "KILL QUERY 123"
+      ],
+      "error": null
+    },
+    {
+      "name": "r3_kill_requires_verified_lease",
+      "invariantHolds": true,
+      "provideEndpoint": false,
+      "originalEndpoint": {
+        "logicalHost": "original.example",
+        "pinnedIp": "203.0.113.11",
+        "port": 3306,
+        "useSsh": false
+      },
+      "mutableConfigPort": 3307,
+      "tcp": [],
+      "guardCalls": [],
+      "sql": [],
+      "error": "Verified target endpoint lease is required to issue KILL QUERY safely."
+    },
+    {
+      "name": "r3_tls_strict_control_accepts_matching_trusted_certificate",
+      "invariantHolds": true,
+      "requestedHost": "wrong.example",
+      "driverResult": {
+        "accepted": true,
+        "authorized": true,
+        "authorizationError": null
+      }
+    },
+    {
+      "name": "r3_tls_wrong_hostname_cannot_be_ignored",
+      "invariantHolds": true,
+      "trustedCa": true,
+      "verifyIdentity": true,
+      "rejectUnauthorized": false,
+      "driverResult": {
+        "accepted": false,
+        "error": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "authorized": false,
+        "authorizationError": "ERR_TLS_CERT_ALTNAME_INVALID"
+      }
+    },
+    {
+      "name": "r3_tls_strict_control_rejects_wrong_hostname",
+      "invariantHolds": true,
+      "driverResult": {
+        "accepted": false,
+        "error": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "authorized": false,
+        "authorizationError": "ERR_TLS_CERT_ALTNAME_INVALID"
+      }
+    },
+    {
+      "name": "r3_tls_cannot_disable_certificate_verification",
+      "invariantHolds": true,
+      "configuredSsl": {
+        "rejectUnauthorized": true,
+        "verifyIdentity": true
+      },
+      "certificate": "self-signed; SAN wrong.example; requested host db.example",
+      "insecureDriverResult": {
+        "accepted": false,
+        "error": "DEPTH_ZERO_SELF_SIGNED_CERT",
+        "authorized": false,
+        "authorizationError": "DEPTH_ZERO_SELF_SIGNED_CERT"
+      }
+    },
+    {
+      "name": "r3_tls_strict_control_rejects_untrusted_certificate",
+      "invariantHolds": true,
+      "secureDriverResult": {
+        "accepted": false,
+        "error": "DEPTH_ZERO_SELF_SIGNED_CERT",
+        "authorized": false,
+        "authorizationError": "DEPTH_ZERO_SELF_SIGNED_CERT"
+      }
+    },
+    {
+      "name": "r3_auth_min_version_overshoots_committed_db",
+      "invariantHolds": true,
+      "committedDbVersion": 3,
+      "publishedAfterA": 3,
+      "registryVersion": 3,
+      "invalidatedAfterBothReloads": false,
+      "boundary": "Controlled transaction notification/read ordering; no real DB concurrency executed."
+    },
+    {
+      "name": "r3_tls_metadata_independent_of_cwd",
+      "invariantHolds": true,
+      "childStatus": 0,
+      "dependencyImportSucceeded": true,
+      "patchInstalled": true,
+      "endpointPreserved": true,
+      "resetPreserved": true
+    },
+    {
+      "name": "r4_quoted_identifier_identity",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM ` orders`",
+      "parserFrom": [
+        {
+          "db": null,
+          "table": " orders",
+          "as": null
+        }
+      ],
+      "expectedPhysicalReferences": [
+        "app. orders"
+      ],
+      "extractedPhysicalReferences": [
+        "app. orders"
+      ],
+      "validationError": null,
+      "rewritten": "SELECT * FROM ` orders` LIMIT 5",
+      "boundary": "Actual locked parser/extractor/validator/rewriter. No MySQL query or production ACL evaluator executed."
+    },
+    {
+      "name": "r4_cte_name_must_not_shadow_different_physical_identifier",
+      "invariantHolds": true,
+      "sql": "WITH salary AS (SELECT 1) SELECT * FROM orders JOIN ` salary` ON 1=1",
+      "parserFrom": [
+        {
+          "db": null,
+          "table": "orders",
+          "as": null
+        },
+        {
+          "db": null,
+          "table": " salary",
+          "as": null,
+          "join": "INNER JOIN",
+          "on": {
+            "type": "binary_expr",
+            "operator": "=",
+            "left": {
+              "type": "number",
+              "value": 1
+            },
+            "right": {
+              "type": "number",
+              "value": 1
+            }
+          }
+        }
+      ],
+      "expectedPhysicalReferences": [
+        "app.orders",
+        "app. salary"
+      ],
+      "extractedPhysicalReferences": [
+        "app.orders",
+        "app. salary"
+      ],
+      "validationError": null,
+      "rewritten": "WITH `salary` AS (SELECT 1) SELECT * FROM `orders` INNER JOIN ` salary` ON 1 = 1 LIMIT 5",
+      "boundary": "Actual locked parser/extractor/validator/rewriter. No MySQL query or production ACL evaluator executed."
+    },
+    {
+      "name": "r4_exact_cte_alias_control",
+      "invariantHolds": true,
+      "sql": "WITH salary AS (SELECT 1) SELECT * FROM orders JOIN salary ON 1=1",
+      "parserFrom": [
+        {
+          "db": null,
+          "table": "orders",
+          "as": null
+        },
+        {
+          "db": null,
+          "table": "salary",
+          "as": null,
+          "join": "INNER JOIN",
+          "on": {
+            "type": "binary_expr",
+            "operator": "=",
+            "left": {
+              "type": "number",
+              "value": 1
+            },
+            "right": {
+              "type": "number",
+              "value": 1
+            }
+          }
+        }
+      ],
+      "expectedPhysicalReferences": [
+        "app.orders"
+      ],
+      "extractedPhysicalReferences": [
+        "app.orders"
+      ],
+      "validationError": null,
+      "rewritten": "WITH `salary` AS (SELECT 1) SELECT * FROM `orders` INNER JOIN `salary` ON 1 = 1 LIMIT 5",
+      "boundary": "Actual locked parser/extractor/validator/rewriter. No MySQL query or production ACL evaluator executed."
+    },
+    {
+      "name": "r4_ssh_transient_preconnect_failure_can_retry",
+      "invariantHolds": true,
+      "bastionLookups": 2,
+      "clientCount": 1,
+      "errors": [
+        "EAI_AGAIN",
+        null
+      ],
+      "recovered": true,
+      "cachedClientEntries": 1,
+      "boundary": "Exact manager with controlled DNS and ssh2 client; no actual SSH."
+    },
+    {
+      "name": "r4_ssh_ready_control",
+      "invariantHolds": true,
+      "clientCount": 2,
+      "clientsBeforeControl": 1,
+      "controlClientDelta": 1,
+      "calls": [
+        {
+          "host": "203.0.113.8"
+        },
+        {
+          "host": "203.0.113.8"
+        }
+      ],
+      "reviewHarnessCorrection": "Round-4 control shared a counter with the preceding recovery test; compare the delta, not total===1."
+    },
+    {
+      "name": "r4_bootstrap_config_signature_typechecks",
+      "invariantHolds": true,
+      "registryReturnType": "Array<{\n    id: string;\n    name: string;\n    host: string;\n    port: number;\n    username: string;\n    passwordEncrypted: string;\n    defaultDatabase: string;\n    maxPoolSize: number;\n    queueTimeoutMs: number;\n    tlsConfig?: Record<string, unknown> | null;\n    sshConfig?: {\n      use_ssh: boolean;\n      host?: string;\n      port?: number;\n      username?: string;\n      private_key_encrypted?: string;\n      host_fingerprint_sha256?: string;\n    } | null;\n  }>",
+      "warmUpParameterType": "Array<{\n      id: string;\n      name: string;\n      host: string;\n      port: number;\n      username: string;\n      passwordEncrypted: string;\n      defaultDatabase: string;\n      maxPoolSize: number;\n      queueTimeoutMs: number;\n      tlsConfig?: Record<string, unknown> | null;\n      sshConfig?: SshProfileConfig | null;\n    }>",
+      "exactCall": "await poolManager.warmUpActiveProfiles(registryHub.getActiveProfileConfigs());",
+      "diagnostics": [],
+      "fixture": "interface SshProfileConfig { use_ssh:boolean }\ndeclare const registryHub:{getActiveProfileConfigs(): Array<{\n    id: string;\n    name: string;\n    host: string;\n    port: number;\n    username: string;\n    passwordEncrypted: string;\n    defaultDatabase: string;\n    maxPoolSize: number;\n    queueTimeoutMs: number;\n    tlsConfig?: Record<string, unknown> | null;\n    sshConfig?: {\n      use_ssh: boolean;\n      host?: string;\n      port?: number;\n      username?: string;\n      private_key_encrypted?: string;\n      host_fingerprint_sha256?: string;\n    } | null;\n  }>};\ndeclare const poolManager:{warmUpActiveProfiles(activeProfileConfigs?: Array<{\n      id: string;\n      name: string;\n      host: string;\n      port: number;\n      username: string;\n      passwordEncrypted: string;\n      defaultDatabase: string;\n      maxPoolSize: number;\n      queueTimeoutMs: number;\n      tlsConfig?: Record<string, unknown> | null;\n      sshConfig?: SshProfileConfig | null;\n    }>):Promise<void>};\nasync function bootstrap(){await poolManager.warmUpActiveProfiles(registryHub.getActiveProfileConfigs());}\n",
+      "boundary": "Actual TypeScript semantic check of verbatim extracted signatures and call. Not a full-project tsc build."
+    },
+    {
+      "name": "r4_replay_must_not_delete_concurrent_append",
+      "invariantHolds": true,
+      "idsInFileBeforeReplayUnlink": [
+        "r4-A",
+        "r4-B"
+      ],
+      "replayCount": 1,
+      "mysqlDurableIds": [
+        "r4-A"
+      ],
+      "fileStillExists": true,
+      "remainingFiles": [
+        "audit-fallback-2026-11-08.jsonl"
+      ],
+      "fallbackIds": [
+        "r4-B"
+      ],
+      "totalUnflushed": 0,
+      "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r4-replay-oWDEMV",
+      "boundary": "Real filesystem and exact AuditEngine methods; MySQL insert outcomes are stubbed."
+    },
+    {
+      "name": "r4_sealed_file_replay_control",
+      "invariantHolds": true,
+      "count": 1,
+      "mysqlDurableIds": [
+        "control"
+      ],
+      "fileStillExists": false,
+      "boundary": "Control with no concurrent append; real filesystem, stubbed MySQL."
+    },
+    {
+      "name": "r5_replay_unlink_after_last_read",
+      "invariantHolds": true,
+      "scenario": "unlink-after-last-read",
+      "replayReads": 3,
+      "idsBeforeCleanup": [
+        "unlink-after-last-read-A",
+        "unlink-after-last-read-B"
+      ],
+      "replayCount": 1,
+      "mysqlDurableIds": [
+        "unlink-after-last-read-A"
+      ],
+      "fallbackIds": [
+        "unlink-after-last-read-B"
+      ],
+      "lostEventIds": [],
+      "totalUnflushed": 0,
+      "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r5-replay-aTRznW",
+      "boundary": "Exact AuditEngine with real filesystem. A scheduling barrier pauses after final real read; MySQL success/failure is controlled. No production DB."
+    },
+    {
+      "name": "r5_replay_rewrite_after_last_read",
+      "invariantHolds": true,
+      "scenario": "rewrite-after-last-read",
+      "replayReads": 3,
+      "idsBeforeCleanup": [
+        "rewrite-after-last-read-A",
+        "rewrite-after-last-read-B",
+        "rewrite-after-last-read-C"
+      ],
+      "replayCount": 1,
+      "mysqlDurableIds": [
+        "rewrite-after-last-read-A"
+      ],
+      "fallbackIds": [
+        "rewrite-after-last-read-B",
+        "rewrite-after-last-read-C"
+      ],
+      "lostEventIds": [],
+      "totalUnflushed": 0,
+      "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r5-replay-Eg2vKk",
+      "boundary": "Exact AuditEngine with real filesystem. A scheduling barrier pauses after final real read; MySQL success/failure is controlled. No production DB."
+    },
+    {
+      "name": "r5_loop_breaker_can_build_failure_state",
+      "invariantHolds": true,
+      "attemptedFailures": 3,
+      "blocked": true,
+      "errorCode": "ERR_AGENT_LOOP_DETECTED",
+      "publishedInstanceMethods": [
+        "checkBeforeExecution",
+        "recordOutcome",
+        "recordFailure",
+        "recordSuccess",
+        "executeWithBreaker"
+      ],
+      "stateEntries": 1,
+      "expectedDefaultThreshold": 3,
+      "boundary": "Migrated to the new public executeWithBreaker API, which feeds actual controlled work failures back to the state machine. No manually injected state in this observation."
+    },
+    {
+      "name": "r5_loop_breaker_seeded_state_control",
+      "invariantHolds": true,
+      "errorCode": "ERR_AGENT_LOOP_DETECTED",
+      "boundary": "Test-only injection into transpiled private Map; not a supported production integration mechanism."
+    },
+    {
+      "name": "r5_registry_full_body_semantic_typecheck",
+      "invariantHolds": true,
+      "diagnostics": [],
+      "boundary": "Actual TS 5.9.3 strict check of entire extracted Registry/Snapshot body; imported AppError replaced by minimal local type. Not a full monorepo build."
+    },
+    {
+      "name": "r5_acl_filters_foreign_role_and_profile_rows",
+      "invariantHolds": true,
+      "activeRoleIds": [
+        "1"
+      ],
+      "dbAcl": {
+        "denies": [],
+        "allows": [
+          "app"
+        ]
+      },
+      "tableAcl": {
+        "blacklists": [],
+        "whitelists": [
+          "app.orders"
+        ]
+      },
+      "boundary": "Exact SnapshotBuilder with role list already restricted to the user; does not prove upstream roles-to-user association."
+    },
+    {
+      "name": "r5_ssh_concurrent_failure_evicted_and_retry_shared",
+      "invariantHolds": true,
+      "initialResults": [
+        "rejected",
+        "rejected"
+      ],
+      "callsAfterFailure": 1,
+      "cacheAfterFailure": 0,
+      "totalBastionCalls": 2,
+      "boundary": "Controlled guard and ssh2. No real SSH handshake."
+    },
+    {
+      "name": "r6_rotation_cannot_retarget_inflight_replay",
+      "invariantHolds": false,
+      "initialBytes": 2371,
+      "replacementBytes": 322,
+      "activeIdsBeforeCleanup": [
+        "r6-B"
+      ],
+      "replayed": 1,
+      "mysqlDurableIds": [
+        "r6-A"
+      ],
+      "fallbackIds": [
+        "r6-A"
+      ],
+      "remainingFiles": [
+        "audit-fallback-2026-11-08.jsonl.1794140611349-1.sealed.jsonl"
+      ],
+      "activeFileExists": false,
+      "totalUnflushed": 0,
+      "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r6-rotation-BUf1pI",
+      "boundary": "Exact public AuditEngine methods; real append/rename/read/unlink. Controlled MySQL pauses old-file replay while public seal rotates the pathname and a writer creates a replacement."
+    },
+    {
+      "name": "r6_seal_then_replay_sealed_control",
+      "invariantHolds": true,
+      "count": 1,
+      "mysqlDurableIds": [
+        "sealed-A"
+      ],
+      "activeIds": [
+        "active-B"
+      ],
+      "sealedExists": false,
+      "boundary": "Positive control: seal before starting replay and replay sealed path only; real filesystem, stubbed MySQL."
+    },
+    {
+      "name": "r6_loop_breaker_true_sliding_window",
+      "invariantHolds": false,
+      "windowMs": 30000,
+      "threshold": 3,
+      "failureOffsetsMs": [
+        0,
+        29000,
+        31000,
+        32000
+      ],
+      "checkOffsetMs": 32001,
+      "failuresInLastWindow": 3,
+      "stateAfterEachFailure": [
+        {
+          "lastFingerprint": "ef2dbe9e81a5e6987a7b3413",
+          "count": 1,
+          "firstErrorAt": 1000000,
+          "blockedUntil": 0
+        },
+        {
+          "lastFingerprint": "ef2dbe9e81a5e6987a7b3413",
+          "count": 2,
+          "firstErrorAt": 1000000,
+          "blockedUntil": 0
+        },
+        {
+          "lastFingerprint": "ef2dbe9e81a5e6987a7b3413",
+          "count": 1,
+          "firstErrorAt": 1031000,
+          "blockedUntil": 0
+        },
+        {
+          "lastFingerprint": "ef2dbe9e81a5e6987a7b3413",
+          "count": 2,
+          "firstErrorAt": 1031000,
+          "blockedUntil": 0
+        }
+      ],
+      "errorCode": null,
+      "boundary": "Public recordFailure/checkBeforeExecution with explicit deterministic now values; no injected state or real query."
+    },
+    {
+      "name": "r6_loop_breaker_session_isolation_control",
+      "invariantHolds": true,
+      "blockedA": true,
+      "blockedB": false
+    },
+    {
+      "name": "r6_loop_breaker_success_and_different_sql_reset_control",
+      "invariantHolds": true,
+      "entriesAfterSuccess": 0,
+      "state": {
+        "lastFingerprint": "9de59b26fc3f933cbc78b7e0",
+        "count": 1,
+        "firstErrorAt": 1000004,
+        "blockedUntil": 0
+      }
+    },
+    {
+      "name": "r6_loop_breaker_ignored_error_control",
+      "invariantHolds": true,
+      "codes": [
+        "ERR_QUERY_CANCELED",
+        "ERR_CONCURRENCY_LIMIT",
+        "ERR_RATE_LIMIT_USER",
+        "ERR_RATE_LIMIT_PROFILE",
+        "ERR_POOL_QUEUE_TIMEOUT",
+        "ERR_AUDIT_BUFFER_FULL",
+        "ERR_MEMORY_BUDGET_EXCEEDED"
+      ],
+      "state": {
+        "lastFingerprint": "525d47dd83550c6bc9e505b2",
+        "count": 2,
+        "firstErrorAt": 1000000,
+        "blockedUntil": 0
+      }
+    },
+    {
+      "name": "r6_loop_breaker_configured_threshold_and_cooldown_control",
+      "invariantHolds": true,
+      "threshold": 2,
+      "windowSec": 10,
+      "blockedBeforeExpiry": true,
+      "allowedAtExpiry": true,
+      "stateEntries": 0
+    },
+    {
+      "name": "r6_loop_breaker_bounded_capacity_control",
+      "invariantHolds": true,
+      "maxTrackedKeys": 2,
+      "stateEntries": 2,
+      "keys": [
+        "2:1",
+        "3:1"
+      ]
+    }
+  ],
+  "sourceAssembly": {
+    "parts": [
+      "part1_intro.md",
+      "part2_adr.md",
+      "part3_monorepo.md",
+      "part4_database_and_dal.md",
+      "part5_control_plane_security.md",
+      "part6_data_plane_pipeline.md",
+      "part7_ast_and_mcp_tools.md",
+      "part8_core_engine_pool.md",
+      "part9_security_ssrf_crypto.md",
+      "part10_audit_and_stats.md",
+      "part11_api_matrix_and_testing.md"
+    ],
+    "byteExactMatch": true
+  },
+  "regression": {
+    "total": 60,
+    "holds": 60,
+    "violated": 0
+  },
+  "extension": {
+    "total": 8,
+    "holds": 6,
+    "violated": 2
+  },
+  "harnessCorrections": [
+    {
+      "observation": "r4_ssh_ready_control",
+      "kind": "inherited correction",
+      "reason": "Compare own client-count delta, not a counter shared with a preceding successful recovery."
+    },
+    {
+      "observation": "r5_loop_breaker_can_build_failure_state",
+      "kind": "public API migration",
+      "oldInvocation": "checkBeforeExecution then unreported work failure",
+      "newInvocation": "executeWithBreaker(params, failingWork)",
+      "reason": "v1.5.0 adds outcome feedback; the old missing-interface probe must now feed outcomes through the new public API. Still requires exactly 3 work failures before subsequent rejection."
+    }
+  ],
+  "summary": {
+    "total": 68,
+    "holds": 66,
+    "violated": 2
+  }
+}

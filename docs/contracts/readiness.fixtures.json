@@ -1,0 +1,76 @@
+{
+  "profiles": [
+    {
+      "id": "101",
+      "name": "mysql_prod_primary",
+      "display_name": "核心业务主库 (只读镜像)",
+      "environment": "PROD",
+      "host": "10.0.8.21",
+      "port": 3306,
+      "username": "mcp_readonly_user",
+      "database": "trade_order",
+      "max_pool_size": 15,
+      "queue_timeout_ms": 3000,
+      "profile_capacity_qpm": 600,
+      "max_inflight_concurrency": 25,
+      "use_ssh": true,
+      "ssh_host": "10.0.8.5",
+      "ssh_port": 22,
+      "ssh_user": "bastion_proxy",
+      "ssh_host_fingerprint_sha256": "SHA256:abcd1234efgh5678ijkl9012mnop3456qrst7890uvw",
+      "tls_config": {
+        "enabled": true,
+        "ca_cert": null
+      },
+      "status": "ACTIVE",
+      "version": 1,
+      "created_at": "2026-11-05T00:00:00.000Z",
+      "updated_at": "2026-11-07T08:00:00.000Z"
+    }
+  ],
+  "CreateProfilePayload": {
+    "name": "mysql_crm_read",
+    "display_name": "CRM客户管理从库",
+    "environment": "PROD",
+    "host": "10.0.12.18",
+    "port": 3306,
+    "user": "mcp_agent_reader",
+    "password": "DbSecretPassword123#",
+    "database": "crm_db",
+    "max_pool_size": 10,
+    "queue_timeout_ms": 3000,
+    "profile_capacity_qpm": 300,
+    "use_ssh": true,
+    "ssh_host": "10.0.8.5",
+    "ssh_port": 22,
+    "ssh_user": "bastion_proxy",
+    "ssh_private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n...",
+    "ssh_host_fingerprint_sha256": "SHA256:abcd1234efgh5678ijkl9012mnop3456qrst7890uvw",
+    "tls_config": {
+      "enabled": true,
+      "ca_cert": "-----BEGIN CERTIFICATE-----\n..."
+    }
+  },
+  "UpdateProfilePayload": {
+    "display_name": "核心业务主库 (升级读写隔离)",
+    "max_pool_size": 20,
+    "profile_capacity_qpm": 800,
+    "version": 1
+  },
+  "GlobalRateLimitPayload": {
+    "defaultUserQuotaQpm": 80,
+    "burstCapacity": 15,
+    "agentLoopThreshold": 3,
+    "agentLoopWindowSec": 30,
+    "version": 1
+  },
+  "ExportAuditPayload": {
+    "range": "today",
+    "profile_id": "101",
+    "is_high_risk": false
+  },
+  "ResetPasswordPayload": {
+    "mustChangePassword": true,
+    "version": 1
+  }
+}

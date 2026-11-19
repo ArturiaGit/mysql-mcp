@@ -1,0 +1,82 @@
+{
+  "review_date": "2026-11-09",
+  "scope": "original API-R1-01 through API-R1-12 only; no new issue categories",
+  "verification_kind": "static_document_review_only",
+  "integration_tests_executed": false,
+  "inputs": [
+    {
+      "path": "docs\\API_CONTRACT_SPEC.md",
+      "bytes": 139778,
+      "lines": 2384,
+      "sha256": "4C0A252DD53C288013FC128ECB29F6E1A4849ECA60845CAB145E5B2D3E74B98D"
+    },
+    {
+      "path": "docs\\BACKEND_ARCHITECTURE_SPEC.md",
+      "bytes": 230184,
+      "lines": 5176,
+      "sha256": "A0A719F55C2F97F6790A119E26B0275B302D015349C341BB2C574A51D193525C"
+    },
+    {
+      "path": "docs\\FRONTEND_ARCHITECTURE_SPEC.md",
+      "bytes": 95041,
+      "lines": 1187,
+      "sha256": "87478E5B8C44EEEE3F890DE988297B03CE31BA9BF49DC5CEDF2FE7729AE54F0D"
+    },
+    {
+      "path": "docs\\reviews\\API_CONTRACT_REVIEW.md",
+      "bytes": 22440,
+      "lines": 226,
+      "sha256": "E7710EAE090CCF500CF9BA0E0DDA7A09BBD53126FD9B04CEE35914B5179078F0"
+    }
+  ],
+  "structural_observations": {
+    "endpoint_count": 46,
+    "error_matrix_count": 43,
+    "referenced_but_unregistered_errors": [],
+    "contract_matches_generated_parts": true,
+    "tls_config_definition": "export interface TlsConfig {\n    enabled: boolean;\n    ca_cert?: string | null;       // 自定义 PEM 格式 CA 证书文本；为 null 或缺省时使用系统标准根 CA\n  }",
+    "password_backfill_declares_not_null_default": false,
+    "password_backfill_filters_null": true,
+    "backend_user_ddl_has_password_columns": true,
+    "backend_user_ddl_has_edit_version": true,
+    "contract_migration_adds_edit_version": true,
+    "backend_guard_mentions_password_expiry": true,
+    "approval_update_statement": "UPDATE sys_user_approvals \n  SET action = 'APPROVE', operator_id = ? \n  WHERE id = ? AND action IN ('SUBMIT', 'RESUBMIT');",
+    "backend_approval_table": "CREATE TABLE `sys_user_approvals` (\n  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,\n  `user_id` BIGINT UNSIGNED NOT NULL COMMENT '目标或申请人用户 ID',\n  `action` VARCHAR(32) NOT NULL COMMENT 'SUBMIT, APPROVE, REJECT, RESUBMIT, STATUS_CHANGE, ROLE_CHANGE, PAT_REVOKE, CONFIG_UPDATE',\n  `reason` VARCHAR(512) DEFAULT NULL COMMENT '申请说明、驳回理由或变更摘要',\n  `operator_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '操作人 ID (0表示系统自举或本人注册)',\n  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `idx_user_created` (`user_id`, `created_at` DESC)\n) ENGINE=",
+    "role_update_has_indeterminate_immutable_handling": false,
+    "role_update_statement": [
+      "- **功能说明**：全量更新角色策略参数。校验 `version` (409 CAS)。更新成功后递增系统 `globalPolicyVersion`，使排队快照在二次核验时触发策略重载。",
+      "- **不可变字段确定性规则**：`role_name` 属于不可变属性。若请求体试图变更其值（即传入值与数据库已存值不一致），服务端**将严格阻断并返回 `400 ERR_ROLE_IMMUTABLE_FIELD`**；若传入值与数据库已存值完全相同则放行。",
+      "- **缺省与增量更新语义规范**：更新采用**白名单字段增量合并更新 (Partial Patch on Allowed Fields)**。请求体中未提供的可选字段（缺省/未传）一律视为保留当前已存原值；传有效非空值表示更新覆盖；传 `null` 表示清空允许为空的字段（如 `description`）；未知字段返回 `400 ERR_VALIDATION_FAILED`。",
+      "- **跨字段校验规则**：更新后的参数必须满足 **`default_limit <= max_limit`**。"
+    ]
+  },
+  "recorded_review_decisions_not_runtime_test_results": {
+    "API-R1-01": "closed_at_document_level",
+    "API-R1-02": "partially_resolved",
+    "API-R1-03": "partially_resolved",
+    "API-R1-04": "partially_resolved",
+    "API-R1-05": "partially_resolved",
+    "API-R1-06": "closed_at_document_level",
+    "API-R1-07": "closed_at_document_level",
+    "API-R1-08": "closed_at_document_level",
+    "API-R1-09": "closed_at_document_level",
+    "API-R1-10": "closed_at_document_level",
+    "API-R1-11": "closed_at_document_level",
+    "API-R1-12": "partially_resolved"
+  },
+  "summary": {
+    "original_items": 12,
+    "closed_at_document_level": 7,
+    "partially_resolved": 5,
+    "remaining_p1": [
+      "API-R1-02",
+      "API-R1-03",
+      "API-R1-04"
+    ],
+    "remaining_p2": [
+      "API-R1-05",
+      "API-R1-12"
+    ]
+  }
+}

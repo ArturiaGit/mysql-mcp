@@ -1,0 +1,91 @@
+{
+  "review_date": "2026-11-09",
+  "verification_kind": "static_document_structure_only",
+  "integration_tests_executed": false,
+  "inputs": [
+    {
+      "path": "docs\\API_CONTRACT_SPEC.md",
+      "bytes": 153192,
+      "lines": 2504,
+      "sha256": "1945A5E2B3DB891534DDE06121D0DF93FF4A56B5D7B2EC64E29882E77E34EFBE"
+    },
+    {
+      "path": "docs\\BACKEND_ARCHITECTURE_SPEC.md",
+      "bytes": 231349,
+      "lines": 5199,
+      "sha256": "182C1149CB230A5B6E9143C4248E0A59FB276B8E426B9D3A62D553440D7C1C7D"
+    },
+    {
+      "path": "docs\\FRONTEND_ARCHITECTURE_SPEC.md",
+      "bytes": 95041,
+      "lines": 1187,
+      "sha256": "87478E5B8C44EEEE3F890DE988297B03CE31BA9BF49DC5CEDF2FE7729AE54F0D"
+    }
+  ],
+  "observations": {
+    "endpoint_count": 47,
+    "error_matrix_count": 44,
+    "referenced_but_unregistered_errors": [],
+    "contract_matches_generated_parts": true,
+    "password_feature_terms_in_backend": {
+      "password_updated_at": 4,
+      "password_expires_days": 3,
+      "password_expires_at": 1,
+      "/auth/password-policy": 3
+    },
+    "tls_config_in_create_profile_section": true,
+    "tls_config_in_test_db_section": true,
+    "host_fingerprint_field_in_create_profile_section": true,
+    "user_list_mentions_version": true,
+    "user_role_update_mentions_version": true,
+    "routes": [
+      "GET /api/v1/auth/csrf",
+      "POST /api/v1/auth/register",
+      "POST /api/v1/auth/login",
+      "POST /api/v1/auth/logout",
+      "POST /api/v1/auth/change-password",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/auth/password-policy",
+      "PUT /api/v1/auth/password-policy",
+      "GET /api/v1/approvals/pending",
+      "POST /api/v1/approvals/:id/approve",
+      "POST /api/v1/approvals/:id/reject",
+      "POST /api/v1/approvals/resubmit",
+      "GET /api/v1/users",
+      "PUT /api/v1/users/:id/status",
+      "PUT /api/v1/users/:id/roles",
+      "DELETE /api/v1/users/:id",
+      "POST /api/v1/users/:id/reset-password",
+      "GET /api/v1/pats",
+      "POST /api/v1/pats",
+      "POST /api/v1/pats/:id/revoke",
+      "GET /api/v1/profiles",
+      "GET /api/v1/profiles/my-options",
+      "POST /api/v1/profiles",
+      "PUT /api/v1/profiles/:id",
+      "DELETE /api/v1/profiles/:id",
+      "POST /api/v1/profiles/test-db",
+      "POST /api/v1/profiles/test-ssh",
+      "GET /api/v1/roles",
+      "POST /api/v1/roles",
+      "PUT /api/v1/roles/:id",
+      "DELETE /api/v1/roles/:id",
+      "GET /api/v1/roles/:id/table-acls",
+      "PUT /api/v1/roles/:id/table-acls",
+      "GET /api/v1/roles/:id/db-acls",
+      "PUT /api/v1/roles/:id/db-acls",
+      "GET /api/v1/rate-limits/global",
+      "PUT /api/v1/rate-limits/global",
+      "GET /api/v1/rate-limits/users/:id",
+      "PUT /api/v1/rate-limits/users/:id",
+      "DELETE /api/v1/rate-limits/users/:id",
+      "GET /api/v1/audits",
+      "GET /api/v1/audits/stats",
+      "POST /api/v1/audits/export",
+      "GET /api/v1/audits/export/download",
+      "GET /api/v1/settings/notifications",
+      "PUT /api/v1/settings/notifications",
+      "POST /api/v1/settings/test-notify"
+    ]
+  }
+}

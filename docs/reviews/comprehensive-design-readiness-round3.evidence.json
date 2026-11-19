@@ -1,0 +1,553 @@
+{
+  "date": "2026-11-12",
+  "timezone": "Asia/Shanghai",
+  "runtime": "v22.22.0",
+  "typescript": "5.9.3",
+  "sources": [
+    {
+      "path": "docs/ARCHITECTURE_SPEC.md",
+      "sha256": "21614af8cadc8f92172779cd6106d12009084ed8b4b2ba5fbcbc738cbc4a4d22",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "sha256": "4fc7381a92c46957219a622c58fa8f054524365b65638f76e9545f2b03bf039c",
+      "unchangedSinceRound2": false
+    },
+    {
+      "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+      "sha256": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "sha256": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/DATABASE_DESIGN_SPEC.md",
+      "sha256": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/sql/001_metadata_schema.sql",
+      "sha256": "655fae957076927283141b15cd7d90afb77e9bc6b278b3ef70f7d76fe6e6f7c2",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/contracts/readiness.types.ts",
+      "sha256": "f40baa341a7deca4b611e461f8c4538277dcbc09f183cfb2df0286fb17f4625f",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/contracts/readiness.fixtures.json",
+      "sha256": "8c361a9a2dc4aefa38239409c034c558c8a3f531a8f9c941e17a37bebace6589",
+      "unchangedSinceRound2": true
+    },
+    {
+      "path": "docs/contracts/endpoint-trace.json",
+      "sha256": "7e508d351d3bc9d2cc0a147a73b40c3a0f197adea5ff497852efb25c3b832323",
+      "unchangedSinceRound2": true
+    }
+  ],
+  "observations": [
+    {
+      "name": "Only backend changed among nine tracked source artifacts",
+      "passed": true,
+      "detail": {
+        "changed": "backend v1.7.3",
+        "unchanged": 8
+      }
+    },
+    {
+      "name": "Current four-module source graph compiles and rejects both former failure modes",
+      "passed": true,
+      "detail": {
+        "diagnostics": [],
+        "missingDiagnostics": [
+          {
+            "code": 2503,
+            "file": "apps\\admin-api\\src\\repositories\\audit.repository.ts",
+            "line": 6,
+            "message": "Cannot find namespace 'mysql2'."
+          },
+          {
+            "code": 2503,
+            "file": "apps\\admin-api\\src\\repositories\\audit.repository.ts",
+            "line": 19,
+            "message": "Cannot find namespace 'mysql2'."
+          }
+        ],
+        "importOnlyDiagnostics": [
+          {
+            "code": 2345,
+            "file": "apps\\admin-api\\src\\services\\audit-query.service.ts",
+            "line": 8,
+            "message": "Argument of type 'MetadataQueryExecutor' is not assignable to parameter of type 'Pool'.\n  Type 'MetadataQueryExecutor' is missing the following properties from type 'Pool': getConnection, releaseConnection, on, end, and 35 more."
+          },
+          {
+            "code": 2345,
+            "file": "caller.ts",
+            "line": 8,
+            "message": "Argument of type 'MetadataQueryExecutor' is not assignable to parameter of type 'Pool'.\n  Type 'MetadataQueryExecutor' is missing the following properties from type 'Pool': getConnection, releaseConnection, on, end, and 35 more."
+          }
+        ],
+        "boundary": "Real TypeScript/mysql2 declarations, verbatim four modules; reused compiler helper, independent assertions"
+      }
+    },
+    {
+      "name": "Concurrent service calls isolate their UTC initialization and release on mixed success/failure",
+      "passed": true,
+      "detail": {
+        "trace": [
+          "0:borrow",
+          "0:SET-start",
+          "1:borrow",
+          "1:SET-start",
+          "1:SET-done",
+          "1:SELECT",
+          "1:release",
+          "0:SET-done",
+          "0:SELECT",
+          "0:release"
+        ],
+        "calls": [
+          {
+            "i": 1,
+            "sql": "SELECT * FROM sys_audit_logs WHERE query_instance_id = ? LIMIT 1",
+            "params": [
+              "q-' OR 1=1 --"
+            ]
+          },
+          {
+            "i": 0,
+            "sql": "SELECT * FROM sys_audit_logs WHERE query_instance_id = ? LIMIT 1",
+            "params": [
+              "q-first"
+            ]
+          }
+        ],
+        "boundary": "Original four-module chain; controlled pool, not MySQL integration"
+      }
+    },
+    {
+      "name": "Failed UTC setup destroys the connection; next service call uses a fresh initialized connection",
+      "passed": true,
+      "detail": {
+        "trace": [
+          "0:borrow",
+          "0:SET",
+          "0:destroy",
+          "1:borrow",
+          "1:SET",
+          "1:SELECT",
+          "1:release"
+        ]
+      }
+    },
+    {
+      "name": "Backend assembly and generated artifacts are synchronized",
+      "passed": true,
+      "detail": {
+        "stdout": "PASS: 47 endpoint traces; 8 generated request types; ProfileReadDTO; contract fixtures (no drift)\r\n",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "RD-08 decision and signoff gate remains explicitly pending",
+      "passed": true,
+      "detail": {
+        "phrases": [
+          "未签署前不冻结联调基线",
+          "新库暂取10，旧15不自动覆盖",
+          "冲突待澄清",
+          "建议向上取整"
+        ],
+        "externalApprovalInferred": false
+      }
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0
+  },
+  "closure": {
+    "RR2_01": "closed at design/snippet level",
+    "RD_02": "closed within original technical scope",
+    "RD_08": "pending owner decisions/signoff"
+  },
+  "method": "Reuse counterpart extraction/compiler/module-loader helpers; independent assertions including concurrent mixed outcomes and recovery after UTC setup failure. Fresh rerun source hashes verified.",
+  "rerun": {
+    "date": "2026-11-12",
+    "timezone": "Asia/Shanghai",
+    "runtime": "v22.22.0",
+    "typescript": "5.9.3",
+    "sources": [
+      {
+        "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+        "sha256": "4fc7381a92c46957219a622c58fa8f054524365b65638f76e9545f2b03bf039c"
+      },
+      {
+        "path": "scripts/be_parts/part1_intro.md",
+        "sha256": "25c02a9e60fafdff2817a714109ea8d879ea864bb159b716b7f2498d7f3db8da"
+      },
+      {
+        "path": "scripts/be_parts/part4_database_and_dal.md",
+        "sha256": "7d4a972e988caa120be9ddd7656584961473225007cf15b3e21cf3f8c581140d"
+      },
+      {
+        "path": "scripts/be_parts/part10_audit_and_stats.md",
+        "sha256": "cd83f6f1d239c1d6e2720cd2eabc6a0c3baee6b723b1542eaeed365f7af5bacd"
+      },
+      {
+        "path": "docs/DATABASE_DESIGN_SPEC.md",
+        "sha256": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd"
+      },
+      {
+        "path": "docs/contracts/readiness.types.ts",
+        "sha256": "f40baa341a7deca4b611e461f8c4538277dcbc09f183cfb2df0286fb17f4625f"
+      },
+      {
+        "path": "docs/reviews/comprehensive-design-readiness-round2.remediation.test.cjs",
+        "sha256": "01bf39e78d280238cadbdd5c6eb36d1c54ed1832c79788521500c7dd7b86553a"
+      }
+    ],
+    "tests": [
+      {
+        "name": "RR2-01 public module -> safe factory -> service -> Repository strict typecheck",
+        "passed": true,
+        "result": {
+          "typescript": "5.9.3",
+          "mysql2": "3.24.6",
+          "diagnostics": [],
+          "modules": [
+            "packages/core-engine/src/metadata-pool.ts",
+            "packages/core-engine/src/index.ts",
+            "apps/admin-api/src/repositories/audit.repository.ts",
+            "apps/admin-api/src/services/audit-query.service.ts"
+          ],
+          "boundary": "Actual extracted modules and mysql2 declarations; aliases resolved with tsconfig paths only"
+        }
+      },
+      {
+        "name": "Negative controls reject missing namespace, import-only Pool fix and wrong module path",
+        "passed": true,
+        "result": {
+          "namespace": [
+            {
+              "code": 2503,
+              "file": "apps\\admin-api\\src\\repositories\\audit.repository.ts",
+              "line": 19,
+              "message": "Cannot find namespace 'mysql2'."
+            }
+          ],
+          "poolOnly": [
+            {
+              "code": 2345,
+              "file": "apps\\admin-api\\src\\services\\audit-query.service.ts",
+              "line": 8,
+              "message": "Argument of type 'MetadataQueryExecutor' is not assignable to parameter of type 'Pool'.\n  Type 'MetadataQueryExecutor' is missing the following properties from type 'Pool': getConnection, releaseConnection, on, end, and 35 more."
+            },
+            {
+              "code": 2345,
+              "file": "caller.ts",
+              "line": 8,
+              "message": "Argument of type 'MetadataQueryExecutor' is not assignable to parameter of type 'Pool'.\n  Type 'MetadataQueryExecutor' is missing the following properties from type 'Pool': getConnection, releaseConnection, on, end, and 35 more."
+            }
+          ],
+          "wrongPath": [
+            {
+              "code": 2307,
+              "file": "apps\\admin-api\\src\\repositories\\audit.repository.ts",
+              "line": 3,
+              "message": "Cannot find module './metadata-pool' or its corresponding type declarations."
+            }
+          ],
+          "mutations": "Temporary extracted modules only; workspace sources unchanged"
+        }
+      },
+      {
+        "name": "Audit SELECT waits for UTC; parameters, response and per-borrow initialization preserved",
+        "passed": true,
+        "result": {
+          "secondBorrow": [
+            "borrow",
+            "SET-start",
+            "SET-done",
+            "SELECT",
+            "release"
+          ],
+          "boundary": "Documented query service/Repository/executor with controlled promise connection; no MySQL server"
+        }
+      },
+      {
+        "name": "Audit SQL failure propagates original error and releases exactly once",
+        "passed": true,
+        "result": [
+          "borrow",
+          "SET-start",
+          "SET-done",
+          "SELECT",
+          "release"
+        ]
+      },
+      {
+        "name": "UTC failure destroys without querying/releasing; checkout failure does not use connection",
+        "passed": true,
+        "result": {
+          "initializationFailure": [
+            "borrow",
+            "SET-start",
+            "destroy"
+          ],
+          "checkoutFailure": [
+            "borrow"
+          ]
+        }
+      },
+      {
+        "name": "No-row response and existing pagination placeholder stay unchanged",
+        "passed": true,
+        "result": {
+          "boundary": "General pagination remains an explicit placeholder, not a completed implementation"
+        }
+      },
+      {
+        "name": "Backend assembly, contract generation and unsigned RD-08 remain consistent",
+        "passed": true,
+        "result": {
+          "generated": {
+            "command": [
+              "python",
+              "scripts/generate_readiness_contracts.py",
+              "--check"
+            ],
+            "stdout": "PASS: 47 endpoint traces; 8 generated request types; ProfileReadDTO; contract fixtures (no drift)",
+            "stderr": ""
+          },
+          "decisionGate": "RD-08 remains pending; no product approval inferred"
+        }
+      }
+    ],
+    "regressions": {
+      "databaseStatic": {
+        "command": [
+          "python",
+          "scripts/validate_database_design.py"
+        ],
+        "stdout": "PASS: 1067 static/model assertions; 14 tables; 136 columns; 45 indexes; 7 foreign keys; 47 mapped endpoints; 3 JSON examples.\r\nNOT RUN: MySQL parsing/execution, CHECK enforcement, multi-connection concurrency, migration, restore, or performance tests.",
+        "stderr": ""
+      },
+      "validatorMutation": {
+        "command": [
+          "python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "scripts",
+          "-p",
+          "test_validate_database_design.py"
+        ],
+        "stdout": "",
+        "stderr": "...\r\n----------------------------------------------------------------------\r\nRan 3 tests in 0.003s\r\n\r\nOK"
+      },
+      "previousPositiveRun": {
+        "command": [
+          "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-design-review-20261108\\r2-node22\\node_modules\\node\\bin\\node.exe",
+          "docs/reviews/comprehensive-design-readiness-20261112.remediation.test.cjs"
+        ],
+        "stdout": "PASS RD-01 shared allocation SQL and complete revision lifecycle\nPASS RD-02 UTC parser, serialization, milliseconds and display boundary\nPASS RD-02 await UTC initialization; destroy failed connection; initialize each borrow\nPASS RD-02 nontransaction executor initializes and releases; startup wiring uses safe entrypoints\nPASS RD-03 single physical schema and original constraints retained\nPASS RD-04 actual contract fixture compiles; mapper round-trip; no secret/read-only write leak\nPASS RD-05 generated request signatures and negative type mutations\nPASS RD-06 exact 47 method/path coverage and implementation trace\nPASS RD-07 extracted guard: role/users/bindings lock order; last admin and self protection\nPASS RD-09 bootstrap snippet strict typecheck with actual mysql2 types\nPASS RD-09 first empty initialization and ordinary restart preserve identity/configuration\nPASS RD-09 missing marker, nonempty PENDING and absent active super-admin never create identity\nPASS RD-09 audit rollback and post-commit secret delivery failure do not reissue admin\nPASS RD-08 unsigned decisions remain explicit and are not represented as approved\nPASS Generated parts, request types, fixtures and endpoint trace have no drift\n{\"passed\":15,\"total\":15}",
+        "stderr": ""
+      },
+      "previousPositiveEvidence": {
+        "date": "2026-11-12",
+        "timezone": "Asia/Shanghai",
+        "runtime": "v22.22.0",
+        "typescript": "5.9.3",
+        "sources": [
+          {
+            "path": "docs/ARCHITECTURE_SPEC.md",
+            "sha256": "21614af8cadc8f92172779cd6106d12009084ed8b4b2ba5fbcbc738cbc4a4d22"
+          },
+          {
+            "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+            "sha256": "4fc7381a92c46957219a622c58fa8f054524365b65638f76e9545f2b03bf039c"
+          },
+          {
+            "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+            "sha256": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0"
+          },
+          {
+            "path": "docs/API_CONTRACT_SPEC.md",
+            "sha256": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e"
+          },
+          {
+            "path": "docs/DATABASE_DESIGN_SPEC.md",
+            "sha256": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd"
+          },
+          {
+            "path": "docs/sql/001_metadata_schema.sql",
+            "sha256": "655fae957076927283141b15cd7d90afb77e9bc6b278b3ef70f7d76fe6e6f7c2"
+          },
+          {
+            "path": "docs/contracts/readiness.types.ts",
+            "sha256": "f40baa341a7deca4b611e461f8c4538277dcbc09f183cfb2df0286fb17f4625f"
+          },
+          {
+            "path": "docs/contracts/readiness.fixtures.json",
+            "sha256": "8c361a9a2dc4aefa38239409c034c558c8a3f531a8f9c941e17a37bebace6589"
+          },
+          {
+            "path": "docs/contracts/endpoint-trace.json",
+            "sha256": "7e508d351d3bc9d2cc0a147a73b40c3a0f197adea5ff497852efb25c3b832323"
+          }
+        ],
+        "tests": [
+          {
+            "name": "RD-01 shared allocation SQL and complete revision lifecycle",
+            "passed": true,
+            "detail": {
+              "states": [
+                {
+                  "counter": 1,
+                  "revision": 1
+                },
+                {
+                  "counter": 2,
+                  "revision": 2
+                },
+                {
+                  "counter": 3,
+                  "revision": 3
+                },
+                {
+                  "counter": 4,
+                  "revision": 4
+                }
+              ],
+              "boundary": "SQL-guided sequential model; not database concurrency"
+            }
+          },
+          {
+            "name": "RD-02 UTC parser, serialization, milliseconds and display boundary",
+            "passed": true,
+            "detail": {
+              "driver": "3.24.6",
+              "iso": "2026-11-12T08:00:00.123Z",
+              "sql": "'2026-11-12 08:00:00.123'",
+              "display": "16:00:00",
+              "boundary": "real mysql2 decoder/SQL encoder and Intl; no server/browser"
+            }
+          },
+          {
+            "name": "RD-02 await UTC initialization; destroy failed connection; initialize each borrow",
+            "passed": true
+          },
+          {
+            "name": "RD-02 nontransaction executor initializes and releases; startup wiring uses safe entrypoints",
+            "passed": true
+          },
+          {
+            "name": "RD-03 single physical schema and original constraints retained",
+            "passed": true
+          },
+          {
+            "name": "RD-04 actual contract fixture compiles; mapper round-trip; no secret/read-only write leak",
+            "passed": true,
+            "detail": {
+              "typescript": "5.9.3",
+              "username": "mcp_readonly_user",
+              "diagnostics": 0
+            }
+          },
+          {
+            "name": "RD-05 generated request signatures and negative type mutations",
+            "passed": true
+          },
+          {
+            "name": "RD-06 exact 47 method/path coverage and implementation trace",
+            "passed": true
+          },
+          {
+            "name": "RD-07 extracted guard: role/users/bindings lock order; last admin and self protection",
+            "passed": true,
+            "detail": {
+              "boundary": "documented guard on controlled current-read rows; not an InnoDB scheduler"
+            }
+          },
+          {
+            "name": "RD-09 bootstrap snippet strict typecheck with actual mysql2 types",
+            "passed": true
+          },
+          {
+            "name": "RD-09 first empty initialization and ordinary restart preserve identity/configuration",
+            "passed": true
+          },
+          {
+            "name": "RD-09 missing marker, nonempty PENDING and absent active super-admin never create identity",
+            "passed": true
+          },
+          {
+            "name": "RD-09 audit rollback and post-commit secret delivery failure do not reissue admin",
+            "passed": true
+          },
+          {
+            "name": "RD-08 unsigned decisions remain explicit and are not represented as approved",
+            "passed": true
+          },
+          {
+            "name": "Generated parts, request types, fixtures and endpoint trace have no drift",
+            "passed": true
+          }
+        ],
+        "summary": {
+          "passed": 15,
+          "total": 15
+        },
+        "boundaries": {
+          "realMysql": false,
+          "realHttp": false,
+          "browser": false,
+          "wholeProjectBuild": false,
+          "productSignoff": false,
+          "method": "extracted snippets, actual TS compiler/mysql2 decoder, controlled SQL responses and sequential model"
+        }
+      }
+    },
+    "summary": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0
+    },
+    "closure": {
+      "RR2_01": "closed at design/snippet level",
+      "RD_02": "remaining consumer migration verified",
+      "RD_08": "pending responsible-owner decisions/signoff"
+    },
+    "temporaryWorkspace": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-rr2-01-TL27Nr",
+    "protectedFilesUnchanged": true,
+    "protectedFileCount": 183,
+    "boundaries": {
+      "realMysql": false,
+      "realHttp": false,
+      "browser": false,
+      "wholeProjectBuild": false,
+      "productSignoff": false,
+      "generalPaginationImplemented": false
+    }
+  },
+  "rerunEvidenceSha256": "113f01e673a35c18828fae5d587fb1683d659c42b752a4a41f7cf1f8cb09d8aa",
+  "temporaryWorkspace": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-rr2-01-HUQ6QR",
+  "protectedFilesUnchanged": true,
+  "protectedFileCount": 184,
+  "boundaries": {
+    "realMysql": false,
+    "realHttp": false,
+    "browser": false,
+    "wholeProjectBuild": false,
+    "productSignoff": false,
+    "historical96SuiteRerun": false
+  }
+}

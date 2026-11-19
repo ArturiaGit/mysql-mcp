@@ -1,0 +1,411 @@
+{
+  "review": "database-design-round2-bounded",
+  "date": "2026-11-12",
+  "timezone": "Asia/Shanghai",
+  "runtime": "v24.16.0",
+  "scope": [
+    "DB-R1-01",
+    "DB-R1-02",
+    "DB-R1-03",
+    "DB-R1-04",
+    "related policy and documentation regression"
+  ],
+  "sources": [
+    {
+      "path": "docs/ARCHITECTURE_SPEC.md",
+      "sha256": "d37e4ba71d70168889e9c6a4a3b3c6a66be9013c66672af02cd7e86bb3fbf760",
+      "bytes": 109312,
+      "unchangedSinceRound1": true
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "sha256": "6dbaa390d253bfa90fb04eba66dc05cb09f11a941c36a4225c68d2747d4ae127",
+      "bytes": 246783,
+      "unchangedSinceRound1": false
+    },
+    {
+      "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+      "sha256": "3fb10fc54273a3c067de8fb27f7e555e0f434ae59e809b9c17de3d7911c80ddf",
+      "bytes": 102957,
+      "unchangedSinceRound1": false
+    },
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "sha256": "3bf1a1429d6b4abb43d6b7e3a86fe7acaeba450df9dff17f956fcf44e043496b",
+      "bytes": 154087,
+      "unchangedSinceRound1": false
+    },
+    {
+      "path": "docs/DATABASE_DESIGN_SPEC.md",
+      "sha256": "30efbddd375e1765f156746837d7a4d7f6a51df77e399b2b5b7f7bb2230f5df8",
+      "bytes": 101300,
+      "unchangedSinceRound1": false
+    },
+    {
+      "path": "docs/sql/001_metadata_schema.sql",
+      "sha256": "64b46b9f0afd9ff76441f506398f2f0e207ebc30e59ea21fa2ea3b249e9c308f",
+      "bytes": 20191,
+      "unchangedSinceRound1": true
+    },
+    {
+      "path": "scripts/validate_database_design.py",
+      "sha256": "a3f483d92fadf83d975e3bf92da37b12fb83cbf8d65725000a96ec29251c9e97",
+      "bytes": 16795,
+      "unchangedSinceRound1": false
+    },
+    {
+      "path": "scripts/test_validate_database_design.py",
+      "sha256": "5b3279159197773e8b8f232a781961da3ef67d790795ef33b665f10c3dbea818",
+      "bytes": 2905,
+      "unchangedSinceRound1": null
+    }
+  ],
+  "observations": [
+    {
+      "name": "USER row mapping remains paired, absence is null",
+      "passed": true,
+      "actual": {
+        "row": {
+          "qpm_limit": 30,
+          "burst_capacity": 1
+        },
+        "mapped": {
+          "qpmLimit": 30,
+          "burstCapacity": 1
+        }
+      }
+    },
+    {
+      "name": "Independent quota/burst boundary grid and actual token-bucket rejection",
+      "passed": true,
+      "actual": {
+        "combinations": 24,
+        "finiteBucketCases": 18,
+        "results": [
+          {
+            "qpm": -1,
+            "userBurst": 1,
+            "globalBurst": 1,
+            "actualBurst": 1,
+            "finiteBucketChecked": false
+          },
+          {
+            "qpm": -1,
+            "userBurst": 1,
+            "globalBurst": 500,
+            "actualBurst": 1,
+            "finiteBucketChecked": false
+          },
+          {
+            "qpm": -1,
+            "userBurst": 20,
+            "globalBurst": 1,
+            "actualBurst": 20,
+            "finiteBucketChecked": false
+          },
+          {
+            "qpm": -1,
+            "userBurst": 20,
+            "globalBurst": 500,
+            "actualBurst": 20,
+            "finiteBucketChecked": false
+          },
+          {
+            "qpm": -1,
+            "userBurst": 500,
+            "globalBurst": 1,
+            "actualBurst": 500,
+            "finiteBucketChecked": false
+          },
+          {
+            "qpm": -1,
+            "userBurst": 500,
+            "globalBurst": 500,
+            "actualBurst": 500,
+            "finiteBucketChecked": false
+          },
+          {
+            "qpm": 1,
+            "userBurst": 1,
+            "globalBurst": 1,
+            "actualBurst": 1,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 1,
+            "userBurst": 1,
+            "globalBurst": 500,
+            "actualBurst": 1,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 1,
+            "userBurst": 20,
+            "globalBurst": 1,
+            "actualBurst": 20,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 1,
+            "userBurst": 20,
+            "globalBurst": 500,
+            "actualBurst": 20,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 1,
+            "userBurst": 500,
+            "globalBurst": 1,
+            "actualBurst": 500,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 1,
+            "userBurst": 500,
+            "globalBurst": 500,
+            "actualBurst": 500,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 30,
+            "userBurst": 1,
+            "globalBurst": 1,
+            "actualBurst": 1,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 30,
+            "userBurst": 1,
+            "globalBurst": 500,
+            "actualBurst": 1,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 30,
+            "userBurst": 20,
+            "globalBurst": 1,
+            "actualBurst": 20,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 30,
+            "userBurst": 20,
+            "globalBurst": 500,
+            "actualBurst": 20,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 30,
+            "userBurst": 500,
+            "globalBurst": 1,
+            "actualBurst": 500,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 30,
+            "userBurst": 500,
+            "globalBurst": 500,
+            "actualBurst": 500,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 10000,
+            "userBurst": 1,
+            "globalBurst": 1,
+            "actualBurst": 1,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 10000,
+            "userBurst": 1,
+            "globalBurst": 500,
+            "actualBurst": 1,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 10000,
+            "userBurst": 20,
+            "globalBurst": 1,
+            "actualBurst": 20,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 10000,
+            "userBurst": 20,
+            "globalBurst": 500,
+            "actualBurst": 20,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 10000,
+            "userBurst": 500,
+            "globalBurst": 1,
+            "actualBurst": 500,
+            "finiteBucketChecked": true
+          },
+          {
+            "qpm": 10000,
+            "userBurst": 500,
+            "globalBurst": 500,
+            "actualBurst": 500,
+            "finiteBucketChecked": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Existing bucket shrinks after constructing a fresh updated snapshot",
+      "passed": true,
+      "actual": {
+        "freshQuotas": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 30,
+          "userBurstCapacity": 1,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        },
+        "automaticInvalidationTested": false
+      }
+    },
+    {
+      "name": "Remove coverage restores role QPM and GLOBAL burst; global changes do not replace role QPM",
+      "passed": true,
+      "actual": {
+        "before": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 60,
+          "userBurstCapacity": 500,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        },
+        "after": {
+          "defaultLimit": 5,
+          "maxLimit": 10,
+          "maxTimeoutMs": 1000,
+          "userQpmLimit": 60,
+          "userBurstCapacity": 10,
+          "maxInflightConcurrency": 2,
+          "loopBreakerThreshold": 3,
+          "loopBreakerWindowSec": 30
+        },
+        "signoffStillRequired": true
+      }
+    },
+    {
+      "name": "Role maximum, unlimited role, USER override, no-role deny and Profile protection retained",
+      "passed": true,
+      "actual": "Existing policy precedence, bounded Profile protection and string IDs preserved"
+    },
+    {
+      "name": "Corrected CSRF and USER route mappings match requested fixes",
+      "passed": true,
+      "actual": {
+        "csrf": "| `GET /api/v1/auth/csrf` | 内存CSRF/Session | 按需建立/复用CSRF seed并返回token；不注销Session；不撤销授权上下文；不写业务库 |",
+        "get": "| `GET /api/v1/rate-limits/users/:id` | sys_users、sys_rate_limits(USER) | 只读；返回已保存覆盖；无业务行时isCustom=false、revision=version=0、配额=null；不以历史counter回显revision；不写管理审计；不失效快照 |",
+        "put": "| `PUT /api/v1/rate-limits/users/:id` | sys_users、sys_rate_limit_revisions、sys_rate_limits(USER)、sys_user_approvals | 按§7.5锁序；USER revision CAS（兼容version别名）；rule/counter同事务更新；不以sys_users.version做CAS；不删除PAT；管理审计与提交后失效并重载QPM/burst |",
+        "delete": "| `DELETE /api/v1/rate-limits/users/:id` | sys_users、sys_rate_limit_revisions、sys_rate_limits(USER)、sys_user_approvals | 按§7.5锁序；USER revision CAS（兼容version别名）；仅删除USER规则；保留counter；不以sys_users.version做CAS；不删除PAT；不重置用户版本；管理审计与提交后失效并重载QPM/burst |"
+      }
+    },
+    {
+      "name": "Counterfactual controls detect global-only burst assignment and dropped mapping",
+      "passed": true,
+      "actual": {
+        "mutantsDetected": 2,
+        "note": "In-memory test controls only; no document edited and not new defects"
+      }
+    }
+  ],
+  "staticCheck": {
+    "stdout": "PASS: 1067 static/model assertions; 14 tables; 136 columns; 45 indexes; 7 foreign keys; 47 mapped endpoints; 3 JSON examples.\r\nNOT RUN: MySQL parsing/execution, CHECK enforcement, multi-connection concurrency, migration, restore, or performance tests.",
+    "stderr": ""
+  },
+  "mutationTests": {
+    "stdout": "",
+    "stderr": "test_current_matrix (__main__.ApiSemanticValidationTests.test_current_matrix) ... ok\r\ntest_rejects_all_original_bad_rows (__main__.ApiSemanticValidationTests.test_rejects_all_original_bad_rows) ... ok\r\ntest_semantic_mutations (__main__.ApiSemanticValidationTests.test_semantic_mutations) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 3 tests in 0.003s\r\n\r\nOK"
+  },
+  "suites": [
+    {
+      "script": "docs/reviews/database-design-remediation.test.cjs",
+      "evidenceFile": "database-design-review-round2.remediation.evidence.json",
+      "summary": {
+        "total": 15,
+        "passed": 15
+      },
+      "stderr": "(node:18388) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)",
+      "adaptation": "Only evidence output basename redirected; assertions unchanged"
+    },
+    {
+      "script": "docs/reviews/cross-design-review-round4.repro.cjs",
+      "evidenceFile": "database-design-review-round2.cross-regression.evidence.json",
+      "summary": {
+        "total": 96,
+        "holds": 96,
+        "violated": 0,
+        "closedIssues": 14,
+        "remainingIssues": 0
+      },
+      "stderr": "",
+      "adaptation": "Only evidence output basename redirected; assertions unchanged"
+    },
+    {
+      "script": "docs/reviews/backend-design-review-round8.repro.cjs",
+      "evidenceFile": "database-design-review-round2.backend-regression.evidence.json",
+      "summary": {
+        "total": 4,
+        "holds": 4,
+        "violated": 0
+      },
+      "adaptation": "Existing REVIEW_EVIDENCE_FILE override only"
+    }
+  ],
+  "closure": [
+    {
+      "id": "DB-R1-01",
+      "documentAndSnippet": "closed",
+      "integration": "pending"
+    },
+    {
+      "id": "DB-R1-02",
+      "documentConflict": "closed",
+      "productAndInterfaceSignoff": "pending"
+    },
+    {
+      "id": "DB-R1-03",
+      "documentMapping": "closed",
+      "httpTest": "pending"
+    },
+    {
+      "id": "DB-R1-04",
+      "documentMapping": "closed",
+      "mysqlConcurrency": "pending"
+    }
+  ],
+  "newFindings": [],
+  "protectedFileCount": 155,
+  "protectedFilesUnchanged": true,
+  "boundaries": {
+    "realMysql": false,
+    "realRepository": false,
+    "automaticCacheInvalidation": false,
+    "realHttp": false,
+    "browser": false,
+    "wholeProjectBuild": false,
+    "historicalFull73ProbeSuite": false,
+    "localSshLoopback": true,
+    "baselineSignoffVerified": false,
+    "methodology": "Complete current source blocks, type erasure only; own quota grid plus historical tests with evidence-path-only redirects"
+  },
+  "summary": {
+    "independentGroups": 7,
+    "passedIndependentGroups": 7,
+    "closedAtDocumentLevel": 4,
+    "newP1": 0,
+    "newP2": 0
+  }
+}

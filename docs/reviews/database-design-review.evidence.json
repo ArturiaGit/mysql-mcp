@@ -1,0 +1,141 @@
+{
+  "reviewDate": "2026-11-11",
+  "timezone": "Asia/Shanghai",
+  "scope": "Current source documents and DDL, not a running application",
+  "sources": [
+    {
+      "path": "docs/ARCHITECTURE_SPEC.md",
+      "bytes": 109312,
+      "sha256": "d37e4ba71d70168889e9c6a4a3b3c6a66be9013c66672af02cd7e86bb3fbf760"
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "bytes": 247159,
+      "sha256": "38923bf04ee11b657a8ec2efb7441e2eace896c2a666688621538a22ff90fc0a"
+    },
+    {
+      "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+      "bytes": 102123,
+      "sha256": "0989e8c64381ad4aabdb75f871717f9350b15b59acf9ef2e887cd32e2eb4db74"
+    },
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "bytes": 153253,
+      "sha256": "41ae7363c002f8f0d696bef8bdee9d2a8bb2088a48eba5c8a4001d7eb64e1965"
+    },
+    {
+      "path": "docs/DATABASE_DESIGN_SPEC.md",
+      "bytes": 98838,
+      "sha256": "46ef8b95bb9c6a5c3ba4f7b6ac6ae965e6f92b4243e89a260ee39e1e33c22652"
+    },
+    {
+      "path": "docs/sql/001_metadata_schema.sql",
+      "bytes": 20191,
+      "sha256": "64b46b9f0afd9ff76441f506398f2f0e207ebc30e59ea21fa2ea3b249e9c308f"
+    },
+    {
+      "path": "scripts/validate_database_design.py",
+      "bytes": 13577,
+      "sha256": "5a45695df92a93c6ae304913802cb9f6b2030e866494f42545964f5e901d8fcf"
+    }
+  ],
+  "method": {
+    "runtime": "v24.16.0",
+    "execution": "Two original backend quota snippets evaluated in a VM after erasing two TS annotations; route rows inspected as text.",
+    "extractedLines": {
+      "qpm": 1702,
+      "quotas": 1732
+    },
+    "baselineValidator": "PASS: 984 static/model assertions; 14 tables; 136 columns; 45 indexes; 7 foreign keys; 47 mapped endpoints; 3 JSON examples.\r\nNOT RUN: MySQL parsing/execution, CHECK enforcement, multi-connection concurrency, migration, restore, or performance tests.",
+    "notRun": [
+      "MySQL DDL execution",
+      "actual Repository mapping",
+      "HTTP or browser integration",
+      "InnoDB concurrency",
+      "migration/restore",
+      "load testing"
+    ]
+  },
+  "findings": [
+    {
+      "id": "DB-R1-01",
+      "priority": "P1",
+      "kind": "cross-document integration gap",
+      "storedUserRule": {
+        "qpm_limit": 30,
+        "burst_capacity": 1,
+        "revision": 1,
+        "version": 1
+      },
+      "globalBurstCapacity": 500,
+      "expectedUserBurstCapacity": 1,
+      "observedSnapshot": {
+        "defaultLimit": 50,
+        "maxLimit": 500,
+        "maxTimeoutMs": 15000,
+        "userQpmLimit": 30,
+        "maxInflightConcurrency": 5,
+        "userBurstCapacity": 500,
+        "loopBreakerThreshold": 3,
+        "loopBreakerWindowSec": 30
+      },
+      "note": "The documented builder accepts user QPM but not user burst capacity. This is a documented execution-path counterexample, not a production observation."
+    },
+    {
+      "id": "DB-R1-02",
+      "priority": "P2",
+      "kind": "unresolved external contract semantics",
+      "roleQpm": 60,
+      "userOverride": null,
+      "globalQpmBefore": 100,
+      "globalQpmAfter": 20,
+      "effectiveBefore": 60,
+      "effectiveAfter": 60,
+      "note": "The database design agrees with backend USER > ROLE > GLOBAL, but API promises subsequent global changes apply after override removal."
+    },
+    {
+      "id": "DB-R1-03",
+      "priority": "P2",
+      "kind": "incorrect route semantics",
+      "observed": {
+        "route": "GET /api/v1/auth/csrf",
+        "tables": "内存CSRF/Session",
+        "behavior": "不建表；注销会话并失效相关上下文",
+        "line": 1004
+      },
+      "expected": "Issue/reuse CSRF seed/token without logging out or invalidating the authenticated context."
+    },
+    {
+      "id": "DB-R1-04",
+      "priority": "P2",
+      "kind": "incorrect table and concurrency mapping",
+      "observed": [
+        {
+          "route": "GET /api/v1/rate-limits/users/:id",
+          "tables": "users、user_roles、roles；删除关联PAT/限流",
+          "behavior": "用户CAS；治理操作防自锁；管理审计与提交后失效",
+          "line": 1041
+        },
+        {
+          "route": "PUT /api/v1/rate-limits/users/:id",
+          "tables": "users、user_roles、roles；删除关联PAT/限流",
+          "behavior": "用户CAS；治理操作防自锁；管理审计与提交后失效",
+          "line": 1042
+        },
+        {
+          "route": "DELETE /api/v1/rate-limits/users/:id",
+          "tables": "users、user_roles、roles；删除关联PAT/限流",
+          "behavior": "用户CAS；治理操作防自锁；管理审计与提交后失效",
+          "line": 1043
+        }
+      ],
+      "expected": "Read USER rule; mutate rule and persistent counter using revision; delete only rule, retaining counter. Do not use sys_users.version as the limit CAS."
+    }
+  ],
+  "positiveControls": {
+    "userQpmOverride": 30,
+    "unlimitedRole": -1,
+    "staticValidatorPassed": true
+  },
+  "sourceHashesUnchanged": true
+}

@@ -1,0 +1,408 @@
+{
+  "CreateProfilePayload": {
+    "source": "API_CONTRACT_SPEC.md#6.5.3",
+    "fields": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "constraints": "- | 长度 1~64 字符，仅限 `^[a-zA-Z0-9_-]+$` | 唯一英文标识 (创建后不可变更)"
+      },
+      {
+        "name": "display_name",
+        "type": "string",
+        "required": true,
+        "constraints": "- | 长度 1~128 字符 | 中文展示名"
+      },
+      {
+        "name": "environment",
+        "type": "string",
+        "required": false,
+        "constraints": "`\"PROD\"` | 枚举: `\"PROD\"`, `\"STG\"`, `\"DEV\"` | 部署环境 (创建后不可变更)"
+      },
+      {
+        "name": "host",
+        "type": "string",
+        "required": true,
+        "constraints": "- | 最大 255 字符，非空 | 目标 MySQL 主机域名或 IP"
+      },
+      {
+        "name": "port",
+        "type": "number",
+        "required": true,
+        "constraints": "`3306` | 整数，`1 <= port <= 65535` | 目标端口"
+      },
+      {
+        "name": "user",
+        "type": "string",
+        "required": true,
+        "constraints": "- | 长度 1~64 字符 | 数据库登录用户"
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "required": true,
+        "constraints": "- | 长度 1~255 字符 | 数据库登录明文密码"
+      },
+      {
+        "name": "database",
+        "type": "string",
+        "required": true,
+        "constraints": "- | 长度 1~64 字符 | 默认连接数据库名"
+      },
+      {
+        "name": "max_pool_size",
+        "type": "number",
+        "required": false,
+        "constraints": "`10` | 整数，`1 <= val <= 50` | 生产连接池最大容量"
+      },
+      {
+        "name": "queue_timeout_ms",
+        "type": "number",
+        "required": false,
+        "constraints": "`3000` | 整数，`500 <= val <= 30000` | 连接池借出排队超时 (ms)"
+      },
+      {
+        "name": "profile_capacity_qpm",
+        "type": "number",
+        "required": false,
+        "constraints": "`300` | 整数，`10 <= val <= 10000` | 数据源 QPM 保护上限"
+      },
+      {
+        "name": "max_inflight_concurrency",
+        "type": "number",
+        "required": false,
+        "constraints": "`30` | 整数，`1 <= val <= 50` | 最大在途并发数"
+      },
+      {
+        "name": "use_ssh",
+        "type": "boolean",
+        "required": false,
+        "constraints": "`false` | 布尔值 | 是否经由 SSH 堡垒机隧道转发"
+      },
+      {
+        "name": "ssh_host",
+        "type": "string",
+        "required": false,
+        "constraints": "- | `use_ssh=true` 时必填 | 跳板机 IP 或域名"
+      },
+      {
+        "name": "ssh_port",
+        "type": "number",
+        "required": false,
+        "constraints": "`22` | 整数，`1 <= val <= 65535` | 跳板机端口"
+      },
+      {
+        "name": "ssh_user",
+        "type": "string",
+        "required": false,
+        "constraints": "- | `use_ssh=true` 时必填 | 跳板机用户名"
+      },
+      {
+        "name": "ssh_private_key",
+        "type": "string",
+        "required": false,
+        "constraints": "- | `use_ssh=true` 时必填 | 跳板机 OpenSSH 格式私钥文本"
+      },
+      {
+        "name": "ssh_host_fingerprint_sha256",
+        "type": "string",
+        "required": false,
+        "constraints": "- | `use_ssh=true` 时必填 (如 \"SHA256:...\") | 预期 SSH 主机密钥指纹 (Fail-Closed)"
+      },
+      {
+        "name": "tls_config",
+        "type": "TlsConfig | null",
+        "required": false,
+        "constraints": "`null` | 结构化对象 | 数据库 TLS 加密连接配置"
+      }
+    ]
+  },
+  "UpdateProfilePayload": {
+    "source": "API_CONTRACT_SPEC.md#6.5.4",
+    "fields": [
+      {
+        "name": "display_name",
+        "type": "string",
+        "required": false,
+        "constraints": "长度 1~128 字符 | 中文展示名"
+      },
+      {
+        "name": "host",
+        "type": "string",
+        "required": false,
+        "constraints": "最大 255 字符 (修改时必传password) | 目标 MySQL 主机"
+      },
+      {
+        "name": "port",
+        "type": "number",
+        "required": false,
+        "constraints": "整数 1~65535 (修改时必传password) | 目标端口"
+      },
+      {
+        "name": "user",
+        "type": "string",
+        "required": false,
+        "constraints": "长度 1~64 字符 (修改时必传password) | 数据库用户"
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "required": false,
+        "constraints": "端点变更时必填；未变时留空沿用 | 数据库密码"
+      },
+      {
+        "name": "database",
+        "type": "string",
+        "required": false,
+        "constraints": "长度 1~64 字符 | 默认数据库名"
+      },
+      {
+        "name": "max_pool_size",
+        "type": "number",
+        "required": false,
+        "constraints": "整数 1~50 | 连接池容量"
+      },
+      {
+        "name": "queue_timeout_ms",
+        "type": "number",
+        "required": false,
+        "constraints": "整数 500~30000 | 排队超时"
+      },
+      {
+        "name": "profile_capacity_qpm",
+        "type": "number",
+        "required": false,
+        "constraints": "整数 10~10000 | QPM 保护上限"
+      },
+      {
+        "name": "max_inflight_concurrency",
+        "type": "number",
+        "required": false,
+        "constraints": "整数 1~50 | 最大在途并发数"
+      },
+      {
+        "name": "use_ssh",
+        "type": "boolean",
+        "required": false,
+        "constraints": "布尔值 | 是否启用跳板机"
+      },
+      {
+        "name": "ssh_host",
+        "type": "string",
+        "required": false,
+        "constraints": "修改时须提供新私钥与指纹 | 跳板机主机"
+      },
+      {
+        "name": "ssh_port",
+        "type": "number",
+        "required": false,
+        "constraints": "整数 1~65535 | 跳板机端口"
+      },
+      {
+        "name": "ssh_user",
+        "type": "string",
+        "required": false,
+        "constraints": "修改时须提供新私钥与指纹 | 跳板机用户"
+      },
+      {
+        "name": "ssh_private_key",
+        "type": "string",
+        "required": false,
+        "constraints": "端点变更时必填；未变时留空沿用 | 跳板机私钥"
+      },
+      {
+        "name": "ssh_host_fingerprint_sha256",
+        "type": "string",
+        "required": false,
+        "constraints": "预期主机密钥指纹 | SHA256 指纹文本"
+      },
+      {
+        "name": "tls_config",
+        "type": "TlsConfig | null",
+        "required": false,
+        "constraints": "结构化对象 | TLS 加密配置"
+      },
+      {
+        "name": "version",
+        "type": "number",
+        "required": true,
+        "constraints": "必须等于当前读取到的版本号 | 乐观锁版本号"
+      }
+    ]
+  },
+  "GlobalRateLimitPayload": {
+    "source": "API_CONTRACT_SPEC.md#6.7.2",
+    "fields": [
+      {
+        "name": "defaultUserQuotaQpm",
+        "type": "number",
+        "required": true,
+        "constraints": "整数，`1 <= val <= 10000` | 默认用户 QPM 限额"
+      },
+      {
+        "name": "burstCapacity",
+        "type": "number",
+        "required": true,
+        "constraints": "整数，`1 <= val <= 500` | 令牌桶突发容量"
+      },
+      {
+        "name": "agentLoopThreshold",
+        "type": "number",
+        "required": true,
+        "constraints": "整数，`2 <= val <= 10` | 死循环连续报错熔断阈值"
+      },
+      {
+        "name": "agentLoopWindowSec",
+        "type": "number",
+        "required": true,
+        "constraints": "整数，`10 <= val <= 300` | 死循环监测滑动窗口 (秒)"
+      },
+      {
+        "name": "version",
+        "type": "number",
+        "required": true,
+        "constraints": "对应 GET 读取到的当前版本号 | 乐观锁版本号"
+      }
+    ]
+  },
+  "UserRateLimitPayload": {
+    "source": "API_CONTRACT_SPEC.md#6.7.4",
+    "fields": [
+      {
+        "name": "userQuotaQpm",
+        "type": "number",
+        "required": true,
+        "constraints": "整数，`-1` 或 `1 <= val <= 10000` | 专属配额 (`-1` 为免限流)"
+      },
+      {
+        "name": "burstCapacity",
+        "type": "number",
+        "required": false,
+        "constraints": "整数，`1 <= val <= 500` (默认 10) | 专属突发容量"
+      },
+      {
+        "name": "revision",
+        "type": "number",
+        "required": true,
+        "constraints": "继承态传 `0`，已有覆盖传当前 `revision` | 终身单调代际版本号 (防 ABA)"
+      }
+    ]
+  },
+  "ExportAuditPayload": {
+    "source": "API_CONTRACT_SPEC.md#6.8.3",
+    "fields": [
+      {
+        "name": "range",
+        "type": "string",
+        "required": true,
+        "constraints": "时间范围: `\"today\"`, `\"7d\"`, `\"30d\"`, `\"custom\"`"
+      },
+      {
+        "name": "startTime",
+        "type": "string",
+        "required": false,
+        "constraints": "自定义起始时间 (ISO 8601 UTC)"
+      },
+      {
+        "name": "endTime",
+        "type": "string",
+        "required": false,
+        "constraints": "自定义截止时间 (ISO 8601 UTC)"
+      },
+      {
+        "name": "profile_id",
+        "type": "string",
+        "required": false,
+        "constraints": "指定数据源 ID"
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "required": false,
+        "constraints": "指定审计状态过滤"
+      },
+      {
+        "name": "is_high_risk",
+        "type": "boolean",
+        "required": false,
+        "constraints": "是否仅导出高危事件"
+      }
+    ]
+  },
+  "TestSshPayload": {
+    "source": "API_CONTRACT_SPEC.md#6.5.7",
+    "fields": [
+      {
+        "name": "profile_id",
+        "type": "string",
+        "required": false,
+        "constraints": "已存 Profile ID"
+      },
+      {
+        "name": "host",
+        "type": "string",
+        "required": false,
+        "constraints": "SSH 堡垒机主机"
+      },
+      {
+        "name": "port",
+        "type": "number",
+        "required": false,
+        "constraints": "SSH 端口 (默认 22)"
+      },
+      {
+        "name": "username",
+        "type": "string",
+        "required": false,
+        "constraints": "SSH 登录用户"
+      },
+      {
+        "name": "privateKey",
+        "type": "string",
+        "required": false,
+        "constraints": "OpenSSH 私钥文本"
+      },
+      {
+        "name": "hostFingerprintSha256",
+        "type": "string",
+        "required": false,
+        "constraints": "预期 SHA-256 主机公钥指纹 (防中间人)"
+      }
+    ]
+  },
+  "ResetPasswordPayload": {
+    "source": "API_CONTRACT_SPEC.md#6.3.5",
+    "fields": [
+      {
+        "name": "newTemporaryPassword",
+        "type": "string",
+        "required": false,
+        "constraints": "由服务端自动生成 | 8~64 字符，须含大小写字母、数字及特殊字符 | 指定临时密码；缺省时服务端生成 16 位强随机凭证"
+      },
+      {
+        "name": "mustChangePassword",
+        "type": "boolean",
+        "required": false,
+        "constraints": "`true` | 布尔值 | 用户首次以此密码登录时是否强制重置密码"
+      },
+      {
+        "name": "version",
+        "type": "number",
+        "required": true,
+        "constraints": "- | 当前读取到的用户主记录版本号 | 乐观锁版本号"
+      }
+    ]
+  },
+  "DownloadQuery": {
+    "source": "API_CONTRACT_SPEC.md#6.8.4",
+    "fields": [
+      {
+        "name": "ticket",
+        "type": "string",
+        "required": true,
+        "constraints": "导出申请时获取的 5 分钟签名 Ticket"
+      }
+    ]
+  }
+}

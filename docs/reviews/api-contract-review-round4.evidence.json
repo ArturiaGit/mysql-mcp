@@ -1,0 +1,368 @@
+{
+  "review_date": "2026-11-09",
+  "scope": [
+    "API-R1-03: timestamp refresh and method-specific L3 exemption",
+    "API-R1-05: updateUserStatus/updateUserRoles CAS"
+  ],
+  "inputs": [
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "bytes": 153192,
+      "sha256": "1945A5E2B3DB891534DDE06121D0DF93FF4A56B5D7B2EC64E29882E77E34EFBE"
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "bytes": 231349,
+      "sha256": "182C1149CB230A5B6E9143C4248E0A59FB276B8E426B9D3A62D553440D7C1C7D"
+    },
+    {
+      "path": "docs/reviews/API_CONTRACT_REVIEW_ROUND3.md",
+      "bytes": 10414,
+      "sha256": "4FAEB411AC5808184E9B2F68CFEA4D3C5AD1DCC1B0CB0B969E8ED1AF9D2F5F67"
+    }
+  ],
+  "static_observations": {
+    "backend_password_change_step": "  1. 在同一个元数据库事务内：更新 `password_hash`、置 `must_change_password = 0`、更新 `password_updated_at = NOW()`、递增 **`auth_version = auth_version + 1`**、递增 **`version = version + 1`**，并写入 `sys_user_approvals` 审计记录；",
+    "timestamp_refresh_present": true,
+    "policy_not_public": true,
+    "policy_in_path_only_l3_allowlist": false,
+    "guard_checks_request_method": true,
+    "api_requires_get_l2_put_l4": true
+  },
+  "verification_boundary": {
+    "guard": "Actual documented guard, imports/export and TS syntax removed; AppError stand-in, fixed Date.now.",
+    "cas": "Actual documented UserService and withTransaction; in-memory SQL/transaction adapter, no actual DB locking or concurrent scheduling.",
+    "fixed_time_utc": "2026-11-09T00:00:00.000Z",
+    "real_http_mysql_integration": false,
+    "full_build_or_semantic_typecheck": false
+  },
+  "guard_probes": [
+    {
+      "name": "expired_business",
+      "method": "GET",
+      "route": "/api/v1/pats",
+      "account": "expired",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "matches_expected": true
+    },
+    {
+      "name": "expired_change_password",
+      "method": "POST",
+      "route": "/api/v1/auth/change-password",
+      "account": "expired",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "matches_expected": true
+    },
+    {
+      "name": "expired_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "expired",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "matches_expected": true
+    },
+    {
+      "name": "anonymous_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "anonymous",
+      "expected": "ERR_AUTH_UNAUTHORIZED",
+      "actual": "ERR_AUTH_UNAUTHORIZED",
+      "matches_expected": true
+    },
+    {
+      "name": "pending_policy_get",
+      "method": "GET",
+      "route": "/api/v1/auth/password-policy",
+      "account": "pending",
+      "expected": "ERR_AUTH_ACCOUNT_PENDING",
+      "actual": "ERR_AUTH_ACCOUNT_PENDING",
+      "matches_expected": true
+    },
+    {
+      "name": "expired_policy_put",
+      "method": "PUT",
+      "route": "/api/v1/auth/password-policy",
+      "account": "expired",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "matches_expected": true
+    },
+    {
+      "name": "forced_change_policy_put",
+      "method": "PUT",
+      "route": "/api/v1/auth/password-policy",
+      "account": "forced",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "matches_expected": true
+    },
+    {
+      "name": "fresh_policy_put",
+      "method": "PUT",
+      "route": "/api/v1/auth/password-policy",
+      "account": "fresh",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "matches_expected": true
+    }
+  ],
+  "cas_probes": [
+    {
+      "method": "updateUserStatus",
+      "stale": false,
+      "expected": "SUCCESS",
+      "actual": "SUCCESS",
+      "checks": {
+        "version_incremented_once": true,
+        "mutation_applied": true,
+        "audit_committed": true,
+        "commit_without_rollback": true,
+        "connection_released": true
+      },
+      "matches_expected": true,
+      "state": {
+        "version": 2,
+        "authVersion": 8,
+        "status": "DISABLED",
+        "roles": [
+          "10"
+        ],
+        "audit": [
+          [
+            "1001",
+            "Changed user status to DISABLED",
+            "9999"
+          ]
+        ]
+      },
+      "events": [
+        "begin",
+        "commit",
+        "release",
+        "invalidate",
+        "cancel",
+        "reload"
+      ],
+      "queries": [
+        {
+          "sql": "SELECT u.id FROM sys_users u INNER JOIN sys_user_roles ur ON u.id = ur.user_id INNER JOIN sys_roles r ON ur.role_id = r.id WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE' FOR UPDATE",
+          "args": []
+        },
+        {
+          "sql": "UPDATE sys_users SET status = ?, auth_version = auth_version + 1, version = version + 1 WHERE id = ? AND version = ?",
+          "args": [
+            "DISABLED",
+            "1001",
+            1
+          ]
+        },
+        {
+          "sql": "INSERT INTO sys_user_approvals (user_id, action, reason, operator_id) VALUES (?, 'STATUS_CHANGE', ?, ?)",
+          "args": [
+            "1001",
+            "Changed user status to DISABLED",
+            "9999"
+          ]
+        }
+      ]
+    },
+    {
+      "method": "updateUserStatus",
+      "stale": true,
+      "expected": "ERR_CONCURRENCY_CONFLICT",
+      "actual": "ERR_CONCURRENCY_CONFLICT",
+      "checks": {
+        "error_is_409": true,
+        "state_unchanged": true,
+        "rollback_without_commit": true,
+        "no_post_commit_side_effects": true,
+        "connection_released": true
+      },
+      "matches_expected": true,
+      "state": {
+        "version": 2,
+        "authVersion": 7,
+        "status": "ACTIVE",
+        "roles": [
+          "10"
+        ],
+        "audit": []
+      },
+      "events": [
+        "begin",
+        "rollback",
+        "release"
+      ],
+      "queries": [
+        {
+          "sql": "SELECT u.id FROM sys_users u INNER JOIN sys_user_roles ur ON u.id = ur.user_id INNER JOIN sys_roles r ON ur.role_id = r.id WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE' FOR UPDATE",
+          "args": []
+        },
+        {
+          "sql": "UPDATE sys_users SET status = ?, auth_version = auth_version + 1, version = version + 1 WHERE id = ? AND version = ?",
+          "args": [
+            "DISABLED",
+            "1001",
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "method": "updateUserRoles",
+      "stale": false,
+      "expected": "SUCCESS",
+      "actual": "SUCCESS",
+      "checks": {
+        "version_incremented_once": true,
+        "mutation_applied": true,
+        "audit_committed": true,
+        "commit_without_rollback": true,
+        "connection_released": true
+      },
+      "matches_expected": true,
+      "state": {
+        "version": 2,
+        "authVersion": 8,
+        "status": "ACTIVE",
+        "roles": [
+          "20"
+        ],
+        "audit": [
+          [
+            "1001",
+            "Updated roles to [20]",
+            "9999"
+          ]
+        ]
+      },
+      "events": [
+        "begin",
+        "commit",
+        "release",
+        "invalidate",
+        "cancel",
+        "reload"
+      ],
+      "queries": [
+        {
+          "sql": "SELECT id FROM sys_roles WHERE role_name = 'SUPER_ADMIN' LIMIT 1",
+          "args": []
+        },
+        {
+          "sql": "SELECT u.id FROM sys_users u INNER JOIN sys_user_roles ur ON u.id = ur.user_id INNER JOIN sys_roles r ON ur.role_id = r.id WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE' FOR UPDATE",
+          "args": []
+        },
+        {
+          "sql": "DELETE FROM sys_user_roles WHERE user_id = ?",
+          "args": [
+            "1001"
+          ]
+        },
+        {
+          "sql": "INSERT INTO sys_user_roles (user_id, role_id) VALUES ?",
+          "args": [
+            [
+              [
+                "1001",
+                "20"
+              ]
+            ]
+          ]
+        },
+        {
+          "sql": "UPDATE sys_users SET auth_version = auth_version + 1, version = version + 1 WHERE id = ? AND version = ?",
+          "args": [
+            "1001",
+            1
+          ]
+        },
+        {
+          "sql": "INSERT INTO sys_user_approvals (user_id, action, reason, operator_id) VALUES (?, 'ROLE_CHANGE', ?, ?)",
+          "args": [
+            "1001",
+            "Updated roles to [20]",
+            "9999"
+          ]
+        }
+      ]
+    },
+    {
+      "method": "updateUserRoles",
+      "stale": true,
+      "expected": "ERR_CONCURRENCY_CONFLICT",
+      "actual": "ERR_CONCURRENCY_CONFLICT",
+      "checks": {
+        "error_is_409": true,
+        "state_unchanged": true,
+        "rollback_without_commit": true,
+        "no_post_commit_side_effects": true,
+        "connection_released": true
+      },
+      "matches_expected": true,
+      "state": {
+        "version": 2,
+        "authVersion": 7,
+        "status": "ACTIVE",
+        "roles": [
+          "10"
+        ],
+        "audit": []
+      },
+      "events": [
+        "begin",
+        "rollback",
+        "release"
+      ],
+      "queries": [
+        {
+          "sql": "SELECT id FROM sys_roles WHERE role_name = 'SUPER_ADMIN' LIMIT 1",
+          "args": []
+        },
+        {
+          "sql": "SELECT u.id FROM sys_users u INNER JOIN sys_user_roles ur ON u.id = ur.user_id INNER JOIN sys_roles r ON ur.role_id = r.id WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE' FOR UPDATE",
+          "args": []
+        },
+        {
+          "sql": "DELETE FROM sys_user_roles WHERE user_id = ?",
+          "args": [
+            "1001"
+          ]
+        },
+        {
+          "sql": "INSERT INTO sys_user_roles (user_id, role_id) VALUES ?",
+          "args": [
+            [
+              [
+                "1001",
+                "20"
+              ]
+            ]
+          ]
+        },
+        {
+          "sql": "UPDATE sys_users SET auth_version = auth_version + 1, version = version + 1 WHERE id = ? AND version = ?",
+          "args": [
+            "1001",
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "guard_observations": 8,
+    "guard_expectations_met": 8,
+    "cas_observations": 4,
+    "cas_expectations_met": 4,
+    "recorded_review_decisions_not_automated_proofs": {
+      "API-R1-03": "partially_resolved_method_specific_L3_exemption_missing",
+      "API-R1-05": "resolved_at_document_level"
+    },
+    "protected_inputs_and_prior_review_artifacts_unchanged_during_run": true
+  }
+}

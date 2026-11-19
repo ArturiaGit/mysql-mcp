@@ -1,0 +1,114 @@
+{
+  "review_date": "2026-11-09",
+  "scope": [
+    "API-R1-02",
+    "API-R1-03",
+    "API-R1-04",
+    "API-R1-05",
+    "API-R1-12"
+  ],
+  "verification_kind": "static_review_and_five_isolated_documented_guard_probes",
+  "integration_tests_executed": false,
+  "inputs": [
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "bytes": 139827,
+      "lines": 2384,
+      "sha256": "6E92754621C47E82278099E6EE0B1E6CCBCED4B7569C47CEE9E8ABCC92872DDD"
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "bytes": 231009,
+      "lines": 5196,
+      "sha256": "35A6235E07EF3B3BF8253C5DDF1F71249EB7E4E1C8F249390880E2C5A2B327E4"
+    },
+    {
+      "path": "docs/reviews/API_CONTRACT_REVIEW_ROUND2.md",
+      "bytes": 15237,
+      "lines": 155,
+      "sha256": "D58FBC14797F18B23159A8D3FDAF390C11E92FA4856B129D822D857C98EAD4BA"
+    }
+  ],
+  "observations": {
+    "contract_matches_generated_parts": true,
+    "tls_definition": "export interface TlsConfig {\r\n    enabled: boolean;\r\n    ca_cert?: string | null;       // 自定义 PEM 格式 CA 证书文本；为 null 或缺省时使用系统标准根 CA\r\n  }",
+    "migration_sql": "-- 步骤 1：增加版本列与密码字段 (允许 NULL 以支持存量平滑回填)\n   ALTER TABLE `sys_users` \n     ADD COLUMN `version` INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '乐观锁版本号',\n     ADD COLUMN `password_updated_at` DATETIME DEFAULT NULL COMMENT '密码最后修改时间',\n     ADD COLUMN `password_expires_days` INT DEFAULT 90 COMMENT '密码有效期天数 (30-180，NULL表示永不过期)';\n\n   -- 步骤 2：存量历史数据平滑回填，起算点设定为用户创建时间 created_at\n   UPDATE `sys_users` \n   SET `password_updated_at` = `created_at`, `password_expires_days` = 90 \n   WHERE `password_updated_at` IS NULL;\n\n   -- 步骤 3：收紧非空约束与自动默认值\n   ALTER TABLE `sys_users` \n     MODIFY COLUMN `password_updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '密码最后修改时间';",
+    "backend_password_change_mentions_password_updated_at": true,
+    "password_policy_in_public_paths": false,
+    "backend_user_table_has_edit_version": true,
+    "user_service_accepts_expected_version": true,
+    "user_service_has_version_where_predicate": true,
+    "user_service_increments_edit_version": true,
+    "approval_accept_statement": "UPDATE sys_user_approvals \n  SET action = 'APPROVE', operator_id = ? \n  WHERE id = ? AND action IN ('SUBMIT', 'RESUBMIT');",
+    "approval_reject_statement": "UPDATE sys_user_approvals \n  SET action = 'REJECT', reason = ?, operator_id = ? \n  WHERE id = ? AND action IN ('SUBMIT', 'RESUBMIT');",
+    "role_update_rules": [
+      "- **功能说明**：全量更新角色策略参数。校验 `version` (409 CAS)。更新成功后递增系统 `globalPolicyVersion`，使排队快照在二次核验时触发策略重载。",
+      "- **不可变字段确定性规则**：`role_name` 属于不可变属性。若请求体试图变更其值（即传入值与数据库已存值不一致），服务端**将严格阻断并返回 `400 ERR_ROLE_IMMUTABLE_FIELD`**；若传入值与数据库已存值完全相同则放行。",
+      "- **缺省与增量更新语义规范**：更新采用**白名单字段增量合并更新 (Partial Patch on Allowed Fields)**。请求体中未提供的可选字段（缺省/未传）一律视为保留当前已存原值；传有效非空值表示更新覆盖；传 `null` 表示清空允许为空的字段（如 `description`）；未知字段返回 `400 ERR_VALIDATION_FAILED`。",
+      "- **跨字段校验规则**：更新后的参数必须满足 **`default_limit <= max_limit`**。"
+    ]
+  },
+  "guard_probe_constraints": {
+    "fixed_time_utc": "2026-11-09T00:00:00.000Z",
+    "source": "backend §5.5 guards.ts code block",
+    "modifications": "remove imports/export, erase TS-only syntax, supply AppError stand-in and fixed Date.now; guard logic unchanged",
+    "actual_http_or_database_used": false
+  },
+  "guard_probes": [
+    {
+      "name": "expired_business_is_blocked_control",
+      "route": "/api/v1/pats",
+      "expected": "ERR_MUST_CHANGE_PASSWORD",
+      "actual": "ERR_MUST_CHANGE_PASSWORD",
+      "matches_expected": true
+    },
+    {
+      "name": "expired_change_password_is_allowed_control",
+      "route": "/api/v1/auth/change-password",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "matches_expected": true
+    },
+    {
+      "name": "expired_password_policy_is_allowed",
+      "route": "/api/v1/auth/password-policy",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "matches_expected": true
+    },
+    {
+      "name": "password_policy_still_requires_session_control",
+      "route": "/api/v1/auth/password-policy",
+      "expected": "ERR_AUTH_UNAUTHORIZED",
+      "actual": "ERR_AUTH_UNAUTHORIZED",
+      "matches_expected": true
+    },
+    {
+      "name": "password_policy_still_requires_active_control",
+      "route": "/api/v1/auth/password-policy",
+      "expected": "ERR_AUTH_ACCOUNT_PENDING",
+      "actual": "ERR_AUTH_ACCOUNT_PENDING",
+      "matches_expected": true
+    }
+  ],
+  "recorded_review_decisions_not_automated_proofs": {
+    "API-R1-02": "substantive_rules_resolved",
+    "API-R1-03": "partially_resolved",
+    "API-R1-04": "substantive_storage_condition_resolved",
+    "API-R1-05": "partially_resolved",
+    "API-R1-12": "resolved_at_document_level"
+  },
+  "summary": {
+    "scoped_items": 5,
+    "substantively_resolved": 3,
+    "partially_resolved": 2,
+    "remaining_p1": [
+      "API-R1-03"
+    ],
+    "remaining_p2": [
+      "API-R1-05"
+    ],
+    "guard_observations": 5,
+    "guard_expectations_met": 5
+  }
+}

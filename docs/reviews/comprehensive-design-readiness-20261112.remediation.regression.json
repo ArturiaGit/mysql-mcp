@@ -1,0 +1,3090 @@
+{
+  "date": "2026-11-12",
+  "timezone": "Asia/Shanghai",
+  "command": [
+    "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-design-review-20261108\\r2-node22\\node_modules\\node\\bin\\node.exe",
+    "docs/reviews/database-design-review-round2.repro.cjs",
+    "--historical",
+    "--typecheck"
+  ],
+  "exitCode": 0,
+  "mirror": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-readiness-regression-9k2n634h",
+  "historicalMaterialsUnchanged": true,
+  "adaptations": [
+    "CR-01: follow the canonical SQL reference instead of removed embedded DDL",
+    "CR-10: extract ProfileReadDTO (ProfileDTO is now its compatibility alias); ID assertions unchanged"
+  ],
+  "sources": [
+    {
+      "path": "docs/API_CONTRACT_SPEC.md",
+      "sha256": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e"
+    },
+    {
+      "path": "docs/ARCHITECTURE_SPEC.md",
+      "sha256": "21614af8cadc8f92172779cd6106d12009084ed8b4b2ba5fbcbc738cbc4a4d22"
+    },
+    {
+      "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+      "sha256": "a81c356a5d59536225437d9e48b1a31df5446612c5d76db6e2435c13da5d54c3"
+    },
+    {
+      "path": "docs/DATABASE_DESIGN_SPEC.md",
+      "sha256": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd"
+    },
+    {
+      "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+      "sha256": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0"
+    },
+    {
+      "path": "docs/LAYOUT_SPEC.md",
+      "sha256": "b048f3da76d83b289c9ff30d3dfee3968063cf2ba48ba4a7052b7e1f9c909d71"
+    },
+    {
+      "path": "docs/UI_DESIGN_SPEC.md",
+      "sha256": "21c041b9f2c677662f3e8eace6dbfb9e239b7ece0ce0f09c8ba7e1853e70eb31"
+    },
+    {
+      "path": "docs/sql/001_metadata_schema.sql",
+      "sha256": "655fae957076927283141b15cd7d90afb77e9bc6b278b3ef70f7d76fe6e6f7c2"
+    }
+  ],
+  "boundaries": {
+    "realMysql": false,
+    "realHttp": false,
+    "browser": false,
+    "adaptedHistoricalRunner": true
+  },
+  "results": {
+    "database-design-review-round2.evidence.json": {
+      "review": "database-design-round2-bounded",
+      "date": "2026-11-12",
+      "timezone": "Asia/Shanghai",
+      "runtime": "v22.22.0",
+      "scope": [
+        "DB-R1-01",
+        "DB-R1-02",
+        "DB-R1-03",
+        "DB-R1-04",
+        "related policy and documentation regression"
+      ],
+      "sources": [
+        {
+          "path": "docs/ARCHITECTURE_SPEC.md",
+          "sha256": "21614af8cadc8f92172779cd6106d12009084ed8b4b2ba5fbcbc738cbc4a4d22",
+          "bytes": 97074,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "docs/BACKEND_ARCHITECTURE_SPEC.md",
+          "sha256": "a81c356a5d59536225437d9e48b1a31df5446612c5d76db6e2435c13da5d54c3",
+          "bytes": 243277,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "docs/FRONTEND_ARCHITECTURE_SPEC.md",
+          "sha256": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0",
+          "bytes": 105461,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "docs/API_CONTRACT_SPEC.md",
+          "sha256": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e",
+          "bytes": 153969,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "docs/DATABASE_DESIGN_SPEC.md",
+          "sha256": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd",
+          "bytes": 102984,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "docs/sql/001_metadata_schema.sql",
+          "sha256": "655fae957076927283141b15cd7d90afb77e9bc6b278b3ef70f7d76fe6e6f7c2",
+          "bytes": 20321,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "scripts/validate_database_design.py",
+          "sha256": "a3f483d92fadf83d975e3bf92da37b12fb83cbf8d65725000a96ec29251c9e97",
+          "bytes": 16795,
+          "unchangedSinceRound1": false
+        },
+        {
+          "path": "scripts/test_validate_database_design.py",
+          "sha256": "5b3279159197773e8b8f232a781961da3ef67d790795ef33b665f10c3dbea818",
+          "bytes": 2905,
+          "unchangedSinceRound1": null
+        }
+      ],
+      "observations": [
+        {
+          "name": "USER row mapping remains paired, absence is null",
+          "passed": true,
+          "actual": {
+            "row": {
+              "qpm_limit": 30,
+              "burst_capacity": 1
+            },
+            "mapped": {
+              "qpmLimit": 30,
+              "burstCapacity": 1
+            }
+          }
+        },
+        {
+          "name": "Independent quota/burst boundary grid and actual token-bucket rejection",
+          "passed": true,
+          "actual": {
+            "combinations": 24,
+            "finiteBucketCases": 18,
+            "results": [
+              {
+                "qpm": -1,
+                "userBurst": 1,
+                "globalBurst": 1,
+                "actualBurst": 1,
+                "finiteBucketChecked": false
+              },
+              {
+                "qpm": -1,
+                "userBurst": 1,
+                "globalBurst": 500,
+                "actualBurst": 1,
+                "finiteBucketChecked": false
+              },
+              {
+                "qpm": -1,
+                "userBurst": 20,
+                "globalBurst": 1,
+                "actualBurst": 20,
+                "finiteBucketChecked": false
+              },
+              {
+                "qpm": -1,
+                "userBurst": 20,
+                "globalBurst": 500,
+                "actualBurst": 20,
+                "finiteBucketChecked": false
+              },
+              {
+                "qpm": -1,
+                "userBurst": 500,
+                "globalBurst": 1,
+                "actualBurst": 500,
+                "finiteBucketChecked": false
+              },
+              {
+                "qpm": -1,
+                "userBurst": 500,
+                "globalBurst": 500,
+                "actualBurst": 500,
+                "finiteBucketChecked": false
+              },
+              {
+                "qpm": 1,
+                "userBurst": 1,
+                "globalBurst": 1,
+                "actualBurst": 1,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 1,
+                "userBurst": 1,
+                "globalBurst": 500,
+                "actualBurst": 1,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 1,
+                "userBurst": 20,
+                "globalBurst": 1,
+                "actualBurst": 20,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 1,
+                "userBurst": 20,
+                "globalBurst": 500,
+                "actualBurst": 20,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 1,
+                "userBurst": 500,
+                "globalBurst": 1,
+                "actualBurst": 500,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 1,
+                "userBurst": 500,
+                "globalBurst": 500,
+                "actualBurst": 500,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 30,
+                "userBurst": 1,
+                "globalBurst": 1,
+                "actualBurst": 1,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 30,
+                "userBurst": 1,
+                "globalBurst": 500,
+                "actualBurst": 1,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 30,
+                "userBurst": 20,
+                "globalBurst": 1,
+                "actualBurst": 20,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 30,
+                "userBurst": 20,
+                "globalBurst": 500,
+                "actualBurst": 20,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 30,
+                "userBurst": 500,
+                "globalBurst": 1,
+                "actualBurst": 500,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 30,
+                "userBurst": 500,
+                "globalBurst": 500,
+                "actualBurst": 500,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 10000,
+                "userBurst": 1,
+                "globalBurst": 1,
+                "actualBurst": 1,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 10000,
+                "userBurst": 1,
+                "globalBurst": 500,
+                "actualBurst": 1,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 10000,
+                "userBurst": 20,
+                "globalBurst": 1,
+                "actualBurst": 20,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 10000,
+                "userBurst": 20,
+                "globalBurst": 500,
+                "actualBurst": 20,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 10000,
+                "userBurst": 500,
+                "globalBurst": 1,
+                "actualBurst": 500,
+                "finiteBucketChecked": true
+              },
+              {
+                "qpm": 10000,
+                "userBurst": 500,
+                "globalBurst": 500,
+                "actualBurst": 500,
+                "finiteBucketChecked": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "Existing bucket shrinks after constructing a fresh updated snapshot",
+          "passed": true,
+          "actual": {
+            "freshQuotas": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 30,
+              "userBurstCapacity": 1,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            },
+            "automaticInvalidationTested": false
+          }
+        },
+        {
+          "name": "Remove coverage restores role QPM and GLOBAL burst; global changes do not replace role QPM",
+          "passed": true,
+          "actual": {
+            "before": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 60,
+              "userBurstCapacity": 500,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            },
+            "after": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 60,
+              "userBurstCapacity": 10,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            },
+            "signoffStillRequired": true
+          }
+        },
+        {
+          "name": "Role maximum, unlimited role, USER override, no-role deny and Profile protection retained",
+          "passed": true,
+          "actual": "Existing policy precedence, bounded Profile protection and string IDs preserved"
+        },
+        {
+          "name": "Corrected CSRF and USER route mappings match requested fixes",
+          "passed": true,
+          "actual": {
+            "csrf": "| `GET /api/v1/auth/csrf` | 内存CSRF/Session | 按需建立/复用CSRF seed并返回token；不注销Session；不撤销授权上下文；不写业务库 |",
+            "get": "| `GET /api/v1/rate-limits/users/:id` | sys_users、sys_rate_limits(USER) | 只读；返回已保存覆盖；无业务行时isCustom=false、revision=version=0、配额=null；不以历史counter回显revision；不写管理审计；不失效快照 |",
+            "put": "| `PUT /api/v1/rate-limits/users/:id` | sys_users、sys_rate_limit_revisions、sys_rate_limits(USER)、sys_user_approvals | 按§7.5锁序；USER revision CAS（兼容version别名）；rule/counter同事务更新；不以sys_users.version做CAS；不删除PAT；管理审计与提交后失效并重载QPM/burst |",
+            "delete": "| `DELETE /api/v1/rate-limits/users/:id` | sys_users、sys_rate_limit_revisions、sys_rate_limits(USER)、sys_user_approvals | 按§7.5锁序；USER revision CAS（兼容version别名）；仅删除USER规则；保留counter；不以sys_users.version做CAS；不删除PAT；不重置用户版本；管理审计与提交后失效并重载QPM/burst |"
+          }
+        },
+        {
+          "name": "Counterfactual controls detect global-only burst assignment and dropped mapping",
+          "passed": true,
+          "actual": {
+            "mutantsDetected": 2,
+            "note": "In-memory test controls only; no document edited and not new defects"
+          }
+        }
+      ],
+      "staticCheck": {
+        "stdout": "PASS: 1067 static/model assertions; 14 tables; 136 columns; 45 indexes; 7 foreign keys; 47 mapped endpoints; 3 JSON examples.\r\nNOT RUN: MySQL parsing/execution, CHECK enforcement, multi-connection concurrency, migration, restore, or performance tests.",
+        "stderr": ""
+      },
+      "mutationTests": {
+        "stdout": "",
+        "stderr": "test_current_matrix (__main__.ApiSemanticValidationTests.test_current_matrix) ... ok\r\ntest_rejects_all_original_bad_rows (__main__.ApiSemanticValidationTests.test_rejects_all_original_bad_rows) ... ok\r\ntest_semantic_mutations (__main__.ApiSemanticValidationTests.test_semantic_mutations) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 3 tests in 0.003s\r\n\r\nOK"
+      },
+      "suites": [
+        {
+          "script": "docs/reviews/database-design-remediation.test.cjs",
+          "evidenceFile": "database-design-review-round2.remediation.evidence.json",
+          "summary": {
+            "total": 15,
+            "passed": 15
+          },
+          "stderr": "(node:18560) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time\n(Use `node --trace-warnings ...` to show where the warning was created)",
+          "adaptation": "Only evidence output basename redirected; assertions unchanged"
+        },
+        {
+          "script": "docs/reviews/cross-design-review-round4.repro.cjs",
+          "evidenceFile": "database-design-review-round2.cross-regression.evidence.json",
+          "summary": {
+            "total": 96,
+            "holds": 96,
+            "violated": 0,
+            "closedIssues": 14,
+            "remainingIssues": 0
+          },
+          "stderr": "",
+          "adaptation": "Only evidence output basename redirected; assertions unchanged"
+        },
+        {
+          "script": "docs/reviews/backend-design-review-round8.repro.cjs",
+          "evidenceFile": "database-design-review-round2.backend-regression.evidence.json",
+          "summary": {
+            "total": 4,
+            "holds": 4,
+            "violated": 0
+          },
+          "adaptation": "Existing REVIEW_EVIDENCE_FILE override only"
+        }
+      ],
+      "closure": [
+        {
+          "id": "DB-R1-01",
+          "documentAndSnippet": "closed",
+          "integration": "pending"
+        },
+        {
+          "id": "DB-R1-02",
+          "documentConflict": "closed",
+          "productAndInterfaceSignoff": "pending"
+        },
+        {
+          "id": "DB-R1-03",
+          "documentMapping": "closed",
+          "httpTest": "pending"
+        },
+        {
+          "id": "DB-R1-04",
+          "documentMapping": "closed",
+          "mysqlConcurrency": "pending"
+        }
+      ],
+      "newFindings": [],
+      "protectedFileCount": 172,
+      "protectedFilesUnchanged": true,
+      "boundaries": {
+        "realMysql": false,
+        "realRepository": false,
+        "automaticCacheInvalidation": false,
+        "realHttp": false,
+        "browser": false,
+        "wholeProjectBuild": false,
+        "historicalFull73ProbeSuite": false,
+        "localSshLoopback": true,
+        "baselineSignoffVerified": false,
+        "methodology": "Complete current source blocks, type erasure only; own quota grid plus historical tests with evidence-path-only redirects"
+      },
+      "summary": {
+        "independentGroups": 7,
+        "passedIndependentGroups": 7,
+        "closedAtDocumentLevel": 4,
+        "newP1": 0,
+        "newP2": 0
+      }
+    },
+    "database-design-review-round2.remediation.evidence.json": {
+      "date": "2026-11-12",
+      "timezone": "Asia/Shanghai",
+      "runtime": "v22.22.0",
+      "scope": "Document code, mapping fixture and token bucket; not actual Repository or HTTP handlers",
+      "boundaries": {
+        "realMySQL": false,
+        "realRepository": false,
+        "realHTTP": false,
+        "automaticCacheInvalidation": false,
+        "sourceCode": "complete current TypeScript blocks with native type erasure",
+        "clock": "frozen to test burst deterministically"
+      },
+      "sources": {
+        "docs/DATABASE_DESIGN_SPEC.md": "93190c64f157cbc46781664b3a426886ad07330c429e2d1782552e8e2b3f10dd",
+        "docs/BACKEND_ARCHITECTURE_SPEC.md": "a81c356a5d59536225437d9e48b1a31df5446612c5d76db6e2435c13da5d54c3",
+        "docs/API_CONTRACT_SPEC.md": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e",
+        "docs/FRONTEND_ARCHITECTURE_SPEC.md": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0",
+        "docs/sql/001_metadata_schema.sql": "655fae957076927283141b15cd7d90afb77e9bc6b278b3ef70f7d76fe6e6f7c2",
+        "scripts/validate_database_design.py": "a3f483d92fadf83d975e3bf92da37b12fb83cbf8d65725000a96ec29251c9e97"
+      },
+      "sourceHashesUnchanged": true,
+      "observations": [
+        {
+          "id": "DB-R1-01 USER=1/GLOBAL=500 reaches bucket",
+          "passed": true,
+          "actual": {
+            "defaultLimit": 5,
+            "maxLimit": 10,
+            "maxTimeoutMs": 1000,
+            "userQpmLimit": 30,
+            "userBurstCapacity": 1,
+            "maxInflightConcurrency": 2,
+            "loopBreakerThreshold": 3,
+            "loopBreakerWindowSec": 30
+          }
+        },
+        {
+          "id": "DB-R1-01 USER=20/GLOBAL=10 is not min-capped",
+          "passed": true,
+          "actual": {
+            "defaultLimit": 5,
+            "maxLimit": 10,
+            "maxTimeoutMs": 1000,
+            "userQpmLimit": 30,
+            "userBurstCapacity": 20,
+            "maxInflightConcurrency": 2,
+            "loopBreakerThreshold": 3,
+            "loopBreakerWindowSec": 30
+          }
+        },
+        {
+          "id": "DB-R1-01 update reloads both values and clamps existing bucket",
+          "passed": true,
+          "actual": {
+            "before": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 60,
+              "userBurstCapacity": 20,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            },
+            "after": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 30,
+              "userBurstCapacity": 1,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            }
+          }
+        },
+        {
+          "id": "DB-R1-01 deletion reloads role QPM and GLOBAL burst",
+          "passed": true,
+          "actual": {
+            "before": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 30,
+              "userBurstCapacity": 1,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            },
+            "after": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 60,
+              "userBurstCapacity": 500,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            }
+          }
+        },
+        {
+          "id": "DB-R1-02 GLOBAL QPM change does not replace role quota",
+          "passed": true,
+          "actual": {
+            "before": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 60,
+              "userBurstCapacity": 10,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            },
+            "after": {
+              "defaultLimit": 5,
+              "maxLimit": 10,
+              "maxTimeoutMs": 1000,
+              "userQpmLimit": 60,
+              "userBurstCapacity": 20,
+              "maxInflightConcurrency": 2,
+              "loopBreakerThreshold": 3,
+              "loopBreakerWindowSec": 30
+            }
+          }
+        },
+        {
+          "id": "DB-R1-02 multi-role maximum without inflating smaller quotas",
+          "passed": true,
+          "actual": {
+            "defaultLimit": 5,
+            "maxLimit": 10,
+            "maxTimeoutMs": 1000,
+            "userQpmLimit": 30,
+            "userBurstCapacity": 10,
+            "maxInflightConcurrency": 2,
+            "loopBreakerThreshold": 3,
+            "loopBreakerWindowSec": 30
+          }
+        },
+        {
+          "id": "DB-R1-02 unlimited role and USER override priority",
+          "passed": true,
+          "actual": "unlimited role wins among roles; USER still has higher priority"
+        },
+        {
+          "id": "Profile protection remains for unlimited USER QPM",
+          "passed": true,
+          "actual": "second same-instant request blocked by Profile bucket"
+        },
+        {
+          "id": "Empty roles remain default deny",
+          "passed": true,
+          "actual": "403"
+        },
+        {
+          "id": "Compatibility fallback is GLOBAL only without usable role QPM",
+          "passed": true,
+          "actual": "synthetic legacy fixture; valid current database roles always have QPM"
+        },
+        {
+          "id": "USER burst does not override GLOBAL breaker settings",
+          "passed": true,
+          "actual": {
+            "defaultLimit": 5,
+            "maxLimit": 10,
+            "maxTimeoutMs": 1000,
+            "userQpmLimit": 30,
+            "userBurstCapacity": 1,
+            "maxInflightConcurrency": 2,
+            "loopBreakerThreshold": 3,
+            "loopBreakerWindowSec": 30
+          }
+        },
+        {
+          "id": "Explicit revised API and frontend inheritance contracts",
+          "passed": true,
+          "actual": "configuration DTO remains nullable; dashboard displays effective quota"
+        },
+        {
+          "id": "Original static checks plus critical route semantics",
+          "passed": true,
+          "actual": "PASS: 1067 static/model assertions; 14 tables; 136 columns; 45 indexes; 7 foreign keys; 47 mapped endpoints; 3 JSON examples.\r\nNOT RUN: MySQL parsing/execution, CHECK enforcement, multi-connection concurrency, migration, restore, or performance tests."
+        },
+        {
+          "id": "Generation fragments match all three changed specifications",
+          "passed": true,
+          "actual": [
+            {
+              "doc": "BACKEND_ARCHITECTURE_SPEC.md",
+              "matches": true
+            },
+            {
+              "doc": "API_CONTRACT_SPEC.md",
+              "matches": true
+            },
+            {
+              "doc": "FRONTEND_ARCHITECTURE_SPEC.md",
+              "matches": true
+            }
+          ]
+        },
+        {
+          "id": "Snapshot block strict TypeScript semantic check",
+          "passed": true,
+          "actual": {
+            "typescript": "5.9.3",
+            "diagnostics": [],
+            "adaptation": "Only AppError import replaced with typed stub; not a whole-project build"
+          }
+        }
+      ],
+      "summary": {
+        "total": 15,
+        "passed": 15
+      }
+    },
+    "database-design-review-round2.cross-regression.evidence.json": {
+      "review": "cross-design-round4-bounded",
+      "date": "2026-11-11",
+      "timezone": "Asia/Shanghai",
+      "runtime": "v22.22.0",
+      "typescript": "5.9.3",
+      "scope": [
+        "CR-01",
+        "CR-02",
+        "CR-03",
+        "CR-04",
+        "CR-05",
+        "CR-06",
+        "CR-07",
+        "CR-08",
+        "CR-09",
+        "CR-10",
+        "CR-11",
+        "CR-12",
+        "CR-13",
+        "CR-14"
+      ],
+      "ssh2PrimarySource": {
+        "package": "1.17.0",
+        "clientPath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-cross-review-20261111\\node_modules\\ssh2\\lib/client.js",
+        "hexDigestPresent": true
+      },
+      "sourceHashes": {
+        "ARCHITECTURE_SPEC.md": "21614af8cadc8f92172779cd6106d12009084ed8b4b2ba5fbcbc738cbc4a4d22",
+        "FRONTEND_ARCHITECTURE_SPEC.md": "78286bdaa2a5c6a98345f07b0802181ae3f33fd99b40d89e4bf0fe7f6029d1b0",
+        "BACKEND_ARCHITECTURE_SPEC.md": "a81c356a5d59536225437d9e48b1a31df5446612c5d76db6e2435c13da5d54c3",
+        "API_CONTRACT_SPEC.md": "34c00e059d1219c976185a3ff5c0a5b21076ec672e77b1d3c3e6346b828dcb2e"
+      },
+      "protectedInputsUnchanged": true,
+      "assembly": [
+        {
+          "file": "ARCHITECTURE_SPEC.md",
+          "parts": 8,
+          "exactTextMatch": true
+        },
+        {
+          "file": "FRONTEND_ARCHITECTURE_SPEC.md",
+          "parts": 11,
+          "exactTextMatch": true
+        },
+        {
+          "file": "BACKEND_ARCHITECTURE_SPEC.md",
+          "parts": 11,
+          "exactTextMatch": true
+        },
+        {
+          "file": "API_CONTRACT_SPEC.md",
+          "parts": 10,
+          "exactTextMatch": true
+        }
+      ],
+      "boundaries": {
+        "realMysql": false,
+        "realTLS": false,
+        "realSSH": "loopback ssh2 client/server only; no external service or DB target",
+        "realHttpServer": false,
+        "browser": false,
+        "wholeProjectBuild": false,
+        "full73ProbeSuite": false,
+        "changedAssertionsNotUsedAsIndependentProof": true,
+        "adaptations": [
+          "resolve TLS helper from documented exported pool module",
+          "inject actual documented SSH manager via new constructor parameter",
+          "model ssh2 hostHash callback as actual hex digest",
+          "require exact logout warning redirect"
+        ],
+        "additionalDependencies": {
+          "ssh2": "1.17.0",
+          "zod": "3.25.76"
+        }
+      },
+      "observations": [
+        {
+          "id": "ddl_no_duplicate_columns",
+          "issue": "CR-01",
+          "holds": true,
+          "actual": [],
+          "boundary": "document extraction"
+        },
+        {
+          "id": "ddl_original_missing_columns_restored",
+          "issue": "CR-01",
+          "holds": true,
+          "actual": {
+            "tables": 14,
+            "checkedColumns": {
+              "sys_users": [
+                "apply_reason",
+                "password_updated_at",
+                "password_expires_days",
+                "version"
+              ],
+              "sys_roles": [
+                "is_builtin"
+              ],
+              "sys_profiles": [
+                "lower_case_table_names"
+              ]
+            },
+            "missing": []
+          },
+          "boundary": "bounded to original duplicate/missing-column findings; not enforcing pre-existing unrelated column-width/default equality"
+        },
+        {
+          "id": "tls_disabled",
+          "issue": "CR-02",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 1
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": null,
+            "dns": [
+              "db.example.test"
+            ],
+            "decrypted": [],
+            "direct": [
+              {
+                "host": "203.0.113.10",
+                "port": 3306
+              }
+            ],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "mysql-stream",
+                "kind": "direct"
+              },
+              {
+                "event": "mysql-destroy"
+              }
+            ]
+          },
+          "boundary": "document-code; captured mysql2 option only"
+        },
+        {
+          "id": "tls_system_ca",
+          "issue": "CR-02",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 0
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true
+            },
+            "dns": [
+              "db.example.test"
+            ],
+            "decrypted": [],
+            "direct": [
+              {
+                "host": "203.0.113.10",
+                "port": 3306
+              }
+            ],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "mysql-stream",
+                "kind": "direct"
+              },
+              {
+                "event": "mysql-destroy"
+              }
+            ]
+          },
+          "boundary": "document-code; captured mysql2 option only"
+        },
+        {
+          "id": "tls_private_ca",
+          "issue": "CR-02",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 0
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true,
+              "ca": "PRIVATE_CA"
+            },
+            "dns": [
+              "db.example.test"
+            ],
+            "decrypted": [],
+            "direct": [
+              {
+                "host": "203.0.113.10",
+                "port": 3306
+              }
+            ],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "mysql-stream",
+                "kind": "direct"
+              },
+              {
+                "event": "mysql-destroy"
+              }
+            ]
+          },
+          "boundary": "document-code; captured mysql2 option only"
+        },
+        {
+          "id": "pool_tls_helper_resolves_in_module",
+          "issue": "CR-02",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "helperDeclaredOrImported": true,
+            "driverFactoryReached": true
+          },
+          "boundary": "separate CommonJS module; no cross-module global helper injected"
+        },
+        {
+          "id": "admin_tls_helper_resolves_in_module",
+          "issue": "CR-02",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "helperDeclaredOrImported": true,
+            "driverFactoryReached": true
+          },
+          "boundary": "separate CommonJS module with timer double; real documented helper not injected"
+        },
+        {
+          "id": "tls_clear_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "tls_ca_change_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "host_change_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "ssh_toggle_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "ssh_host_change_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "ssh_port_change_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "ssh_user_change_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "ssh_fingerprint_change_requires_reentry",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+              "message": "修改主机地址、端口、用户名、TLS 信任链或 SSH 堡垒机配置后进行连通性测试时，必须重新输入数据库密码。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "document-code; track rejection before decryption/DNS/driver creation"
+        },
+        {
+          "id": "unchanged_profile_reuses_credential",
+          "issue": "CR-03",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 0
+            },
+            "connections": 1,
+            "password": "SAVED_DB_SECRET",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true,
+              "ca": "PRIVATE_CA"
+            },
+            "dns": [
+              "db.example.test"
+            ],
+            "decrypted": [
+              "DB_CIPHER"
+            ],
+            "direct": [
+              {
+                "host": "203.0.113.10",
+                "port": 3306
+              }
+            ],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "mysql-stream",
+                "kind": "direct"
+              },
+              {
+                "event": "mysql-destroy"
+              }
+            ]
+          },
+          "boundary": "positive document-code control"
+        },
+        {
+          "id": "ssh_new_profile_actual_forward",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 1
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "actual documented connectivity service and ephemeral SSH manager; controlled driver and SSH event client; hex hash callback follows installed ssh2 source; no real network in this observation"
+        },
+        {
+          "id": "ssh_saved_profile_actual_forward",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 0
+            },
+            "connections": 1,
+            "password": "SAVED_DB_SECRET",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true,
+              "ca": "PRIVATE_CA"
+            },
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [
+              "DB_CIPHER",
+              "SSH_CIPHER"
+            ],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "decrypted-saved",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "actual documented connectivity service and ephemeral SSH manager; controlled driver and SSH event client; hex hash callback follows installed ssh2 source; no real network in this observation"
+        },
+        {
+          "id": "ssh_draft_profile_actual_forward",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 1
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true,
+              "ca": "PRIVATE_CA"
+            },
+            "dns": [
+              "db.example.test",
+              "new-bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "actual documented connectivity service and ephemeral SSH manager; controlled driver and SSH event client; hex hash callback follows installed ssh2 source; no real network in this observation"
+        },
+        {
+          "id": "ssh_hex_new_forward_control",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 1
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "controlled protocol adapter; unsupported raw-hex control diagnoses encoding mismatch and validates repaired forwarding/cleanup"
+        },
+        {
+          "id": "ssh_hex_saved_forward_control",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 0
+            },
+            "connections": 1,
+            "password": "SAVED_DB_SECRET",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true,
+              "ca": "PRIVATE_CA"
+            },
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [
+              "DB_CIPHER",
+              "SSH_CIPHER"
+            ],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "decrypted-saved",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "controlled protocol adapter; unsupported raw-hex control diagnoses encoding mismatch and validates repaired forwarding/cleanup"
+        },
+        {
+          "id": "ssh_hex_draft_forward_control",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": null,
+            "result": {
+              "reachable": true,
+              "latencyMs": 0
+            },
+            "connections": 1,
+            "password": "NEW",
+            "ssl": {
+              "rejectUnauthorized": true,
+              "verifyIdentity": true,
+              "ca": "PRIVATE_CA"
+            },
+            "dns": [
+              "db.example.test",
+              "new-bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "controlled protocol adapter; unsupported raw-hex control diagnoses encoding mismatch and validates repaired forwarding/cleanup"
+        },
+        {
+          "id": "ssh_wrong_host_key_rejected",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": null,
+              "message": "Host denied (verification failed)"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": false,
+                "observedHex": "0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            ]
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_bastion_ssrf_rejected",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_SSRF_PROHIBITED",
+              "message": "controlled denied host"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_target_ssrf_rejected",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_SSRF_PROHIBITED",
+              "message": "controlled denied host"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [
+              "db.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_missing_fingerprint_rejected",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_VALIDATION_FAILED",
+              "message": "启用 SSH 测试必须提供完整的 ssh_host、ssh_user 与 ssh_host_fingerprint_sha256。"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_manager_missing_fail_closed",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_INTERNAL_SERVER",
+              "message": "SSH tunnel requested for connectivity test, but SshTunnelManager is not configured."
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": []
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_forward_error_closes_client",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": "ERR_INTERNAL_SERVER",
+              "message": "SSH forwardOut to 203.0.113.10:3306 failed: controlled forward failure"
+            },
+            "result": null,
+            "connections": 0,
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_mysql_connect_error_closes_tunnel",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": null,
+              "message": "controlled MySQL connect failure"
+            },
+            "result": null,
+            "connections": 1,
+            "password": "NEW",
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "ssh_mysql_ping_error_closes_tunnel",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "error": {
+              "code": null,
+              "message": "controlled MySQL ping failure"
+            },
+            "result": null,
+            "connections": 1,
+            "password": "NEW",
+            "ssl": null,
+            "dns": [
+              "db.example.test",
+              "bastion.example.test"
+            ],
+            "decrypted": [],
+            "direct": [],
+            "bareSocketCount": 0,
+            "sshEvents": [
+              {
+                "event": "ssh-connect",
+                "host": "203.0.113.20",
+                "port": 22,
+                "username": "tunnel",
+                "keySource": "new",
+                "hostHash": "sha256"
+              },
+              {
+                "event": "host-verify",
+                "accepted": true,
+                "observedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f"
+              },
+              {
+                "event": "forward-out",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "mysql-stream",
+                "kind": "authenticated-ssh-forward"
+              },
+              {
+                "event": "mysql-destroy"
+              },
+              {
+                "event": "ssh-end"
+              }
+            ]
+          },
+          "boundary": "actual documented manager/service with controlled guard/SSH/MySQL error events"
+        },
+        {
+          "id": "real_ssh_openssh_fingerprint_accepted",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "openssh",
+            "mode": "ephemeral",
+            "fingerprint": "SHA256:V+T+NKRHVbV+//GBCKXdv3A5wjsfr8/vqrXSjIj2T5M",
+            "error": null,
+            "channelReturned": true,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              },
+              {
+                "event": "server-ready"
+              },
+              {
+                "event": "server-forward-accepted",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "returned-channel",
+                "constructor": "Channel"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_hex_fingerprint_diagnostic_control",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "hex",
+            "mode": "ephemeral",
+            "fingerprint": "57e4fe34a44755b57efff18108a5ddbf7039c23b1fafcfefaab5d28c88f64f93",
+            "error": null,
+            "channelReturned": true,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              },
+              {
+                "event": "server-ready"
+              },
+              {
+                "event": "server-forward-accepted",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "returned-channel",
+                "constructor": "Channel"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "fingerprint_parse_canonical_openssh",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:QfiY1Zr++mlHQ7h/aX+akaWMha0pPjzXgM3GKxtHUh8",
+            "valid": true,
+            "parsedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_padded_openssh",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:QfiY1Zr++mlHQ7h/aX+akaWMha0pPjzXgM3GKxtHUh8=",
+            "valid": true,
+            "parsedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_hex",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "valid": true,
+            "parsedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_uppercase_hex",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "41F898D59AFEFA694743B87F697F9A91A58C85AD293E3CD780CDC62B1B47521F",
+            "valid": true,
+            "parsedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_trimmed_openssh",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "  SHA256:QfiY1Zr++mlHQ7h/aX+akaWMha0pPjzXgM3GKxtHUh8  ",
+            "valid": true,
+            "parsedHex": "41f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_missing",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": null,
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_null",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": null,
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_empty",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_whitespace",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "   ",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_wrong_prefix",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA1:QfiY1Zr++mlHQ7h/aX+akaWMha0pPjzXgM3GKxtHUh8",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_hex_short",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "1f898d59afefa694743b87f697f9a91a58c85ad293e3cd780cdc62b1b47521f",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_hex_nonhex",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_base64_short",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_base64_long",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_base64_bad_character",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_base64_noncanonical_bits",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_double_padding",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": "SHA256:QfiY1Zr++mlHQ7h/aX+akaWMha0pPjzXgM3GKxtHUh8==",
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_parse_nonstring",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "input": 42,
+            "valid": false,
+            "parsedHex": null,
+            "thrown": null
+          },
+          "boundary": "actual parser; deterministic SHA-256 digest; malformed input must reject without throwing"
+        },
+        {
+          "id": "fingerprint_verify_correct",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "observed": true,
+            "wanted": true,
+            "thrown": null
+          },
+          "boundary": "actual shared verifier: matching, unequal, missing and malformed digests"
+        },
+        {
+          "id": "fingerprint_verify_mismatched",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "observed": false,
+            "wanted": false,
+            "thrown": null
+          },
+          "boundary": "actual shared verifier: matching, unequal, missing and malformed digests"
+        },
+        {
+          "id": "fingerprint_verify_malformed_driver",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "observed": false,
+            "wanted": false,
+            "thrown": null
+          },
+          "boundary": "actual shared verifier: matching, unequal, missing and malformed digests"
+        },
+        {
+          "id": "fingerprint_verify_missing_expected",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "observed": false,
+            "wanted": false,
+            "thrown": null
+          },
+          "boundary": "actual shared verifier: matching, unequal, missing and malformed digests"
+        },
+        {
+          "id": "fingerprint_verify_malformed_expected",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "observed": false,
+            "wanted": false,
+            "thrown": null
+          },
+          "boundary": "actual shared verifier: matching, unequal, missing and malformed digests"
+        },
+        {
+          "id": "real_ssh_ephemeral_mismatch_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "mismatch",
+            "mode": "ephemeral",
+            "fingerprint": "SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "error": {
+              "code": null,
+              "message": "Host denied (verification failed)"
+            },
+            "channelReturned": false,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_ephemeral_missing_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "missing",
+            "mode": "ephemeral",
+            "fingerprint": null,
+            "error": {
+              "code": "ERR_VALIDATION_FAILED",
+              "message": "SSH host_fingerprint_sha256 is required for Fail-Closed verification."
+            },
+            "channelReturned": false,
+            "events": [],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_ephemeral_malformed_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "malformed",
+            "mode": "ephemeral",
+            "fingerprint": "SHA256:not-a-valid-base64-digest",
+            "error": {
+              "code": null,
+              "message": "Host denied (verification failed)"
+            },
+            "channelReturned": false,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_cached_openssh_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "openssh",
+            "mode": "cached",
+            "fingerprint": "SHA256:V+T+NKRHVbV+//GBCKXdv3A5wjsfr8/vqrXSjIj2T5M",
+            "error": null,
+            "channelReturned": true,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              },
+              {
+                "event": "server-ready"
+              },
+              {
+                "event": "server-forward-accepted",
+                "host": "203.0.113.10",
+                "port": 3306
+              },
+              {
+                "event": "returned-channel",
+                "constructor": "Channel"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_cached_mismatch_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "mismatch",
+            "mode": "cached",
+            "fingerprint": "SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "error": {
+              "code": null,
+              "message": "Host denied (verification failed)"
+            },
+            "channelReturned": false,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_cached_missing_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "missing",
+            "mode": "cached",
+            "fingerprint": null,
+            "error": {
+              "code": null,
+              "message": "Host denied (verification failed)"
+            },
+            "channelReturned": false,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "real_ssh_cached_malformed_closure",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": {
+            "encoding": "malformed",
+            "mode": "cached",
+            "fingerprint": "SHA256:not-a-valid-base64-digest",
+            "error": {
+              "code": null,
+              "message": "Host denied (verification failed)"
+            },
+            "channelReturned": false,
+            "events": [
+              {
+                "event": "resolve",
+                "host": "db.example.test"
+              },
+              {
+                "event": "resolve",
+                "host": "bastion.example.test"
+              }
+            ],
+            "ssh2": "1.17.0",
+            "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+          },
+          "boundary": "real ssh2 client/server over loopback and real host-key verification; server accepts forward channel in-process, no MySQL or target DB socket, no external SSH service"
+        },
+        {
+          "id": "fingerprint_helper_semantic_typecheck",
+          "issue": "CR-04",
+          "holds": true,
+          "actual": [],
+          "boundary": "real TypeScript strict and Node Buffer/crypto typings; unused unrelated imports removed"
+        },
+        {
+          "id": "logout_success",
+          "issue": "CR-05",
+          "holds": true,
+          "actual": {
+            "scenario": "success",
+            "destroyed": true,
+            "cleared": 1,
+            "redirect": "/login",
+            "requests": [
+              {
+                "url": "/api/v1/auth/logout",
+                "headers": {
+                  "x-csrf-token": "d72fda29662ca72d0c20215980fb2073f5067a5b241775339d1bfe3e8eca9a90"
+                }
+              }
+            ],
+            "csrfRequests": 0,
+            "consoleWarnings": []
+          },
+          "boundary": "document-code with response/fetch doubles; exact success/warning redirects asserted; LoginView banner is a documented requirement, not a rendered-browser observation"
+        },
+        {
+          "id": "logout_stale_token",
+          "issue": "CR-05",
+          "holds": true,
+          "actual": {
+            "scenario": "stale-token",
+            "destroyed": true,
+            "cleared": 1,
+            "redirect": "/login",
+            "requests": [
+              {
+                "url": "/api/v1/auth/logout",
+                "headers": {
+                  "x-csrf-token": "STALE_TOKEN"
+                }
+              },
+              {
+                "url": "/api/v1/auth/logout",
+                "headers": {
+                  "x-csrf-token": "d72fda29662ca72d0c20215980fb2073f5067a5b241775339d1bfe3e8eca9a90"
+                }
+              }
+            ],
+            "csrfRequests": 1,
+            "consoleWarnings": []
+          },
+          "boundary": "document-code with response/fetch doubles; exact success/warning redirects asserted; LoginView banner is a documented requirement, not a rendered-browser observation"
+        },
+        {
+          "id": "logout_permission403",
+          "issue": "CR-05",
+          "holds": true,
+          "actual": {
+            "scenario": "permission403",
+            "destroyed": false,
+            "cleared": 1,
+            "redirect": "/login?warning=session_unconfirmed",
+            "requests": [
+              {
+                "url": "/api/v1/auth/logout",
+                "headers": {
+                  "x-csrf-token": "d72fda29662ca72d0c20215980fb2073f5067a5b241775339d1bfe3e8eca9a90"
+                }
+              }
+            ],
+            "csrfRequests": 0,
+            "consoleWarnings": []
+          },
+          "boundary": "document-code with response/fetch doubles; exact success/warning redirects asserted; LoginView banner is a documented requirement, not a rendered-browser observation"
+        },
+        {
+          "id": "logout_http500",
+          "issue": "CR-05",
+          "holds": true,
+          "actual": {
+            "scenario": "http500",
+            "destroyed": false,
+            "cleared": 1,
+            "redirect": "/login?warning=session_unconfirmed",
+            "requests": [
+              {
+                "url": "/api/v1/auth/logout",
+                "headers": {
+                  "x-csrf-token": "d72fda29662ca72d0c20215980fb2073f5067a5b241775339d1bfe3e8eca9a90"
+                }
+              }
+            ],
+            "csrfRequests": 0,
+            "consoleWarnings": []
+          },
+          "boundary": "document-code with response/fetch doubles; exact success/warning redirects asserted; LoginView banner is a documented requirement, not a rendered-browser observation"
+        },
+        {
+          "id": "logout_network_error",
+          "issue": "CR-05",
+          "holds": true,
+          "actual": {
+            "scenario": "network-error",
+            "destroyed": false,
+            "cleared": 1,
+            "redirect": "/login?warning=session_unconfirmed",
+            "requests": [
+              {
+                "url": "/api/v1/auth/logout",
+                "headers": {
+                  "x-csrf-token": "d72fda29662ca72d0c20215980fb2073f5067a5b241775339d1bfe3e8eca9a90"
+                }
+              }
+            ],
+            "csrfRequests": 0,
+            "consoleWarnings": [
+              "本地退出，服务端注销未确认: Error: controlled network failure"
+            ]
+          },
+          "boundary": "document-code with response/fetch doubles; exact success/warning redirects asserted; LoginView banner is a documented requirement, not a rendered-browser observation"
+        },
+        {
+          "id": "all_frontend_entity_id_fields_are_strings",
+          "issue": "CR-06",
+          "holds": true,
+          "actual": [],
+          "boundary": "document extraction"
+        },
+        {
+          "id": "frontend_role_profile_id_arrays_are_strings",
+          "issue": "CR-06",
+          "holds": true,
+          "actual": [],
+          "boundary": "document extraction"
+        },
+        {
+          "id": "profile_create_wire_fields",
+          "issue": "CR-07",
+          "holds": true,
+          "actual": {
+            "line": "| | `/api/v1/profiles` | `POST` | `{ name, display_name, host, port, user, password, database, max_pool_size, profile_capacity_qpm }` | `{ id: string }` | 新建数据源，初始版本号 1 |",
+            "required": [
+              "display_name",
+              "max_pool_size",
+              "profile_capacity_qpm"
+            ],
+            "forbidden": [
+              "displayName",
+              "maxPoolSize",
+              "profileCapacityQpm"
+            ]
+          },
+          "boundary": "document extraction"
+        },
+        {
+          "id": "role_create_wire_fields",
+          "issue": "CR-07",
+          "holds": true,
+          "actual": {
+            "line": "| **角色ACL**| `/api/v1/roles` | `GET/POST`| GET无 / POST: `{ role_name, display_name, description?, profileIds: string[] }` | `RoleDTO[]` / `{ id: string }` | 角色模版创建与列表 |",
+            "required": [
+              "role_name",
+              "display_name",
+              "profileIds"
+            ],
+            "forbidden": []
+          },
+          "boundary": "document extraction"
+        },
+        {
+          "id": "role_update_wire_fields",
+          "issue": "CR-07",
+          "holds": true,
+          "actual": {
+            "line": "| | `/api/v1/roles/:id` | `PUT/DELETE`| PUT: `{ display_name?, description?, profileIds: string[], default_limit?, max_limit?, max_timeout_ms?, user_qpm_limit?, version }` / DELETE无 | `{ success: true }` | 角色模版与策略参数更新/删除 (带版本校验) |",
+            "required": [
+              "default_limit",
+              "max_limit",
+              "max_timeout_ms",
+              "user_qpm_limit"
+            ],
+            "forbidden": [
+              "defaultLimit",
+              "maxLimit",
+              "maxExecutionTimeMs",
+              "userQuotaQpm"
+            ]
+          },
+          "boundary": "document extraction"
+        },
+        {
+          "id": "backend_role_wire_field_alignment",
+          "issue": "CR-07",
+          "holds": true,
+          "actual": "| | `/api/v1/roles/:id` | `PUT/DELETE`| **L4** `SUPER_ADMIN` / `SECURITY_ADMIN` | PUT: `{ display_name?, description?, profileIds?, default_limit?, max_limit?, max_timeout_ms?, user_qpm_limit?, version }` | `{ success: true, version: number }` | 校验 `sys_roles.version` (409)；同事务写审计；同步递增 `globalPolicyVersion` |",
+          "boundary": "document extraction"
+        },
+        {
+          "id": "table_acl_pattern_and_rule_type",
+          "issue": "CR-08",
+          "holds": true,
+          "actual": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "profile_id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "table_pattern",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "rule_type",
+              "type": "'BLACKLIST' | 'WHITELIST'",
+              "optional": false
+            },
+            {
+              "name": "description",
+              "type": "string | null",
+              "optional": true
+            }
+          ],
+          "boundary": "document extraction"
+        },
+        {
+          "id": "dashboard_profile_traffic_is_array",
+          "issue": "CR-09",
+          "holds": true,
+          "actual": {
+            "name": "profile_traffic",
+            "type": "Array<{\n    profile_id: string;\n    profile_name: string;\n    profile_capacity_qpm: number;// QPM 容量上限\n    current_qpm: number;         // 当前实时吞吐\n    time_series: Array<{\n      timestamp: string;\n      actual_qpm: number;\n      limit_qpm: number;\n    }>;\n  }>",
+            "optional": false
+          },
+          "boundary": "document extraction"
+        },
+        {
+          "id": "user_status_request_has_version",
+          "issue": "CR-10",
+          "holds": true,
+          "actual": "| | `/api/v1/users/:id/status` | `PUT` | `{ status: \"DISABLED\" \\| \"ACTIVE\", version }` | `{ success: true }` | 命中 `ERR_LAST_SUPER_ADMIN` 或本人保护阻断 |",
+          "boundary": "document extraction"
+        },
+        {
+          "id": "user_roles_request_has_version",
+          "issue": "CR-10",
+          "holds": true,
+          "actual": "| | `/api/v1/users/:id/roles` | `PUT` | `{ roleIds: string[], version }` | `{ success: true }` | 命中超管防自残阻断；低权限禁止越权提权 |",
+          "boundary": "document extraction"
+        },
+        {
+          "id": "frontend_expiry_guard_includes_natural_expiry",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": "   - **第三关：`MustChangePwdGuard`**：**仅针对已激活（`ACTIVE`）用户生效！** 若 `must_change_password === true || is_password_expired === true`，全屏锁定重定向至 `/change-password`（涵盖首次强制改密与密码自然过期双场景）；改密完成后放行进入第四关；",
+          "boundary": "document extraction"
+        },
+        {
+          "id": "user_schema_dto_requiredness_matches",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": [],
+          "boundary": "static extraction of independent schema optional() and DTO ?; no actual Zod runtime claimed"
+        },
+        {
+          "id": "frontend_password_policy_route_mapping",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": [
+            "  5. **个人密码轮换策略设置与高危确认弹窗 (`/api/v1/auth/password-policy`)**：用户可在个人设置页面通过 `GET /api/v1/auth/password-policy` 查询当前密码有效期，并通过 `PUT /api/v1/auth/password-policy` 调整轮换天数（30~180 天，或 `null` 表示永不过期）。若用户选择关闭定期更换（`passwordExpiresDays: null`），前端必须弹出高危安全风险确认对话框，仅在用户勾选“我已知晓安全风险”并确认后才允许提交；",
+            "| | `/api/v1/auth/password-policy` | `GET` | *(无入参)* | `PasswordPolicyDTO` | 查询当前登录用户密码轮换周期与到期时间 |",
+            "| | `/api/v1/auth/password-policy` | `PUT` | `{ passwordExpiresDays: number | null }` | `{ success: true, passwordExpiresDays: number | null, passwordExpiresAt: string | null, isExpirationEnabled: boolean }` | 调整密码轮换天数 (30~180天，null 为关闭轮换并弹高危风险确认对话框) |",
+            "// 用户密码生命周期策略 DTO (100% 对齐 GET /api/v1/auth/password-policy 线上契约)"
+          ],
+          "boundary": "document extraction"
+        },
+        {
+          "id": "original_rest_error_names_aligned",
+          "issue": "CR-12",
+          "holds": true,
+          "actual": {
+            "oldRoleCode": false,
+            "oldSelfCode": false
+          },
+          "boundary": "document extraction"
+        },
+        {
+          "id": "entity_normalizer_moved_to_runtime_package",
+          "issue": "CR-13",
+          "holds": true,
+          "actual": {
+            "pureTypeBlock": "// packages/shared-types/src/entities.ts\n/**\n * 64位无符号整型实体主键/外键在 TypeScript 全链路（DTO、Repository、Registry、Snapshot、Map Key）\n * 统一使用规范十进制字符串表示，严禁使用 Number(id) 转换！\n * 遵循纯类型包规范：packages/shared-types 仅导出 type 与 interface，零运行时代码。\n */\nexport type EntityId = string;\n",
+            "runtimeFile": "// packages/core-engine/src/utils/entity-id.ts"
+          },
+          "boundary": "document extraction"
+        },
+        {
+          "id": "transition_pending_to_active",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": {
+            "from": "PENDING",
+            "to": "ACTIVE",
+            "code": "ERR_INVALID_STATUS_TRANSITION",
+            "state": "PENDING",
+            "writes": 0,
+            "audits": 0,
+            "tombstones": 0
+          },
+          "boundary": "actual documented Service; controlled query results; no real transaction integration"
+        },
+        {
+          "id": "transition_pending_to_disabled",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": {
+            "from": "PENDING",
+            "to": "DISABLED",
+            "code": "ERR_INVALID_STATUS_TRANSITION",
+            "state": "PENDING",
+            "writes": 0,
+            "audits": 0,
+            "tombstones": 0
+          },
+          "boundary": "actual documented Service; controlled query results; no real transaction integration"
+        },
+        {
+          "id": "transition_rejected_to_active",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": {
+            "from": "REJECTED",
+            "to": "ACTIVE",
+            "code": "ERR_INVALID_STATUS_TRANSITION",
+            "state": "REJECTED",
+            "writes": 0,
+            "audits": 0,
+            "tombstones": 0
+          },
+          "boundary": "actual documented Service; controlled query results; no real transaction integration"
+        },
+        {
+          "id": "transition_rejected_to_disabled",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": {
+            "from": "REJECTED",
+            "to": "DISABLED",
+            "code": "ERR_INVALID_STATUS_TRANSITION",
+            "state": "REJECTED",
+            "writes": 0,
+            "audits": 0,
+            "tombstones": 0
+          },
+          "boundary": "actual documented Service; controlled query results; no real transaction integration"
+        },
+        {
+          "id": "transition_active_to_disabled",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": {
+            "from": "ACTIVE",
+            "to": "DISABLED",
+            "code": null,
+            "state": "DISABLED",
+            "writes": 1,
+            "audits": 1,
+            "tombstones": 1
+          },
+          "boundary": "actual documented Service; controlled query results; no real transaction integration"
+        },
+        {
+          "id": "transition_disabled_to_active",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": {
+            "from": "DISABLED",
+            "to": "ACTIVE",
+            "code": null,
+            "state": "ACTIVE",
+            "writes": 1,
+            "audits": 1,
+            "tombstones": 1
+          },
+          "boundary": "actual documented Service; controlled query results; no real transaction integration"
+        },
+        {
+          "id": "user_status_repair_semantic_typecheck",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": [],
+          "boundary": "real TypeScript 5.9.3 and mysql2/Node types; actual documented ErrorCode/AppError/UserService; only local imports stubbed"
+        },
+        {
+          "id": "user_status_not_found_contract_code",
+          "issue": "CR-14",
+          "holds": true,
+          "actual": [
+            "          code: 'ERR_NOT_FOUND',"
+          ],
+          "boundary": "document extraction"
+        },
+        {
+          "id": "password_policy_settings_and_risk_confirmation",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": [
+            "  5. **个人密码轮换策略设置与高危确认弹窗 (`/api/v1/auth/password-policy`)**：用户可在个人设置页面通过 `GET /api/v1/auth/password-policy` 查询当前密码有效期，并通过 `PUT /api/v1/auth/password-policy` 调整轮换天数（30~180 天，或 `null` 表示永不过期）。若用户选择关闭定期更换（`passwordExpiresDays: null`），前端必须弹出高危安全风险确认对话框，仅在用户勾选“我已知晓安全风险”并确认后才允许提交；\r"
+          ],
+          "boundary": "documented interaction flow only; not a rendered browser acceptance test"
+        },
+        {
+          "id": "user_schema_dto_real_zod_type_equality",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": {
+            "zod": "3.25.76",
+            "diagnostics": []
+          },
+          "boundary": "real Zod inference and TypeScript strict equality; no browser or Vitest runner"
+        },
+        {
+          "id": "password_policy_get_wire_response_matches_dto",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": {
+            "route": "| | `/api/v1/auth/password-policy` | `GET` | *(无入参)* | `PasswordPolicyDTO` | 查询当前登录用户密码轮换周期与到期时间 |",
+            "policyDto": [
+              {
+                "name": "passwordExpiresDays",
+                "type": "number | null",
+                "optional": false
+              },
+              {
+                "name": "passwordExpiresAt",
+                "type": "string | null",
+                "optional": false
+              },
+              {
+                "name": "isExpirationEnabled",
+                "type": "boolean",
+                "optional": false
+              },
+              {
+                "name": "daysRemaining",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "name": "isExpired",
+                "type": "boolean",
+                "optional": false
+              },
+              {
+                "name": "minDays",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "name": "maxDays",
+                "type": "number",
+                "optional": false
+              }
+            ],
+            "policyResponse": {
+              "passwordExpiresDays": 90,
+              "passwordExpiresAt": "2027-02-06T06:00:00.000Z",
+              "isExpirationEnabled": true,
+              "daysRemaining": 89,
+              "isExpired": false,
+              "minDays": 30,
+              "maxDays": 180
+            },
+            "missingPolicyFields": [],
+            "unknownPolicyFields": [],
+            "diagnostics": []
+          },
+          "boundary": "actual API contract JSON assigned to documented frontend response DTO; no adapter documented for this route"
+        },
+        {
+          "id": "password_policy_disabled_contract_response",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": {
+            "disabledPolicy": {
+              "passwordExpiresDays": null,
+              "passwordExpiresAt": null,
+              "isExpirationEnabled": false,
+              "daysRemaining": -1,
+              "isExpired": false,
+              "minDays": 30,
+              "maxDays": 180
+            },
+            "diagnostics": []
+          },
+          "boundary": "contract null/-1 semantics fixture assigned to real DTO with TypeScript strict; not real HTTP"
+        },
+        {
+          "id": "password_policy_wire_field_types_exact",
+          "issue": "CR-11",
+          "holds": true,
+          "actual": {
+            "policyTypeMismatches": [],
+            "policyDto": [
+              {
+                "name": "passwordExpiresDays",
+                "type": "number | null",
+                "optional": false
+              },
+              {
+                "name": "passwordExpiresAt",
+                "type": "string | null",
+                "optional": false
+              },
+              {
+                "name": "isExpirationEnabled",
+                "type": "boolean",
+                "optional": false
+              },
+              {
+                "name": "daysRemaining",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "name": "isExpired",
+                "type": "boolean",
+                "optional": false
+              },
+              {
+                "name": "minDays",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "name": "maxDays",
+                "type": "number",
+                "optional": false
+              }
+            ]
+          },
+          "boundary": "AST-extracted names, requiredness and types; no response adaptation"
+        }
+      ],
+      "closure": [
+        {
+          "id": "CR-01",
+          "closed": true,
+          "passing": 2,
+          "remaining": []
+        },
+        {
+          "id": "CR-02",
+          "closed": true,
+          "passing": 5,
+          "remaining": []
+        },
+        {
+          "id": "CR-03",
+          "closed": true,
+          "passing": 9,
+          "remaining": []
+        },
+        {
+          "id": "CR-04",
+          "closed": true,
+          "passing": 47,
+          "remaining": []
+        },
+        {
+          "id": "CR-05",
+          "closed": true,
+          "passing": 5,
+          "remaining": []
+        },
+        {
+          "id": "CR-06",
+          "closed": true,
+          "passing": 2,
+          "remaining": []
+        },
+        {
+          "id": "CR-07",
+          "closed": true,
+          "passing": 4,
+          "remaining": []
+        },
+        {
+          "id": "CR-08",
+          "closed": true,
+          "passing": 1,
+          "remaining": []
+        },
+        {
+          "id": "CR-09",
+          "closed": true,
+          "passing": 1,
+          "remaining": []
+        },
+        {
+          "id": "CR-10",
+          "closed": true,
+          "passing": 2,
+          "remaining": []
+        },
+        {
+          "id": "CR-11",
+          "closed": true,
+          "passing": 8,
+          "remaining": []
+        },
+        {
+          "id": "CR-12",
+          "closed": true,
+          "passing": 1,
+          "remaining": []
+        },
+        {
+          "id": "CR-13",
+          "closed": true,
+          "passing": 1,
+          "remaining": []
+        },
+        {
+          "id": "CR-14",
+          "closed": true,
+          "passing": 8,
+          "remaining": []
+        }
+      ],
+      "summary": {
+        "total": 96,
+        "holds": 96,
+        "violated": 0,
+        "closedIssues": 14,
+        "remainingIssues": 0
+      }
+    },
+    "database-design-review-round2.backend-regression.evidence.json": {
+      "review": "round-8-bounded",
+      "reviewedAt": "2026-11-12T02:23:33.664Z",
+      "specPath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-readiness-regression-9k2n634h\\docs\\BACKEND_ARCHITECTURE_SPEC.md",
+      "specSha256": "a81c356a5d59536225437d9e48b1a31df5446612c5d76db6e2435c13da5d54c3",
+      "specBytes": 243277,
+      "specLines": 5387,
+      "scope": [
+        "BE-R7-01",
+        "BE-R7-02"
+      ],
+      "fullBaselineExecuted": false,
+      "environment": {
+        "node": "v22.22.0",
+        "typescript": "5.9.3",
+        "mysql2": "3.24.6",
+        "nodeTypes": "26.6.6"
+      },
+      "tests": [
+        {
+          "name": "r7_replay_lease_repeat_seal",
+          "invariantHolds": true,
+          "scenario": "repeat-seal",
+          "acknowledgedFallbackIds": [
+            "r7-A",
+            "r7-B",
+            "r7-C"
+          ],
+          "replayed": 1,
+          "mysqlDurableIds": [
+            "r7-A"
+          ],
+          "fallbackIds": [
+            "r7-C",
+            "r7-B"
+          ],
+          "lostEventIds": [],
+          "sealedA": "audit-fallback-2026-11-12.jsonl.1794450213951-1.sealed.jsonl",
+          "sealedB": "audit-fallback-2026-11-12.jsonl.1794450214038-2.sealed.jsonl",
+          "redirectAfterFirst": "audit-fallback-2026-11-12.jsonl.1794450213951-1.sealed.jsonl",
+          "redirectAfterSecond": "audit-fallback-2026-11-12.jsonl.1794450214038-2.sealed.jsonl",
+          "readObservations": [],
+          "remainingFiles": [
+            "audit-fallback-2026-11-12.jsonl",
+            "audit-fallback-2026-11-12.jsonl.1794450214038-2.sealed.jsonl"
+          ],
+          "totalUnflushed": 0,
+          "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r7-lease-Kyj8Ay",
+          "boundary": "Public audit methods with real filesystem; only MySQL replay is paused. Two rotations re-use one active pathname."
+        },
+        {
+          "name": "r7_replay_lease_seal_before_snapshot",
+          "invariantHolds": true,
+          "scenario": "seal-before-snapshot",
+          "acknowledgedFallbackIds": [
+            "r7-A",
+            "r7-B"
+          ],
+          "replayed": 1,
+          "mysqlDurableIds": [
+            "r7-B"
+          ],
+          "fallbackIds": [
+            "r7-A"
+          ],
+          "lostEventIds": [],
+          "sealedA": "audit-fallback-2026-11-12.jsonl.1794450214340-1.sealed.jsonl",
+          "sealedB": null,
+          "redirectAfterFirst": "audit-fallback-2026-11-12.jsonl.1794450214340-1.sealed.jsonl",
+          "redirectAfterSecond": null,
+          "readObservations": [
+            {
+              "path": "audit-fallback-2026-11-12.jsonl",
+              "ids": [
+                "r7-B"
+              ]
+            },
+            {
+              "path": "audit-fallback-2026-11-12.jsonl.1794450214340-1.sealed.jsonl",
+              "ids": [
+                "r7-A"
+              ]
+            },
+            {
+              "path": "audit-fallback-2026-11-12.jsonl",
+              "ids": [
+                "r7-B"
+              ]
+            },
+            {
+              "path": "audit-fallback-2026-11-12.jsonl",
+              "ids": [
+                "r7-B"
+              ]
+            }
+          ],
+          "remainingFiles": [
+            "audit-fallback-2026-11-12.jsonl.1794450214340-1.sealed.jsonl"
+          ],
+          "totalUnflushed": 0,
+          "temporaryDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-r7-lease-uqF3iS",
+          "boundary": "Real filesystem with a barrier before the first snapshot read opens the path; no bytes forged. Rotation and replacement append complete before the actual snapshot read. MySQL outcomes controlled."
+        },
+        {
+          "name": "r7_two_seals_then_explicit_sealed_replay_control",
+          "invariantHolds": true,
+          "replayedA": 1,
+          "replayedB": 1,
+          "mysqlDurableIds": [
+            "control-A",
+            "control-B"
+          ],
+          "activeIds": [
+            "control-C"
+          ],
+          "boundary": "No overlapping active-path replay: seal generations independently, then replay immutable paths. Real filesystem, controlled MySQL."
+        },
+        {
+          "name": "r7_limiter_module_semantic_typecheck",
+          "invariantHolds": true,
+          "diagnostics": [],
+          "boundary": "Entire extracted limiter/loop-breaker block checked by real TS 5.9.3 strict semantics; actual Node crypto typings. Only local AppError and EntityId imports replaced. Not a whole-project build."
+        }
+      ],
+      "retiredControls": [
+        {
+          "name": "r7_limiter_without_undeclared_property_control",
+          "reason": "Counterfactual removal control is no longer needed after the real source removed the offending expression. Not counted as an executed observation."
+        }
+      ],
+      "sourceAssembly": {
+        "parts": [
+          "part1_intro.md",
+          "part2_adr.md",
+          "part3_monorepo.md",
+          "part4_database_and_dal.md",
+          "part5_control_plane_security.md",
+          "part6_data_plane_pipeline.md",
+          "part7_ast_and_mcp_tools.md",
+          "part8_core_engine_pool.md",
+          "part9_security_ssrf_crypto.md",
+          "part10_audit_and_stats.md",
+          "part11_api_matrix_and_testing.md"
+        ],
+        "byteExactMatch": true
+      },
+      "summary": {
+        "total": 4,
+        "holds": 4,
+        "violated": 0
+      }
+    }
+  }
+}

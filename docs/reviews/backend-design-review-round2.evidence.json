@@ -1,0 +1,249 @@
+{
+  "review": "round-2",
+  "reviewedAt": "2026-11-08T09:00:07.947Z",
+  "specSha256": "3d32059adefc0724869d863e38cdb87da6d8423a425cb33e92172b042a584173",
+  "environment": {
+    "node": "v22.22.0",
+    "mysql2": "3.24.6",
+    "parser": "5.4.0",
+    "fastify": "5.12.8"
+  },
+  "tests": [
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders WHERE EXISTS (SELECT 1 FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders WHERE id IN (SELECT id FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders o JOIN customers c ON c.id=(SELECT MAX(id) FROM secret_salary)",
+      "tables": [
+        "app.orders",
+        "app.customers",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_acl_subquery",
+      "invariantHolds": true,
+      "sql": "SELECT (SELECT MAX(id) FROM secret_salary) AS n FROM orders",
+      "tables": [
+        "app.orders",
+        "app.secret_salary"
+      ]
+    },
+    {
+      "name": "original_union_limit",
+      "invariantHolds": true,
+      "sql": "(SELECT * FROM orders LIMIT 1) UNION ALL SELECT * FROM orders",
+      "allowed": false,
+      "error": "ERR_AST_LIMIT_FAIL_CLOSED"
+    },
+    {
+      "name": "original_union_limit",
+      "invariantHolds": true,
+      "sql": "SELECT * FROM orders UNION ALL SELECT * FROM orders LIMIT 1",
+      "allowed": true,
+      "rewritten": "SELECT * FROM `orders` UNION ALL SELECT * FROM `orders` LIMIT 1"
+    },
+    {
+      "name": "original_low_role_quota",
+      "invariantHolds": true,
+      "quotas": {
+        "defaultLimit": 5,
+        "maxLimit": 10,
+        "maxTimeoutMs": 1000,
+        "userQpmLimit": 2,
+        "maxInflightConcurrency": 1
+      }
+    },
+    {
+      "name": "original_utf8_cell_limit",
+      "invariantHolds": true,
+      "inputBytes": 120000,
+      "outputBytes": 65536,
+      "wasTruncated": true
+    },
+    {
+      "name": "original_utf8_cell_limit",
+      "invariantHolds": true,
+      "inputBytes": 80000,
+      "outputBytes": 65534,
+      "wasTruncated": true
+    },
+    {
+      "name": "original_http_disconnect",
+      "invariantHolds": true,
+      "abortedBeforeDisconnect": false,
+      "abortedAfterDisconnect": true
+    },
+    {
+      "name": "original_audit_double_failure",
+      "invariantHolds": true,
+      "error": "ENOSPC simulated",
+      "queueLength": 1,
+      "totalUnflushed": 1,
+      "reserveRejected": true
+    },
+    {
+      "name": "original_highrisk_slot",
+      "invariantHolds": true,
+      "totalUnflushed": 1
+    },
+    {
+      "name": "original_highrisk_strict",
+      "invariantHolds": true,
+      "error": "ERR_AUDIT_STORAGE_UNAVAILABLE",
+      "fallbackWrites": 1
+    },
+    {
+      "name": "new_stale_reload_clears_new_tombstone",
+      "invariantHolds": false,
+      "invalidatedBeforeOldReload": true,
+      "invalidatedAfterOldReload": false,
+      "currentVersion": 2,
+      "oldSnapshotAllowed": true
+    },
+    {
+      "name": "new_transport_directionality",
+      "invariantHolds": false,
+      "serverReceived": "SERVER_GREETINGCLIENT_COMMAND",
+      "driverReceived": "SERVER_GREETINGCLIENT_COMMAND"
+    },
+    {
+      "name": "original_pool_ssrf_wiring",
+      "invariantHolds": true,
+      "guardCalls": 2,
+      "configuredHost": "db.example",
+      "streamConfigured": true,
+      "maxAllowedPacketPresent": false
+    },
+    {
+      "name": "new_tls_transport_metadata",
+      "invariantHolds": false,
+      "streamWasReplaced": true,
+      "endpointOnTransport": true,
+      "endpointOnCurrentStream": false,
+      "resetOnCurrentStream": false
+    },
+    {
+      "name": "new_audit_shutdown_wait",
+      "invariantHolds": false,
+      "stopReturned": true,
+      "totalUnflushedAtObservation": 1,
+      "isFlushing": true
+    },
+    {
+      "name": "new_runtime_entityid_normalizer",
+      "invariantHolds": false,
+      "unsafeNumber": 9007199254740992,
+      "normalizerAccepted": "9007199254740992"
+    },
+    {
+      "name": "original_canonical_self_operation_guard",
+      "invariantHolds": true,
+      "target": "1",
+      "operator": "1",
+      "normalizedTarget": "1",
+      "error": "ERR_SELF_OPERATION_FORBIDDEN",
+      "updateIssued": false,
+      "tombstones": [],
+      "cancelledUsers": [],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_leading_zero_entityid_guard",
+      "invariantHolds": false,
+      "target": "01",
+      "operator": "1",
+      "normalizedTarget": "01",
+      "error": null,
+      "updateIssued": true,
+      "updateId": "01",
+      "tombstones": [
+        "01"
+      ],
+      "cancelledUsers": [
+        "01"
+      ],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_leading_zero_entityid_guard",
+      "invariantHolds": false,
+      "target": "01",
+      "operator": "2",
+      "normalizedTarget": "01",
+      "error": null,
+      "updateIssued": true,
+      "updateId": "01",
+      "tombstones": [
+        "01"
+      ],
+      "cancelledUsers": [
+        "01"
+      ],
+      "modelBoundary": "SQL is recorded by a stub; no real MySQL UPDATE was executed."
+    },
+    {
+      "name": "new_ssh_forward_target_guard",
+      "invariantHolds": false,
+      "guardHosts": [
+        "bastion.example"
+      ],
+      "forwardTarget": {
+        "host": "169.254.169.254",
+        "port": 80
+      },
+      "hostVerifierConfigured": false,
+      "pinnedBastion": "203.0.113.8"
+    },
+    {
+      "name": "new_ssh_hostkey_required",
+      "invariantHolds": false,
+      "hostVerifierConfigured": false,
+      "openedWithoutHostFingerprint": true
+    },
+    {
+      "name": "new_result_memory_ownership",
+      "invariantHolds": false,
+      "countedBeforeEnd": 20,
+      "countedAfterEnd": 0,
+      "retainedRows": 1
+    },
+    {
+      "name": "new_webhook_lookup_contract",
+      "invariantHolds": false,
+      "error": {
+        "code": "ERR_INVALID_IP_ADDRESS",
+        "message": "Invalid IP address: undefined"
+      }
+    },
+    {
+      "name": "new_qualified_dual_extraction",
+      "invariantHolds": false,
+      "sql": "SELECT * FROM app.`dual`",
+      "tables": [],
+      "isKnownNoTableQuery": true
+    }
+  ],
+  "summary": {
+    "total": 27,
+    "holds": 15,
+    "violated": 12
+  }
+}

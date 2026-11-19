@@ -1,0 +1,405 @@
+{
+  "driverInspection": {
+    "version": "3.24.6",
+    "file": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\mysql-mcp-design-review-20261108\\node_modules\\mysql2\\lib\\base\\connection.js",
+    "sha256": "b22610ef653a8c2e4e6395aa5fdfa78bd150a631fc8029e49e2d165f83d0ccb7",
+    "usesSslCa": true,
+    "usesCaCert": false
+  },
+  "date": "2026-11-09",
+  "timezone": "Asia/Shanghai",
+  "scope": [
+    "ARCHITECTURE_SPEC.md",
+    "FRONTEND_ARCHITECTURE_SPEC.md",
+    "BACKEND_ARCHITECTURE_SPEC.md",
+    "API_CONTRACT_SPEC.md"
+  ],
+  "sha256": {
+    "ARCHITECTURE_SPEC.md": "d37e4ba71d70168889e9c6a4a3b3c6a66be9013c66672af02cd7e86bb3fbf760",
+    "FRONTEND_ARCHITECTURE_SPEC.md": "a50da97d5946d5a57b162872ff262d94db006d9a5008220fec1d7e457e2f1497",
+    "BACKEND_ARCHITECTURE_SPEC.md": "2cbb317bffda809d9be26bae04b4e88088337b58f5ad229165f159ccd898e79a",
+    "API_CONTRACT_SPEC.md": "41ae7363c002f8f0d696bef8bdee9d2a8bb2088a48eba5c8a4001d7eb64e1965"
+  },
+  "runtime": "v24.16.0",
+  "boundaries": {
+    "productionImplementationPresent": false,
+    "realMysql": false,
+    "realTlsOrSsh": false,
+    "liveHttpServer": false,
+    "contractChecks": "Markdown extraction; contract-table model is not a Fastify schema",
+    "historicalReportsModified": false
+  },
+  "observations": [
+    {
+      "id": "ddl_unique_columns",
+      "finding": "CR-01",
+      "kind": "static-extraction",
+      "expected": [],
+      "actual": [],
+      "holds": true
+    },
+    {
+      "id": "ddl_schema_alignment",
+      "finding": "CR-01",
+      "kind": "static-extraction",
+      "expected": {},
+      "actual": {},
+      "holds": true
+    },
+    {
+      "id": "backend_ddl_control",
+      "finding": null,
+      "kind": "control",
+      "expected": 0,
+      "actual": 0,
+      "holds": true
+    },
+    {
+      "id": "logout_csrf_end_to_end",
+      "finding": "CR-05",
+      "kind": "document-code-execution",
+      "expected": {
+        "sessionDestroyed": true,
+        "redirect": "/login"
+      },
+      "actual": {
+        "sessionDestroyed": true,
+        "redirect": "/login",
+        "cacheClears": 1,
+        "requests": [
+          {
+            "url": "/api/v1/auth/logout",
+            "headers": {
+              "x-csrf-token": "d72fda29662ca72d0c20215980fb2073f5067a5b241775339d1bfe3e8eca9a90"
+            },
+            "error": null
+          }
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "csrf_valid_header_control",
+      "finding": null,
+      "kind": "control",
+      "expected": "ALLOW",
+      "actual": "ALLOW",
+      "holds": true
+    },
+    {
+      "id": "tls_disabled_wire_mapping",
+      "finding": "CR-02",
+      "kind": "document-code-execution",
+      "expected": "no ssl option",
+      "actual": {
+        "sslPresent": false,
+        "ssl": null
+      },
+      "holds": true
+    },
+    {
+      "id": "tls_custom_ca_wire_mapping",
+      "finding": "CR-02",
+      "kind": "document-code-execution",
+      "expected": "ssl.ca === PRIVATE_CA",
+      "actual": {
+        "ssl": {
+          "rejectUnauthorized": true,
+          "verifyIdentity": true,
+          "ca": "PRIVATE_CA"
+        }
+      },
+      "holds": true
+    },
+    {
+      "id": "tls_change_requires_credential",
+      "finding": "CR-03",
+      "kind": "document-code-execution",
+      "expected": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+      "actual": {
+        "error": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+        "oldPasswordUsed": false,
+        "sslPresent": false
+      },
+      "holds": true
+    },
+    {
+      "id": "host_change_reentry_control",
+      "finding": null,
+      "kind": "control",
+      "expected": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+      "actual": "ERR_CREDENTIAL_REENTRY_REQUIRED",
+      "holds": true
+    },
+    {
+      "id": "unchanged_credential_reuse_control",
+      "finding": null,
+      "kind": "control",
+      "expected": "saved credential reused",
+      "actual": true,
+      "holds": true
+    },
+    {
+      "id": "ssh_test_uses_requested_path",
+      "finding": "CR-04",
+      "kind": "document-code-execution",
+      "expected": "verified SSH stream",
+      "actual": {
+        "error": null,
+        "directSockets": [],
+        "unreferencedPayloadFields": []
+      },
+      "holds": true
+    },
+    {
+      "id": "profile_option_id_contract",
+      "finding": "CR-06",
+      "kind": "static-extraction",
+      "expected": "string",
+      "actual": {
+        "wireType": "string",
+        "frontendIdDeclaration": "id: string"
+      },
+      "holds": true
+    },
+    {
+      "id": "approval_id_array_contract",
+      "finding": "CR-06",
+      "kind": "static-extraction",
+      "expected": "roleIds: string[]",
+      "actual": "| | `/api/v1/approvals/:id/approve`| `POST`| `{ roleIds: string[] }` | `{ success: true }` | 严格非乐观更新，等待 HTTP 200 后刷新列表 |",
+      "holds": true
+    },
+    {
+      "id": "profile_create_fields",
+      "finding": "CR-07",
+      "kind": "contract-table-model",
+      "expected": {
+        "missing": [],
+        "unknown": []
+      },
+      "actual": {
+        "missing": [],
+        "unknown": [],
+        "frontendRouteLine": "| | `/api/v1/profiles` | `POST` | `{ name, display_name, host, port, user, password, database, max_pool_size, profile_capacity_qpm }` | `{ id: string }` | 新建数据源，初始版本号 1 |"
+      },
+      "holds": true
+    },
+    {
+      "id": "role_create_fields",
+      "finding": "CR-07",
+      "kind": "contract-table-model",
+      "expected": {
+        "missing": [],
+        "unknown": []
+      },
+      "actual": {
+        "missing": [],
+        "unknown": [],
+        "frontendRouteLine": "| **角色ACL**| `/api/v1/roles` | `GET/POST`| GET无 / POST: `{ role_name, display_name, description?, profileIds: string[] }` | `RoleDTO[]` / `{ id: string }` | 角色模版创建与列表 |"
+      },
+      "holds": true
+    },
+    {
+      "id": "role_update_fields",
+      "finding": "CR-07",
+      "kind": "contract-table-model",
+      "expected": {
+        "missing": [],
+        "unknown": []
+      },
+      "actual": {
+        "missing": [],
+        "unknown": [],
+        "frontendRouteLine": "| | `/api/v1/roles/:id` | `PUT/DELETE`| PUT: `{ display_name?, description?, profileIds: string[], default_limit?, max_limit?, max_timeout_ms?, user_qpm_limit?, version }` / DELETE无 | `{ success: true }` | 角色模版与策略参数更新/删除 (带版本校验) |"
+      },
+      "holds": true
+    },
+    {
+      "id": "table_acl_wire_fields",
+      "finding": "CR-08",
+      "kind": "static-extraction",
+      "expected": [
+        "table_pattern",
+        "rule_type"
+      ],
+      "actual": {
+        "wireFields": [
+          "id",
+          "profile_id",
+          "table_pattern",
+          "rule_type",
+          "description"
+        ],
+        "frontendDefinition": "id?: string;                        // 规则唯一标识 (读取时提供)\n  profile_id: string;                 // \"0\" 为全局规则\n  table_pattern: string;              // 支持通配符如 \"salary_*\" 或 \"order_*\"\n  rule_type: 'BLACKLIST' | 'WHITELIST'; // 规则类型: 黑名单优先生效\n  description?: string | null;        // 规则备注说明"
+      },
+      "holds": true
+    },
+    {
+      "id": "dashboard_profile_traffic_shape",
+      "finding": "CR-09",
+      "kind": "static-extraction",
+      "expected": "array",
+      "actual": {
+        "wireIsArray": true,
+        "frontendProperty": "profile_traffic: Array<{\n    profile_id: string;\n    profile_name: string;\n    profile_capacity_qpm: number;// QPM 容量上限\n    current_qpm: number;         // 当前实时吞吐\n    time_series: Array<{\n      timestamp: string;\n      actual_qpm: number;\n      limit_qpm: number;\n    }>;\n  }>;"
+      },
+      "holds": true
+    },
+    {
+      "id": "user_status_cas",
+      "finding": "CR-10",
+      "kind": "contract-table-model",
+      "expected": "version required by both documents",
+      "actual": {
+        "frontendRouteLine": "| | `/api/v1/users/:id/status` | `PUT` | `{ status: \"DISABLED\" \\| \"ACTIVE\", version }` | `{ success: true }` | 命中 `ERR_LAST_SUPER_ADMIN` 或本人保护阻断 |",
+        "missingRequiredFields": [
+          "version"
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "user_roles_cas",
+      "finding": "CR-10",
+      "kind": "contract-table-model",
+      "expected": "version required by both documents",
+      "actual": {
+        "frontendRouteLine": "| | `/api/v1/users/:id/roles` | `PUT` | `{ roleIds: string[], version }` | `{ success: true }` | 命中超管防自残阻断；低权限禁止越权提权 |",
+        "missingRequiredFields": [
+          "version"
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "password_expiry_guard_alignment",
+      "finding": "CR-11",
+      "kind": "mixed:document-backend-code+frontend-rule",
+      "expected": {
+        "frontendRequiresChange": true,
+        "backendDecision": "ERR_MUST_CHANGE_PASSWORD"
+      },
+      "actual": {
+        "frontendRequiresChange": true,
+        "backendDecision": "ERR_MUST_CHANGE_PASSWORD",
+        "missingDtoFields": []
+      },
+      "holds": true
+    },
+    {
+      "id": "error_code_vocabulary",
+      "finding": "CR-12",
+      "kind": "static-extraction",
+      "expected": [
+        "ERR_RBAC_FORBIDDEN",
+        "ERR_SELF_ACTION_PROHIBITED"
+      ],
+      "actual": {
+        "backendCodes": [
+          "ERR_RBAC_FORBIDDEN",
+          "ERR_SELF_ACTION_PROHIBITED"
+        ],
+        "contractCodes": [
+          "ERR_RBAC_FORBIDDEN",
+          "ERR_SELF_ACTION_PROHIBITED"
+        ],
+        "backendCodesInContract": [
+          "ERR_RBAC_FORBIDDEN",
+          "ERR_SELF_ACTION_PROHIBITED"
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "shared_types_type_only_boundary",
+      "finding": "CR-13",
+      "kind": "static-extraction",
+      "expected": "type-only module",
+      "actual": {
+        "runtimeExportInEntities": false,
+        "frontendForbidsRuntime": true,
+        "backendValueImport": false
+      },
+      "holds": true
+    },
+    {
+      "id": "status_transition_pending",
+      "finding": "CR-14",
+      "kind": "document-code+transaction-double",
+      "expected": "ERR_INVALID_STATUS_TRANSITION",
+      "actual": {
+        "from": "PENDING",
+        "to": "ACTIVE",
+        "error": "ERR_INVALID_STATUS_TRANSITION",
+        "finalState": "PENDING",
+        "statements": [
+          "SELECT u.id\n       FROM sys_users u\n       INNER JOIN sys_user_roles ur ON u.id = ur.user_id\n       INNER JOIN sys_roles r ON ur.role_id = r.id\n       WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE'\n       FOR UPDATE",
+          "SELECT id, status, version FROM sys_users WHERE id = ? FOR UPDATE"
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "status_transition_rejected",
+      "finding": "CR-14",
+      "kind": "document-code+transaction-double",
+      "expected": "ERR_INVALID_STATUS_TRANSITION",
+      "actual": {
+        "from": "REJECTED",
+        "to": "ACTIVE",
+        "error": "ERR_INVALID_STATUS_TRANSITION",
+        "finalState": "REJECTED",
+        "statements": [
+          "SELECT u.id\n       FROM sys_users u\n       INNER JOIN sys_user_roles ur ON u.id = ur.user_id\n       INNER JOIN sys_roles r ON ur.role_id = r.id\n       WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE'\n       FOR UPDATE",
+          "SELECT id, status, version FROM sys_users WHERE id = ? FOR UPDATE"
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "status_transition_active",
+      "finding": null,
+      "kind": "control",
+      "expected": "ALLOW",
+      "actual": {
+        "from": "ACTIVE",
+        "to": "DISABLED",
+        "error": null,
+        "finalState": "DISABLED",
+        "statements": [
+          "SELECT u.id\n       FROM sys_users u\n       INNER JOIN sys_user_roles ur ON u.id = ur.user_id\n       INNER JOIN sys_roles r ON ur.role_id = r.id\n       WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE'\n       FOR UPDATE",
+          "SELECT id, status, version FROM sys_users WHERE id = ? FOR UPDATE",
+          "UPDATE sys_users\n         SET status = ?, auth_version = auth_version + 1, version = version + 1\n         WHERE id = ? AND version = ? AND status = ?",
+          "INSERT INTO sys_user_approvals (user_id, action, reason, operator_id)\n         VALUES (?, 'STATUS_CHANGE', ?, ?)"
+        ]
+      },
+      "holds": true
+    },
+    {
+      "id": "status_transition_disabled",
+      "finding": null,
+      "kind": "control",
+      "expected": "ALLOW",
+      "actual": {
+        "from": "DISABLED",
+        "to": "ACTIVE",
+        "error": null,
+        "finalState": "ACTIVE",
+        "statements": [
+          "SELECT u.id\n       FROM sys_users u\n       INNER JOIN sys_user_roles ur ON u.id = ur.user_id\n       INNER JOIN sys_roles r ON ur.role_id = r.id\n       WHERE r.role_name = 'SUPER_ADMIN' AND u.status = 'ACTIVE'\n       FOR UPDATE",
+          "SELECT id, status, version FROM sys_users WHERE id = ? FOR UPDATE",
+          "UPDATE sys_users\n         SET status = ?, auth_version = auth_version + 1, version = version + 1\n         WHERE id = ? AND version = ? AND status = ?",
+          "INSERT INTO sys_user_approvals (user_id, action, reason, operator_id)\n         VALUES (?, 'STATUS_CHANGE', ?, ?)"
+        ]
+      },
+      "holds": true
+    }
+  ],
+  "summary": {
+    "total": 27,
+    "holds": 27,
+    "violated": 0,
+    "findings": 0
+  }
+}
