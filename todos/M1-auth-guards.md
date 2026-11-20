@@ -1,7 +1,7 @@
 # M1：系统自举、认证会话与四级守卫闭环
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[ ] 未开始`
+- **状态**：`[~] 进行中（后端真实 MySQL 验收通过，待前端联调与 QA 验收）`
 - **对应接口数**：9 项 | **对应前端视图**：6 个（Auth / 状态页）
 
 ---
@@ -16,18 +16,18 @@
 
 ## 2. 后端交付清单（9 项接口 + 自举核心）
 
-- [ ] 实现 `BootstrapService`：仅在 `bootstrap_state = 'PENDING'` 且 14 张业务表为空时，同事务创建内置角色、全局配置、首个 `SUPER_ADMIN`、管理审计并置为 `READY`；异常库/非空 `PENDING` 拒绝 ready；密码不写普通日志
-- [ ] 实现 `Argon2id` 哈希与进程级 `Argon2Semaphore`、HttpOnly Cookie 会话（含 Session Regeneration）、`preValidation` 无副作用 CSRF 校验
-- [ ] 实现并注册以下 9 项接口（ID 全量序列化为 `string`，`email` 允许 `null`）：
-  - [ ] `GET /api/v1/auth/csrf`
-  - [ ] `POST /api/v1/auth/register`
-  - [ ] `POST /api/v1/auth/login`
-  - [ ] `POST /api/v1/auth/logout`
-  - [ ] `POST /api/v1/auth/change-password`
-  - [ ] `GET /api/v1/auth/me`（受限状态 `PENDING/REJECTED/DISABLED` 有效 Cookie 也返回 `200` 最小状态）
-  - [ ] `GET /api/v1/auth/password-policy`
-  - [ ] `PUT /api/v1/auth/password-policy`
-  - [ ] `POST /api/v1/approvals/resubmit`（`REJECTED` 用户修改资料重新申请）
+- [x] 实现 `BootstrapService`：仅在 `bootstrap_state = 'PENDING'` 且 14 张业务表为空时，同事务创建内置角色、全局配置、首个 `SUPER_ADMIN`、管理审计并置为 `READY`；异常库/非空 `PENDING` 拒绝 ready；密码不写普通日志
+- [x] 实现 `Argon2id` 哈希与进程级 `Argon2Semaphore`、HttpOnly Cookie 会话（含 Session Regeneration）、`preValidation` 无副作用 CSRF 校验
+- [x] 实现并注册以下 9 项接口（ID 全量序列化为 `string`，`email` 允许 `null`）：
+  - [x] `GET /api/v1/auth/csrf`
+  - [x] `POST /api/v1/auth/register`
+  - [x] `POST /api/v1/auth/login`
+  - [x] `POST /api/v1/auth/logout`
+  - [x] `POST /api/v1/auth/change-password`
+  - [x] `GET /api/v1/auth/me`（受限状态 `PENDING/REJECTED/DISABLED` 有效 Cookie 也返回 `200` 最小状态）
+  - [x] `GET /api/v1/auth/password-policy`
+  - [x] `PUT /api/v1/auth/password-policy`
+  - [x] `POST /api/v1/approvals/resubmit`（`REJECTED` 用户修改资料重新申请）
 
 ---
 
