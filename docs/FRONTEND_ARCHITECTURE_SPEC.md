@@ -1222,7 +1222,7 @@ export function profileToEditForm(profile: ProfileReadDTO) {
 
   --color-safe: oklch(0.45 0.16 155);             /* 深绿放行 */
   --color-safe-soft: oklch(0.94 0.04 155);
-  --color-warning: oklch(0.55 0.15 85);           /* 深琥珀预警 */
+  --color-warning: oklch(0.49 0.14 82);           /* 深琥珀预警 (相对 warning-soft 对比度 >= 5.45:1，满足 WCAG 2.1 AA) */
   --color-warning-soft: oklch(0.95 0.04 85);
   --color-danger: oklch(0.50 0.20 20);            /* 深红高危阻断 */
   --color-danger-soft: oklch(0.95 0.04 20);
