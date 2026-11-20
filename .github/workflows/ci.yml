@@ -67,6 +67,7 @@ jobs:
           } >> "$GITHUB_ENV"
       - run: node scripts/m0/mysql-up.mjs
       - run: pnpm test:integration
+      - run: pnpm test:m1
       - name: Frontend build, gzip budget and browser E2E
         env:
           REQUIRE_FRONTEND: ${{ inputs.require_frontend || github.ref_name == 'main' || github.base_ref == 'main' }}

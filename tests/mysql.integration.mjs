@@ -41,10 +41,10 @@ test('real MySQL 8.0: exact DDL inventory, PENDING, prepared values, BIGINT and 
 
 for (const [name, create, port] of [['admin-api', createAdmin, 8081], ['gateway', createGateway, 8080]]) {
   test(`${name}: real TCP HTTP and real MySQL readiness`, async (t) => {
-    const listener = create(config);
+    const listener = create(config, {});
     t.after(() => listener.close());
     const base = await listener.listen({ host: '127.0.0.1', port });
-    for (const [route, expected, body] of [['live', 200, { status: 'ok' }], ['ready', 200, { status: 'ready' }]]) {
+    for (const [route, expected, body] of [['live', 200, { status: 'ok' }], ['ready', name === 'admin-api' ? 503 : 200, { status: name === 'admin-api' ? 'not_ready' : 'ready' }]]) {
       const response = await fetch(`${base}/health/${route}`, { signal: AbortSignal.timeout(5_000) });
       assert.equal(response.status, expected);
       assert.deepEqual(await response.json(), body);

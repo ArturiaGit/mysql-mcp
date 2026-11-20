@@ -9,8 +9,8 @@
     "src/**/*.ts"
   ],
   "references": [
-    {
-      "path": "../../packages/core-engine"
-    }
+    { "path": "../../packages/shared-types" },
+    { "path": "../../packages/security" },
+    { "path": "../../packages/core-engine" }
   ]
 }

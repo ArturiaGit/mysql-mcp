@@ -1,0 +1,40 @@
+import type { ErrorCode } from '@mysql-mcp/shared-types';
+
+type ErrorDetails = {
+  remaining_attempts?: number;
+  retry_after_sec?: number;
+  validation_errors?: { field: string; message: string; rule: string }[];
+};
+
+const guidance: Partial<Record<ErrorCode, readonly [string, string]>> = {
+  ERR_AUTH_FAILED: ['账号或密码错误。', '请核对后重试。'],
+  ERR_AUTH_UNAUTHORIZED: ['登录会话无效。', '请重新登录。'],
+  ERR_OLD_PASSWORD_INVALID: ['当前密码不正确。', '请核对当前密码后重试。'],
+  ERR_AUTH_ACCOUNT_LOCKED: ['账号已临时锁定。', '请等待冷却后重试。'],
+  ERR_CSRF_INVALID: ['安全令牌无效或已过期。', '请刷新安全令牌后重试。'],
+  ERR_MUST_CHANGE_PASSWORD: ['密码需要更新。', '请修改密码后继续。'],
+  ERR_PASSWORD_POLICY_VIOLATED: ['密码不符合复杂度要求。', '使用 8 至 64 个字符，包含大小写字母、数字和符号。'],
+  ERR_AUTH_ACCOUNT_PENDING: ['账号尚未通过审批。', '请等待管理员审批。'],
+  ERR_AUTH_ACCOUNT_REJECTED: ['申请已被驳回。', '请补充信息后重新提交。'],
+  ERR_AUTH_ACCOUNT_DISABLED: ['账号已停用。', '请联系管理员。'],
+  ERR_AUTH_USERNAME_EXISTS: ['用户名已存在。', '请更换用户名。'],
+  ERR_SAME_AS_OLD_PASSWORD: ['新旧密码相同。', '请设置不同的新密码。'],
+  ERR_NOT_FOUND: ['资源不存在。', '请检查请求路径。'],
+};
+
+export class ApiError extends Error {
+  constructor(readonly statusCode: number, readonly code: ErrorCode, readonly details?: ErrorDetails) {
+    super(code);
+  }
+}
+
+export function errorBody(error: ApiError) {
+  const [message, action_guidance] = guidance[error.code] ?? ['请求未能完成。', '请检查输入或联系管理员。'];
+  const { remaining_attempts, retry_after_sec, validation_errors } = error.details ?? {};
+  return {
+    code: error.code, message, action_guidance, timestamp: new Date().toISOString(),
+    ...(remaining_attempts === undefined ? {} : { remaining_attempts }),
+    ...(retry_after_sec === undefined ? {} : { retry_after_sec }),
+    ...(error.code === 'ERR_VALIDATION_FAILED' ? { details: { validation_errors: validation_errors ?? [] } } : {}),
+  };
+}

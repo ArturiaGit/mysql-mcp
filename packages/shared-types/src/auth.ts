@@ -67,3 +67,8 @@ export interface UpdatePasswordPolicyResponseDTO {
 
 export interface ActionSuccessDTO { success: true; }
 export interface AuthErrorDetailsDTO { remaining_attempts?: number; retry_after_sec?: number; }
+
+export type RestrictedUserProfileDTO = Pick<UserProfileDTO,
+  'id' | 'username' | 'email' | 'department' | 'reject_reason' | 'created_at'> & { status: Exclude<UserStatus, 'ACTIVE'> };
+
+export type CurrentUserResponseDTO = (UserProfileDTO & { status: 'ACTIVE' }) | RestrictedUserProfileDTO;

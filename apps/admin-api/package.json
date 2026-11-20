@@ -5,7 +5,10 @@
   "type": "module",
   "dependencies": {
     "@mysql-mcp/core-engine": "workspace:*",
-    "fastify": "5.12.8"
+    "@mysql-mcp/security": "workspace:*",
+    "@mysql-mcp/shared-types": "workspace:*",
+    "fastify": "5.12.8",
+    "zod": "4.1.13"
   },
   "scripts": {
     "start": "node dist/main.js"
