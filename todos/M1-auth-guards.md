@@ -1,7 +1,7 @@
 # M1：系统自举、认证会话与四级守卫闭环
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[~] 进行中（后端真实 MySQL 验收通过，待前端联调与 QA 验收）`
+- **状态**：`[~] 进行中（前后端均已完成并直连实测通过，进入 QA 独立验收）`
 - **对应接口数**：9 项 | **对应前端视图**：6 个（Auth / 状态页）
 
 ---
@@ -33,17 +33,17 @@
 
 ## 3. 前端交付清单（6 个视图 + 请求/守卫基座）
 
-- [ ] 实现 `src/api/client.ts`：单飞 CSRF 刷新与 `ERR_CSRF_INVALID` 一次重试、401 重定向、`sanitizeReturnUrl`（拦截反斜杠与 `//` 协议相对 URL）
-- [ ] 实现 `src/api/session-request.ts`：`SessionRequestManager.abortAndRotate()`（登出先断业务流再发 `/auth/logout`）
-- [ ] 实现 `src/api/schemas/auth.schema.ts`（`email: nullable`、`id: string`）及 `expectTypeOf` 双向静态等价测试
-- [ ] 实现四级路由守卫管道：`AuthGuard -> StatusGuard -> MustChangePwdGuard（仅 ACTIVE） -> RoleGuard`
-- [ ] 实现 6 个认证与状态视图：
-  - [ ] `/login` (`LoginView.tsx`)
-  - [ ] `/register` (`RegisterView.tsx`)
-  - [ ] `/change-password` (`ChangePasswordView.tsx`，含密码轮换策略编辑与高危关闭确认)
-  - [ ] `/approvals/wait` (`PendingApprovalView.tsx`)
-  - [ ] `/approvals/re` (`ResubmitApprovalView.tsx`，展示 `reject_reason` 并对接重提接口)
-  - [ ] `/forbidden` (`AccountDisabledView.tsx`)
+- [x] 实现 `src/api/client.ts`：单飞 CSRF 刷新与 `ERR_CSRF_INVALID` 一次重试、401 重定向、`sanitizeReturnUrl`（拦截反斜杠与 `//` 协议相对 URL）
+- [x] 实现 `src/api/session-request.ts`：`SessionRequestManager.abortAndRotate()`（登出先断业务流再发 `/auth/logout`）
+- [x] 实现 `src/api/schemas/auth.schema.ts`（`email: nullable`、`id: string`）及 `expectTypeOf` 双向静态等价测试
+- [x] 实现四级路由守卫管道：`AuthGuard -> StatusGuard -> MustChangePwdGuard（仅 ACTIVE） -> RoleGuard`
+- [x] 实现 6 个认证与状态视图：
+  - [x] `/login` (`LoginView.tsx`)
+  - [x] `/register` (`RegisterView.tsx`)
+  - [x] `/change-password` (`ChangePasswordView.tsx`，含密码轮换策略编辑与高危关闭确认)
+  - [x] `/approvals/wait` (`PendingApprovalView.tsx`)
+  - [x] `/approvals/re` (`ResubmitApprovalView.tsx`，展示 `reject_reason` 并对接重提接口)
+  - [x] `/forbidden` (`AccountDisabledView.tsx`)
 
 ---
 
