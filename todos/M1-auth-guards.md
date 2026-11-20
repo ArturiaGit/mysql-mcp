@@ -1,7 +1,7 @@
 # M1：系统自举、认证会话与四级守卫闭环
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[~] 进行中（前后端均已完成并直连实测通过，进入 QA 独立验收）`
+- **状态**：`[x] 已完成（后端真实 MySQL 验收 + 前端高保真直连联调 + QA 独立复测 PASS，待 Arturia 审阅批准推送/合入 main）`
 - **对应接口数**：9 项 | **对应前端视图**：6 个（Auth / 状态页）
 
 ---
@@ -49,6 +49,6 @@
 
 ## 4. 模块联调验收剧本
 
-- [ ] **真实库首次自举与强制改密**：Docker 空库启动生成唯一超管 → 登录自动进 `/change-password` → 手动跳转 `/audits` 被硬拦截 → 完成改密解锁进入 `/dashboard` 并轮换 CSRF
-- [ ] **生命周期守卫闭环**：注册账号（`PENDING`）访问受保护路由被 L2 `StatusGuard` 拦到 `/approvals/wait`（**绝不触发 `MustChangePwdGuard`**）；构造 `REJECTED` 账号在 `/approvals/re` 重提回到 `PENDING`；`DISABLED` 账号进入 `/forbidden`
-- [ ] **安全单测与后端基线**：`sanitizeReturnUrl` 边界测试全绿；防爆破次数提示正确；登出断流测试与 `TC-BE-16` 通过
+- [x] **真实库首次自举与强制改密**：Docker 空库启动生成唯一超管 → 登录自动进 `/change-password` → 手动跳转 `/audits` 被硬拦截 → 完成改密解锁进入 `/dashboard` 并轮换 CSRF
+- [x] **生命周期守卫闭环**：注册账号（`PENDING`）访问受保护路由被 L2 `StatusGuard` 拦到 `/approvals/wait`（**绝不触发 `MustChangePwdGuard`**）；构造 `REJECTED` 账号在 `/approvals/re` 重提回到 `PENDING`；`DISABLED` 账号进入 `/forbidden`
+- [x] **安全单测与后端基线**：`sanitizeReturnUrl` 边界测试全绿；防爆破次数提示正确；登出断流测试与 `TC-BE-16` 通过
