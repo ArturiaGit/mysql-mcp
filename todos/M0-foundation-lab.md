@@ -1,7 +1,7 @@
 # M0：双端工程底座、机械护栏与 `/_lab` 组件实验室
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[~] 进行中`（Step 1 后端与基建、Step 2 前端与 `/_lab` 已本地验收；待 Step 3 QA 独立验收）
+- **状态**：`[~] 待远端 CI 收口`（Step 1 后端、Step 2 前端、Step 3 QA 本地验收全部 `PASS`；待 Arturia 批准推送 GitHub 远端完成首轮 CI/CodeQL 验收后收口）
 - **目标**：搭建 Monorepo 工程骨架、TS/ESLint 机械护栏、Docker MySQL 14 表初始化基线与开发态 `/_lab` 组件实验室，确保后续业务模块在同一套底座与高保真组件库上开发。
 
 ---
@@ -56,9 +56,9 @@
 
 ## 4. 模块验收门禁（全部通过才可勾 `[x]`）
 
-- [ ] `pnpm typecheck` 与 `pnpm lint` 零报错
-- [ ] `python scripts/generate_readiness_contracts.py --check` 通过
-- [ ] Docker MySQL 成功导入 `001_metadata_schema.sql`（14 张表及 `bootstrap_state = 'PENDING'`），`admin-api` 连接测试与健康探针通过
-- [ ] 浏览器对照 `ui-showcase.html` 核验 `/_lab`：Dark/Light 双模式对比度正常、`38px` 表行、`56px` Topbar、键盘导航（`Tab` / `Ctrl+K` / `Esc` 归还焦点）全部正常
-- [ ] `commitlint` 钩子实测有效（拦截非法 commit 信息、放行合规提交），`.gitignore` 拦截敏感文件
-- [ ] `.github/workflows/*.yml` 与 `.github/dependabot.yml` 校验通过（推送 GitHub 远端后 CI 与 CodeQL 首轮全绿，并确认开启 Secret Scanning / Push Protection）
+- [x] `pnpm typecheck` 与 `pnpm lint` 零报错
+- [x] `python scripts/generate_readiness_contracts.py --check` 通过
+- [x] Docker MySQL 成功导入 `001_metadata_schema.sql`（14 张表及 `bootstrap_state = 'PENDING'`），`admin-api` 连接测试与健康探针通过
+- [x] 浏览器对照 `ui-showcase.html` 核验 `/_lab`：Dark/Light 双模式对比度正常、`38px` 表行、`56px` Topbar、键盘导航（`Tab` / `Ctrl+K` / `Esc` 归还焦点）全部正常
+- [x] `commitlint` 钩子实测有效（拦截非法 commit 信息、放行合规提交），`.gitignore` 拦截敏感文件
+- [ ] `.github/workflows/*.yml` 与 `.github/dependabot.yml` 校验通过（本地 YAML/最小权限/Commit SHA 校验已通过；待 Arturia 批准推送 GitHub 远端后完成 CI 与 CodeQL 首轮全绿，并确认开启 Secret Scanning / Push Protection）
