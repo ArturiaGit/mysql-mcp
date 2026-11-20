@@ -25,7 +25,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
       - run: npm install --global pnpm@10.32.1
