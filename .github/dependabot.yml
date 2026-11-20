@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # No routine npm version PRs; security alerting and any permitted security PRs are reviewed by humans.
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: mysql2
+      - dependency-name: node-sql-parser
+      - dependency-name: fastify
+      - dependency-name: '@node-rs/argon2'
+      - dependency-name: ssh2
+      - dependency-name: typescript
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

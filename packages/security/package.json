@@ -1,0 +1,10 @@
+{
+  "name": "@mysql-mcp/security",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@node-rs/argon2": "2.0.2",
+    "ssh2": "1.16.0"
+  }
+}
