@@ -53,6 +53,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm test:guardrails
       - run: pnpm test
+      - run: pnpm --filter @mysql-mcp/admin-ui test
       - name: Set ephemeral database credentials
         run: |
           root_password=$(openssl rand -hex 32)
@@ -68,11 +69,17 @@ jobs:
       - run: node scripts/m0/mysql-up.mjs
       - run: pnpm test:integration
       - run: pnpm test:m1
+      # The backend suite leaves a dirty PENDING fixture. Browser suites each bootstrap their own database.
+      - name: Reset MySQL before frontend verification
+        run: docker compose down --volumes && node scripts/m0/mysql-up.mjs
       - name: Frontend build, gzip budget and browser E2E
         env:
           REQUIRE_FRONTEND: ${{ inputs.require_frontend || github.ref_name == 'main' || github.base_ref == 'main' }}
         run: |
           if [[ "$REQUIRE_FRONTEND" == true ]]; then
+            pnpm --filter @mysql-mcp/admin-ui build
+            pnpm --filter @mysql-mcp/admin-ui test:e2e:m1
+            docker compose down --volumes && node scripts/m0/mysql-up.mjs
             pnpm ci:frontend --require-frontend
           else
             pnpm ci:frontend
