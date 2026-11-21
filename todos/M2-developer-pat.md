@@ -16,6 +16,10 @@
 
 ## 2. 后端交付清单（4 项接口）
 
+> **Owner 拍板执行口径（已确认）**：
+> - **PAT 签发审计**：遵循 `docs/DATABASE_DESIGN_SPEC.md` §L620 现行字典，同事务写入 `sys_user_approvals`：`action = 'CONFIG_UPDATE'`、`target_type = 'PAT'`、`target_id = patId`、`details = { operation: 'PAT_CREATE', name, tokenPrefix, expiresAt }`（仅脱敏摘要，严禁明文/哈希）；吊销沿用 `action = 'PAT_REVOKE'`。
+> - **`SERVER_PEPPER` 配置（方案 A）**：`apps/admin-api` 引入独立必填环境变量 `SERVER_PEPPER`（`Buffer.byteLength >= 32`，缺失或不足时 Fail-Closed 拒绝 `/health/ready`），专门用于 `HMAC-SHA-256(SERVER_PEPPER, rawToken)`；PAT 原文遵循 `DATABASE_DESIGN_SPEC.md` §L734 固定 `^mcp_pat_[0-9a-f]{64}$`（`token_prefix` 取前 16 位）；同步补齐 E2E（`m0-lab` / `m1-auth`）与 CI 环境变量注入。
+
 - [ ] `GET /api/v1/pats`（仅返回 `token_prefix` 与脱敏摘要，永不回传可恢复明文）
 - [ ] `POST /api/v1/pats`（256-bit CSPRNG + `HMAC-SHA-256(SERVER_PEPPER, rawToken)` 落库 `sys_pats`，仅创建响应返回一次 `rawToken`，同事务写审计）
 - [ ] `POST /api/v1/pats/:id/revoke`（仅允许本人或授权主体吊销，同步写审计）
