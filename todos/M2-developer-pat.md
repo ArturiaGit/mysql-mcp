@@ -30,13 +30,13 @@
 
 ## 3. 前端交付清单（2 个视图 + 2 个领域组件）
 
-- [ ] 落地 `src/components/domain/pat-modal/`（严格还原 `ui-showcase.html` `#patDialog` 三态防呆）：
+- [x] 落地 `src/components/domain/pat-modal/`（严格还原 `ui-showcase.html` `#patDialog` 三态防呆）：
   - 输入态（名称必填、有效期、加载防重入）
   - 揭示态（红色警示横幅、等宽明文、一键复制、`我已妥善保存` 勾选解锁关闭按钮）
   - 退出拦截态（未勾选点击关闭或 `Esc` 原地展开挽留确认；真正关闭立即清空内存明文）
-- [ ] 落地 `src/components/domain/client-snippet/`（Claude Desktop / Codex / 通用 cURL 三态切换，默认安全占位 `<YOUR_SAVED_PAT_TOKEN>`，支持仅内存临时装填，绝不持久化）
-- [ ] 实现 `/developer/pats`（`MyTokensView.tsx`，含危险确认输入撤销弹窗）
-- [ ] 实现 `/developer/config`（`ClientConfigView.tsx`，调用 `GET /api/v1/profiles/my-options`）
+- [x] 落地 `src/components/domain/client-snippet/`（Claude Desktop / Codex / 通用 cURL 三态切换，默认安全占位 `<YOUR_SAVED_PAT_TOKEN>`，支持仅内存临时装填，绝不持久化）
+- [x] 实现 `/developer/pats`（`MyTokensView.tsx`，含危险确认输入撤销弹窗）
+- [x] 实现 `/developer/config`（`ClientConfigView.tsx`，调用 `GET /api/v1/profiles/my-options`）
 
 ---
 

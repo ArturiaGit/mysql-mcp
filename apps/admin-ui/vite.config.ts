@@ -52,6 +52,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Keep route-scoped Radix Tabs primitives out of the eager global vendor chunk
+            if (
+              id.includes('@radix-ui/react-tabs') ||
+              id.includes('@radix-ui/react-roving-focus') ||
+              id.includes('@radix-ui/react-collection')
+            ) {
+              return undefined;
+            }
             return 'vendors';
           }
           return undefined;

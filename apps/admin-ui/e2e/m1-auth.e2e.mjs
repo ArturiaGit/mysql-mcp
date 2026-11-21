@@ -183,6 +183,7 @@ async function run() {
         ADMIN_API_HOST: '127.0.0.1',
         ADMIN_API_PORT: String(apiPort),
         ADMIN_API_SECRET: randomBytes(32).toString('hex'),
+        SERVER_PEPPER: process.env.SERVER_PEPPER ?? randomBytes(32).toString('hex'),
         GATEWAY_MASTER_KEYS: JSON.stringify({
           active_key_id: 'e2e',
           keys: { e2e: randomBytes(32).toString('hex') },

@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test:e2e": "node e2e/m0-lab.e2e.mjs",
-    "test:e2e:m1": "node e2e/m1-auth.e2e.mjs"
+    "test:e2e:m1": "node e2e/m1-auth.e2e.mjs",
+    "test:e2e:m2": "node e2e/m2-developer.e2e.mjs"
   },
   "dependencies": {
     "@mysql-mcp/shared-types": "workspace:*",

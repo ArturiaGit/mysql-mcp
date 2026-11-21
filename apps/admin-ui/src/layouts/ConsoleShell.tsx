@@ -1,12 +1,13 @@
 import type { SystemRole } from '@mysql-mcp/shared-types';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { handleLogout } from '@/api/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { useActiveUser } from '@/guards/auth-guards';
+import { useCommandStore, type CommandItem } from '@/stores/useCommandStore';
 import { AppShell } from './AppShell';
 import type { SidebarNavGroup } from './Sidebar';
 
@@ -15,16 +16,18 @@ interface NavRouteDef {
   label: string;
   icon: IconName;
   to: string;
+  keywords: string;
   roles?: readonly SystemRole[];
 }
 
 const OPERATIONS_NAV: readonly NavRouteDef[] = [
-  { id: 'dashboard', label: '工作台大盘', icon: 'grid', to: '/dashboard' },
+  { id: 'dashboard', label: '工作台大盘', icon: 'grid', to: '/dashboard', keywords: 'dashboard overview 首页 大盘' },
   {
     id: 'audits',
     label: '全链路审计',
     icon: 'activity',
     to: '/audits',
+    keywords: 'audit sql logs 审计 日志',
     roles: ['SUPER_ADMIN', 'SECURITY_ADMIN'],
   },
 ];
@@ -35,14 +38,16 @@ const GOVERNANCE_NAV: readonly NavRouteDef[] = [
     label: '审批工单中心',
     icon: 'user-check',
     to: '/approvals',
+    keywords: 'approvals pending 审批 工单',
     roles: ['SUPER_ADMIN', 'SECURITY_ADMIN'],
   },
-  { id: 'users', label: '用户与角色', icon: 'users', to: '/users', roles: ['SUPER_ADMIN'] },
+  { id: 'users', label: '用户与角色', icon: 'users', to: '/users', keywords: 'users roles 用户 角色', roles: ['SUPER_ADMIN'] },
   {
     id: 'policies',
     label: '策略与 ACL',
     icon: 'shield',
     to: '/policies',
+    keywords: 'policies acl blacklist whitelist 策略 权限',
     roles: ['SUPER_ADMIN', 'SECURITY_ADMIN'],
   },
   {
@@ -50,6 +55,7 @@ const GOVERNANCE_NAV: readonly NavRouteDef[] = [
     label: '双重漏斗限流',
     icon: 'sliders',
     to: '/limits',
+    keywords: 'limits qpm rate 限流 配额',
     roles: ['SUPER_ADMIN', 'SECURITY_ADMIN'],
   },
   {
@@ -57,6 +63,7 @@ const GOVERNANCE_NAV: readonly NavRouteDef[] = [
     label: '数据源 Profile',
     icon: 'database',
     to: '/profiles',
+    keywords: 'profiles mysql datasource ssh 数据源',
     roles: ['SUPER_ADMIN', 'DBA'],
   },
   {
@@ -64,14 +71,15 @@ const GOVERNANCE_NAV: readonly NavRouteDef[] = [
     label: '系统告警通知',
     icon: 'mail',
     to: '/settings/notifications',
+    keywords: 'notifications webhook alert 告警 通知',
     roles: ['SUPER_ADMIN', 'SECURITY_ADMIN'],
   },
 ];
 
 const DEVELOPER_NAV: readonly NavRouteDef[] = [
-  { id: 'pats', label: '个人访问令牌', icon: 'key', to: '/developer/pats' },
-  { id: 'config', label: '客户端接入配置', icon: 'terminal', to: '/developer/config' },
-  { id: 'password', label: '密码与轮换策略', icon: 'lock', to: '/change-password' },
+  { id: 'pats', label: '个人访问令牌 (PAT)', icon: 'key', to: '/developer/pats', keywords: 'pat token key 个人访问令牌 签发 吊销 developer' },
+  { id: 'config', label: '客户端接入配置', icon: 'terminal', to: '/developer/config', keywords: 'config snippet claude codex curl mcp 客户端 配置 developer' },
+  { id: 'password', label: '密码与轮换策略', icon: 'lock', to: '/change-password', keywords: 'password policy 密码 轮换' },
 ];
 
 function hasAnyRole(userRoles: readonly SystemRole[], required?: readonly SystemRole[]): boolean {
@@ -90,7 +98,30 @@ export function ConsoleShell({ sectionLabel, pageLabel, children }: ConsoleShell
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const registerCommands = useCommandStore((state) => state.registerCommands);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const groups: readonly { tag: string; defs: readonly NavRouteDef[] }[] = [
+      { tag: 'OPERATIONS', defs: OPERATIONS_NAV },
+      { tag: 'GOVERNANCE', defs: GOVERNANCE_NAV },
+      { tag: 'DEVELOPER', defs: DEVELOPER_NAV },
+    ];
+    const items: CommandItem[] = groups.flatMap(({ tag, defs }) =>
+      defs
+        .filter((def) => hasAnyRole(user.roles, def.roles))
+        .map((def) => ({
+          id: `nav-${def.id}`,
+          title: def.label,
+          tag,
+          keywords: `${def.label} ${def.keywords} ${def.to}`,
+          iconName: def.icon,
+          action: () => navigate(def.to),
+        })),
+    );
+    registerCommands(items);
+    return () => registerCommands([]);
+  }, [navigate, registerCommands, user.roles]);
 
   const mapGroup = (label: string, defs: readonly NavRouteDef[]): SidebarNavGroup | null => {
     const items = defs
