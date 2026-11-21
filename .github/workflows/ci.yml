@@ -42,7 +42,8 @@ jobs:
           base="${PR_BASE:-$BEFORE}"
           tip="${PR_HEAD:-$GITHUB_SHA}"
           if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
-            for commit in $(git rev-list --reverse "$tip"); do
+            git fetch origin main --quiet
+            for commit in $(git rev-list --reverse --no-merges origin/main.."$tip"); do
               git log --format=%B -1 "$commit" | pnpm exec commitlint --verbose
             done
           else

@@ -4,7 +4,7 @@ import type {
   ChangePasswordRequestDTO, EntityId, RegisterRequestDTO, ResubmitApprovalRequestDTO,
   SystemRole, UpdatePasswordPolicyResponseDTO, UserProfileDTO, UserStatus,
 } from '@mysql-mcp/shared-types';
-import { csrfToken, hasStrongPassword, newSecret, passwordExpiry, passwordPolicyDTO, SESSION_TTL_SECONDS } from './auth-domain.js';
+import { csrfToken, createOpaqueId, hasStrongPassword, passwordExpiry, passwordPolicyDTO, SESSION_TTL_SECONDS } from './auth-domain.js';
 import { ApiError } from './errors.js';
 import { IpAttemptLimiter } from './ip-attempt-limiter.js';
 
@@ -28,7 +28,7 @@ export class AuthService {
 
   createCsrf(sid: string | undefined, previous: string | undefined) {
     const session = this.liveSession(sid);
-    const seed = session?.seed ?? (previous && /^[a-f0-9]{64}$/.test(previous) ? previous : newSecret());
+    const seed = session?.seed ?? (previous && /^[a-f0-9]{64}$/.test(previous) ? previous : createOpaqueId());
     return { seed, token: csrfToken(`${session ? sid : 'anonymous'}:${seed}`, this.secret) };
   }
 
@@ -63,7 +63,7 @@ export class AuthService {
     this.loginLimit.admit(ip);
     const [[snapshot]] = await this.db.query<UserRow[]>('SELECT * FROM sys_users WHERE username = ?', [username]);
     if (!snapshot) {
-      this.dummyHash ??= this.hash(newSecret()).catch((error: unknown) => { this.dummyHash = undefined; throw error; });
+      this.dummyHash ??= this.hash(createOpaqueId()).catch((error: unknown) => { this.dummyHash = undefined; throw error; });
       await this.verify(await this.dummyHash, password);
       await this.auditLogin(ip, 'AUTH_FAILED');
       throw loginFailed(1);
@@ -90,7 +90,7 @@ export class AuthService {
     });
     if ('error' in outcome) throw outcome.error;
     this.logout(oldSid);
-    return { user: outcome.user, ...this.issueSession(outcome.user.id, outcome.authVersion) };
+    return { user: outcome.user, ...this.issueRegeneratedSession(outcome.user.id, outcome.authVersion) };
   }
 
   async authenticate(sid: string | undefined): Promise<UserProfileDTO> {
@@ -107,7 +107,7 @@ export class AuthService {
 
   logout(sid: string | undefined): void { if (sid) this.sessions.delete(sid); }
 
-  async changePassword(user: UserProfileDTO, { oldPassword, newPassword, revokeAllPats = true }: ChangePasswordRequestDTO) {
+  async changePassword(user: UserProfileDTO, { oldPassword, newPassword, revokeAllPats = true }: ChangePasswordRequestDTO): Promise<number> {
     const [[row]] = await this.db.query<UserRow[]>('SELECT * FROM sys_users WHERE id = ?', [user.id]);
     if (!row || !(await this.verify(row.password_hash, oldPassword))) throw new ApiError(400, 'ERR_OLD_PASSWORD_INVALID');
     if (!hasStrongPassword(newPassword)) throw new ApiError(400, 'ERR_PASSWORD_POLICY_VIOLATED');
@@ -123,7 +123,7 @@ export class AuthService {
       await tx.query("INSERT INTO sys_user_approvals (user_id, action, operator_id, target_type, target_id, details) VALUES (?, 'STATUS_CHANGE', ?, 'USER', ?, JSON_OBJECT('event', 'PASSWORD_CHANGED'))", [user.id, user.id, user.id]);
     });
     for (const [id, session] of this.sessions) if (session.userId === user.id) this.sessions.delete(id);
-    return this.issueSession(user.id, row.auth_version + 1);
+    return row.auth_version + 1;
   }
 
   getPasswordPolicy(user: UserProfileDTO) {
@@ -165,17 +165,21 @@ export class AuthService {
     return session && session.expiresAt > Date.now() ? session : undefined;
   }
 
-  private issueSession(userId: EntityId, authVersion: number) {
+  issueRegeneratedSession(userId: EntityId, authVersion: number) {
+    return this.createSession(userId, authVersion);
+  }
+
+  private createSession(userId: EntityId, authVersion: number) {
     const now = Date.now();
     if (this.sessions.size >= maxSessions) {
       for (const [id, session] of this.sessions) if (session.expiresAt <= now) this.sessions.delete(id);
       const oldest = this.sessions.keys().next().value;
       if (this.sessions.size >= maxSessions && oldest) this.sessions.delete(oldest);
     }
-    const sid = newSecret();
-    const seed = newSecret();
-    this.sessions.set(sid, { userId, authVersion, seed, expiresAt: now + SESSION_TTL_SECONDS * 1000 });
-    return { sid, seed };
+    const sessionId = createOpaqueId();
+    const csrfNonce = createOpaqueId();
+    this.sessions.set(sessionId, { userId, authVersion, seed: csrfNonce, expiresAt: now + SESSION_TTL_SECONDS * 1000 });
+    return { sid: sessionId, seed: csrfNonce };
   }
 
   private async profile(user: UserRow, db: MetadataQueryExecutor): Promise<UserProfileDTO> {

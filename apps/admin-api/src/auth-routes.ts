@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import rateLimit from '@fastify/rate-limit';
 import type { CurrentUserResponseDTO, SystemRole, UserProfileDTO } from '@mysql-mcp/shared-types';
 import { z } from 'zod';
 import { cookie, CSRF_COOKIE, equalSecret, parseCookies, PASSWORD_MAX_DAYS, PASSWORD_MIN_DAYS, SESSION_COOKIE, SESSION_TTL_SECONDS } from './auth-domain.js';
@@ -21,7 +22,8 @@ const changeSchema = z.strictObject({ oldPassword: password, newPassword: passwo
 const policySchema = z.strictObject({ passwordExpiresDays: z.number().int().min(PASSWORD_MIN_DAYS).max(PASSWORD_MAX_DAYS).nullable() });
 const resubmitSchema = z.strictObject({ ...contact, reason: z.string().trim().min(1).max(512) });
 
-export function registerAuthRoutes(app: FastifyInstance, { service, secureCookies, ready }: RouteOptions): void {
+export async function registerAuthRoutes(app: FastifyInstance, { service, secureCookies, ready }: RouteOptions): Promise<void> {
+  await app.register(rateLimit, { global: false, max: 100, timeWindow: 60_000 });
   const users = new WeakMap<FastifyRequest, UserProfileDTO>();
   const guard = (policy: GuardPolicy = {}) => async (request: FastifyRequest) => {
     const user = await service.authenticate(sessionId(request));
@@ -59,11 +61,11 @@ export function registerAuthRoutes(app: FastifyInstance, { service, secureCookie
     if (seed !== previous) reply.header('set-cookie', cookie(CSRF_COOKIE, seed, secureCookies, SESSION_TTL_SECONDS));
     return { csrfToken: token };
   });
-  app.post('/api/v1/auth/register', async (request) => {
+  app.post('/api/v1/auth/register', { config: { rateLimit: { max: 30, timeWindow: 60_000 } } }, async (request) => {
     await service.register(parse(registerSchema, request.body), request.ip);
     return { success: true, message: '注册申请已成功提交，请等待系统管理员审批。' };
   });
-  app.post('/api/v1/auth/login', async (request, reply) => {
+  app.post('/api/v1/auth/login', { config: { rateLimit: { max: 100, timeWindow: 60_000 } } }, async (request, reply) => {
     const { username, password } = parse(loginSchema, request.body);
     const { user, sid, seed } = await service.login(username, password, request.ip, sessionId(request));
     setCookies(reply, sid, seed);
@@ -75,9 +77,11 @@ export function registerAuthRoutes(app: FastifyInstance, { service, secureCookie
     reply.header('set-cookie', [cookie(SESSION_COOKIE, '', secureCookies, 0), cookie(CSRF_COOKIE, '', secureCookies, 0)]);
     return { success: true };
   });
-  app.post('/api/v1/auth/change-password', { preHandler: guard({ allowExpired: true }) }, async (request, reply) => {
+  app.post('/api/v1/auth/change-password', { config: { rateLimit: { max: 30, timeWindow: 60_000 } }, preHandler: guard({ allowExpired: true }) }, async (request, reply) => {
     const input = parse(changeSchema, request.body);
-    const { sid, seed } = await service.changePassword(current(request), input);
+    const user = current(request);
+    const authVersion = await service.changePassword(user, input);
+    const { sid, seed } = service.issueRegeneratedSession(user.id, authVersion);
     setCookies(reply, sid, seed);
     return { success: true };
   });
@@ -90,7 +94,7 @@ export function registerAuthRoutes(app: FastifyInstance, { service, secureCookie
   });
   app.get('/api/v1/auth/password-policy', { preHandler: guard({ allowExpired: true }) }, async (request) => service.getPasswordPolicy(current(request)));
   app.put('/api/v1/auth/password-policy', { preHandler: guard() }, async (request) => service.updatePasswordPolicy(current(request), parse(policySchema, request.body).passwordExpiresDays));
-  app.post('/api/v1/approvals/resubmit', { preHandler: guard({ restricted: 'rejected' }) }, async (request) => {
+  app.post('/api/v1/approvals/resubmit', { config: { rateLimit: { max: 20, timeWindow: 60_000 } }, preHandler: guard({ restricted: 'rejected' }) }, async (request) => {
     await service.resubmit(current(request), parse(resubmitSchema, request.body));
     return { success: true };
   });

@@ -8,7 +8,7 @@ export const PASSWORD_MIN_DAYS = 30;
 export const PASSWORD_MAX_DAYS = 180;
 export const PASSWORD_DAY_MS = 86_400_000;
 
-export function newSecret(bytes = 32): string { return randomBytes(bytes).toString('hex'); }
+export function createOpaqueId(bytes = 32): string { return randomBytes(bytes).toString('hex'); }
 
 export function csrfToken(seed: string, secret: string): string {
   return createHmac('sha256', secret).update(seed).digest('hex');

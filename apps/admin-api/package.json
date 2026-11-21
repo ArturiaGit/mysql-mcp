@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
+    "@fastify/rate-limit": "10.3.0",
     "@mysql-mcp/core-engine": "workspace:*",
     "@mysql-mcp/security": "workspace:*",
     "@mysql-mcp/shared-types": "workspace:*",

@@ -34,7 +34,9 @@ export function createServer(config?: MetadataDbConfig, env: NodeJS.ProcessEnv =
         console.warn('admin-api metadata initialization failed; readiness remains closed');
       }
     });
-    registerAuthRoutes(app, { service: auth, secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining });
+    app.register(async (authRoutes) => {
+      await registerAuthRoutes(authRoutes, { service: auth, secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining });
+    });
   }
   app.setErrorHandler((error, _request, reply) => {
     const status = error instanceof Error && 'statusCode' in error ? error.statusCode : undefined;
