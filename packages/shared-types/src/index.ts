@@ -1,4 +1,22 @@
 export type { ErrorCode } from './error-codes.js';
+export type {
+  ActionSuccessDTO,
+  AuthErrorDetailsDTO,
+  ChangePasswordRequestDTO,
+  CsrfTokenDTO,
+  CurrentUserResponseDTO,
+  LoginRequestDTO,
+  LoginResponseDTO,
+  PasswordPolicyDTO,
+  RegisterRequestDTO,
+  RegisterResponseDTO,
+  ResubmitApprovalRequestDTO,
+  RestrictedUserProfileDTO,
+  SystemRole,
+  UpdatePasswordPolicyRequestDTO,
+  UpdatePasswordPolicyResponseDTO,
+  UserProfileDTO,
+} from './auth.js';
 
 export type EntityId = string;
 export type UserStatus = 'PENDING' | 'ACTIVE' | 'REJECTED' | 'DISABLED';

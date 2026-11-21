@@ -4,8 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
+    "@fastify/rate-limit": "10.3.0",
     "@mysql-mcp/core-engine": "workspace:*",
-    "fastify": "5.12.8"
+    "@mysql-mcp/security": "workspace:*",
+    "@mysql-mcp/shared-types": "workspace:*",
+    "fastify": "5.12.8",
+    "zod": "4.6.7"
   },
   "scripts": {
     "start": "node dist/main.js"

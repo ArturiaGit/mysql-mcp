@@ -129,6 +129,21 @@ export function Input({ className, ...props }: ComponentProps<'input'>) {
   );
 }
 
+export function Textarea({ className, ...props }: ComponentProps<'textarea'>) {
+  return (
+    <textarea
+      className={cn(
+        'min-h-[84px] w-full min-w-0 rounded-md border border-border-strong bg-bg-app px-2.5 py-2 text-[13px] text-fg-main placeholder:text-fg-subtle',
+        'transition-colors duration-150 hover:border-fg-muted',
+        'aria-[invalid=true]:border-danger',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select

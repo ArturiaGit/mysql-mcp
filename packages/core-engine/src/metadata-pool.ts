@@ -1,4 +1,4 @@
-import mysql, { type FieldPacket, type Pool, type PoolConnection, type QueryResult, type RowDataPacket } from 'mysql2/promise';
+import mysql, { type FieldPacket, type Pool, type PoolConnection, type QueryResult, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise';
 
 export interface MetadataDbConfig {
   host: string;
@@ -11,6 +11,7 @@ export interface MetadataDbConfig {
 
 export type MetadataParameter = string | number | boolean | Date | Buffer | null;
 export type MetadataRow = RowDataPacket;
+export type MetadataWriteResult = ResultSetHeader;
 
 /** Deliberately excludes Pool.query, Pool.execute, and raw driver access. */
 export interface MetadataPool {
@@ -23,6 +24,8 @@ export interface MetadataQueryExecutor {
     sql: string, values?: readonly MetadataParameter[],
   ): Promise<[T, FieldPacket[]]>;
 }
+
+export type MetadataTransactionExecutor = MetadataQueryExecutor;
 
 const drivers = new WeakMap<MetadataPool, Pool>();
 const queryTimeout = 2_000;
@@ -82,4 +85,51 @@ export function createMetadataQueryExecutor(pool: MetadataPool): MetadataQueryEx
       }
     },
   });
+}
+
+export async function withMetadataTransaction<T>(
+  pool: MetadataPool,
+  operation: (transaction: MetadataTransactionExecutor) => Promise<T>,
+): Promise<T> {
+  const driver = drivers.get(pool);
+  if (!driver) throw new TypeError('Expected a MetadataPool created by createMetadataPool');
+  const connection = await acquireMetadataConnection(driver);
+  let reusable = false;
+  let inTransaction = false;
+  let committing = false;
+  let timedOut = false;
+  const transaction: MetadataTransactionExecutor = Object.freeze({
+    async query<T extends QueryResult = RowDataPacket[]>(sql: string, values: readonly MetadataParameter[] = []) {
+      if (!inTransaction || committing || timedOut) throw new Error('Metadata transaction is unavailable');
+      try {
+        return await connection.execute<T>({ sql, timeout: queryTimeout }, [...values]);
+      } catch (error) {
+        timedOut = error instanceof Error && 'code' in error && error.code === 'PROTOCOL_SEQUENCE_TIMEOUT';
+        throw error;
+      }
+    },
+  });
+  try {
+    await connection.query({ sql: 'START TRANSACTION', timeout: queryTimeout });
+    inTransaction = true;
+    const result = await operation(transaction);
+    if (timedOut) throw new Error('Metadata transaction timed out');
+    committing = true;
+    await connection.query({ sql: 'COMMIT', timeout: queryTimeout });
+    reusable = true;
+    return result;
+  } catch (error) {
+    if (inTransaction && !committing && !timedOut) {
+      try {
+        inTransaction = false;
+        await connection.query({ sql: 'ROLLBACK', timeout: queryTimeout });
+        reusable = true;
+      } catch { /* A connection with an uncertain transaction state must be destroyed. */ }
+    }
+    throw error;
+  } finally {
+    inTransaction = false;
+    if (reusable) connection.release();
+    else connection.destroy();
+  }
 }

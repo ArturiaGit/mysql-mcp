@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Kbd } from '@/components/ui/form-controls';
@@ -11,6 +12,7 @@ export interface TopbarProps {
   pageLabel: string;
   badgeText?: string;
   onOpenHelp?: () => void;
+  rightSlot?: ReactNode;
 }
 
 export function Topbar({
@@ -18,6 +20,7 @@ export function Topbar({
   pageLabel,
   badgeText,
   onOpenHelp,
+  rightSlot,
 }: TopbarProps) {
   const theme = useShellStore((state) => state.theme);
   const toggleTheme = useShellStore((state) => state.toggleTheme);
@@ -130,6 +133,8 @@ export function Topbar({
             <Icon name="help" className="size-4" />
           </Button>
         )}
+
+        {rightSlot}
       </div>
     </header>
   );

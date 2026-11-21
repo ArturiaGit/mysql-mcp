@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync } from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
@@ -173,6 +174,15 @@ async function run() {
       ...process.env,
       ADMIN_API_HOST: '127.0.0.1',
       ADMIN_API_PORT: String(apiPort),
+      ADMIN_API_SECRET: process.env.ADMIN_API_SECRET ?? randomBytes(32).toString('hex'),
+      GATEWAY_MASTER_KEYS:
+        process.env.GATEWAY_MASTER_KEYS ??
+        JSON.stringify({
+          active_key_id: 'e2e',
+          keys: { e2e: randomBytes(32).toString('hex') },
+        }),
+      BOOTSTRAP_ADMIN_PASSWORD:
+        process.env.BOOTSTRAP_ADMIN_PASSWORD ?? `Aa1!${randomBytes(12).toString('base64url')}`,
     },
   });
 
@@ -205,9 +215,16 @@ async function run() {
     const page = await context.newPage();
 
     const pageErrors = [];
+    let allowExpectedUnauth401 = false;
     page.on('pageerror', (err) => pageErrors.push(err.message));
     page.on('console', (msg) => {
-      if (msg.type() === 'error') pageErrors.push(msg.text());
+      if (msg.type() === 'error') {
+        const text = msg.text();
+        if (allowExpectedUnauth401 && text.includes('status of 401')) {
+          return;
+        }
+        pageErrors.push(text);
+      }
     });
 
     // 1. Navigate to /_lab and verify Tab -> .skip-link first, then real admin-api:8081 live/ready probe
@@ -369,11 +386,14 @@ async function run() {
     await waitForHttp(previewBase, async (res) => res.status === 200);
     await page.goto(`${previewBase}/_lab`, { waitUntil: 'networkidle' });
     await page.getByTestId('route-unavailable-banner').waitFor({ state: 'visible' });
+    allowExpectedUnauth401 = true;
     await page.goto(`${previewBase}/`, { waitUntil: 'networkidle' });
+    await page.waitForURL(/\/login$/);
     await page.waitForFunction(
       () => document.querySelector('[data-testid="topbar-health-badge"]')?.textContent?.trim() === 'ADMIN-API READY',
     );
-    console.log('PASS: Production bundle gates /_lab out and connects / to real admin-api:8081');
+    allowExpectedUnauth401 = false;
+    console.log('PASS: Production bundle gates /_lab out, redirects unauth / -> /login, and connects to real admin-api:8081');
 
     assert.equal(pageErrors.length, 0, `Unexpected browser errors: ${pageErrors.join('; ')}`);
   } catch (error) {

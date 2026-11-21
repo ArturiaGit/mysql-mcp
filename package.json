@@ -12,8 +12,9 @@
     "build": "tsc -b",
     "typecheck": "tsc -b --force && pnpm --filter @mysql-mcp/admin-ui typecheck",
     "lint": "eslint . && node scripts/m0/check-workspace.mjs",
-    "test": "pnpm build && node --test tests/foundation.test.mjs",
+    "test": "pnpm build && node --test tests/foundation.test.mjs tests/auth-domain.test.mjs",
     "test:integration": "pnpm build && node --test tests/mysql.integration.mjs",
+    "test:m1": "pnpm build && node --test tests/m1.integration.mjs",
     "test:guardrails": "node --test tests/guardrails.test.mjs",
     "ci:frontend": "node scripts/m0/frontend-budget.mjs"
   },
