@@ -100,6 +100,7 @@
    - 格式强制为 `<type>(<scope>)[!]: <subject>`。
    - 允许 `type`：`feat`、`fix`、`refactor`、`perf`、`test`、`docs`、`build`、`ci`、`chore`、`revert`。
    - 统一 `scope`：`gateway`、`admin-api`、`admin-ui`、`core-ast`、`core-engine`、`security`、`shared-types`、`db`、`ci`、`deps`、`docs`。
+   - **Git / GitHub 全链路中文规范**：Git 提交信息（`<subject>`、Body、Footer；仅保留英文 `<type>(<scope>)` 前缀及必要技术术语/代码/路径原文）、PR 标题与描述、PR Review 意见、Issue / Commit 评论与 Release Notes 等所有 Git / GitHub 协作信息**必须统一使用简体中文**撰写。
    - **禁止跳过钩子**（严禁 `--no-verify`）；严禁将 `.env*`、私钥、测试凭据、临时截图或调试产物提交进仓库；未跑通对应切片门禁前不得提交 `feat` 宣称完成。
 3. **版本号规范（[SemVer 2.0.0](https://semver.org/lang/zh-CN/)）**：
    - `M0 ~ M7` 开发联调期及 `RD-08` 未最终签署前使用 **`0.x.y`** 步进（`0.1.0` 起步，阶段里程碑递增 `MINOR`，缺陷修复递增 `PATCH`）；全链路 E2E 与准入门禁全部冻结后发布 **`v1.0.0`**（Git Tag 统一 `vX.Y.Z`）。
