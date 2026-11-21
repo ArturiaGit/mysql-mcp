@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { isApiClientError } from '@/api/client';
-import { PATS_QUERY_KEY, useMyPats, useMyProfileOptions } from '@/api/pats';
+import { patsQueryKey, useMyPats, useMyProfileOptions } from '@/api/pats';
 import { PatCreateModal, PatRevokeModal } from '@/components/domain/pat-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useActiveUser } from '@/guards/auth-guards';
 import { ConsoleShell } from '@/layouts/ConsoleShell';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -66,10 +67,11 @@ function getPatStatus(pat: PatListItemDTO, nowMs: number): {
 }
 
 export default function MyTokensView() {
+  const user = useActiveUser();
   const queryClient = useQueryClient();
   const pushToast = useToastStore((state) => state.push);
-  const { data: pats = [], isLoading, isFetching, error, refetch } = useMyPats();
-  const { data: profileOptions = [] } = useMyProfileOptions();
+  const { data: pats = [], isLoading, isFetching, error, refetch } = useMyPats(user.id);
+  const { data: profileOptions = [] } = useMyProfileOptions(user.id);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeTarget, setRevokeTarget] = useState<PatListItemDTO | null>(null);
@@ -336,7 +338,7 @@ export default function MyTokensView() {
           onOpenChange={setCreateOpen}
           profiles={profileOptions}
           onPatCreated={() => {
-            void queryClient.invalidateQueries({ queryKey: PATS_QUERY_KEY });
+            void queryClient.invalidateQueries({ queryKey: patsQueryKey(user.id) });
           }}
         />
 
@@ -344,7 +346,7 @@ export default function MyTokensView() {
           target={revokeTarget}
           onClose={() => setRevokeTarget(null)}
           onRevoked={(revoked) => {
-            void queryClient.invalidateQueries({ queryKey: PATS_QUERY_KEY });
+            void queryClient.invalidateQueries({ queryKey: patsQueryKey(user.id) });
             pushToast(
               '个人访问令牌已吊销',
               `令牌「${revoked.name}」(${revoked.token_prefix}…) 已作废并记录审计。`,

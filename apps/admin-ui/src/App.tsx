@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
 import { registerUnauthorizedHandler, sanitizeReturnUrl } from '@/api/client';
+import { resetSessionCacheOnUnauthorized } from '@/api/session-cache';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { ProtectedRoute } from '@/guards/auth-guards';
 
@@ -44,7 +45,7 @@ function UnauthorizedBridge() {
 
   useEffect(() => {
     registerUnauthorizedHandler((currentPath) => {
-      qc.removeQueries({ queryKey: ['auth'] });
+      resetSessionCacheOnUnauthorized(qc);
       const safeReturn = sanitizeReturnUrl(currentPath, '/dashboard');
       const target =
         safeReturn === '/dashboard' || safeReturn === '/login'

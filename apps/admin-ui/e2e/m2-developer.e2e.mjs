@@ -457,19 +457,156 @@ async function run() {
     console.log('PASS: Script 3 — Dangerous REVOKE confirmation dialog revoked PAT in real MySQL & refreshed UI');
 
     // ------------------------------------------------------------------
-    // Bonus Edge Case: User with 0 authorized profiles opens /developer/config cleanly
+    // Security P1 Regression: Cross-user React Query cache isolation (in-SPA, ZERO page reload!)
+    //   Scenario A: Direct /login account switch without logout
+    //   Scenario B: 401 session invalidation (auth_version bump) -> auto /login -> switch to User B
     // ------------------------------------------------------------------
-    await page.getByTestId('console-logout-btn').click();
+    // Re-issue a fresh PAT for User A so both /developer/pats and /developer/config hold real User A metadata
+    const userAPatName = 'UserA-Isolation-Guard-PAT';
+    await page.getByTestId('open-create-pat-btn').click();
+    await page.getByTestId('pat-create-modal').waitFor({ state: 'visible' });
+    await page.getByTestId('pat-name-input').fill(userAPatName);
+    await page.getByTestId('pat-expires-days-input').fill('30');
+    await page.getByTestId('pat-create-submit-btn').click();
+    await page.getByTestId('pat-reveal-danger-banner').waitFor({ state: 'visible' });
+    const userARawToken = (await page.getByTestId('pat-secret-output').innerText()).trim();
+    const userAPatPrefix = userARawToken.slice(0, 16);
+    await page.getByTestId('pat-backup-confirm-checkbox').check();
+    await page.getByTestId('pat-done-btn').click();
+    await page.getByTestId('pat-create-modal').waitFor({ state: 'hidden' });
+    await page.getByTestId('pat-table-row').first().waitFor({ state: 'visible' });
+
+    // Also visit /developer/config in-SPA so User A's profile-options cache is hot in the SAME QueryClient
+    await page.locator('#app-sidebar a[href="/developer/config"]').click();
+    await page.waitForURL(/\/developer\/config$/);
+    await page.getByTestId('profile-chip-prod_analytics').waitFor({ state: 'visible' });
+
+    const forbiddenUserAStrings = [userAPatName, userAPatPrefix, 'prod_analytics', '分析只读主库'];
+
+    const installLeakObserver = async () => {
+      await page.evaluate((needles) => {
+        const w = window;
+        if (w.__m2LeakObserver) {
+          w.__m2LeakObserver.disconnect();
+        }
+        w.__m2LeakHits = [];
+        const scan = () => {
+          const text = document.body?.innerText ?? '';
+          for (const needle of needles) {
+            if (text.includes(needle)) {
+              w.__m2LeakHits.push(`${window.location.pathname}:${needle}`);
+            }
+          }
+        };
+        const observer = new MutationObserver(scan);
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+        w.__m2LeakObserver = observer;
+      }, forbiddenUserAStrings);
+    };
+
+    const collectAndStopLeakObserver = async () => {
+      return page.evaluate(() => {
+        const w = window;
+        if (w.__m2LeakObserver) {
+          w.__m2LeakObserver.disconnect();
+          w.__m2LeakObserver = null;
+        }
+        return Array.from(new Set(w.__m2LeakHits ?? []));
+      });
+    };
+
+    // Delay GET /api/v1/pats & /api/v1/profiles/my-options by 250ms during User B checks
+    // so any stale cross-user cache flash on initial paint is guaranteed to be observed!
+    let delayDeveloperGets = false;
+    await page.route(/\/api\/v1\/(pats|profiles\/my-options)$/, async (route) => {
+      if (delayDeveloperGets && route.request().method() === 'GET') {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      await route.continue();
+    });
+
+    // --- Scenario A: Direct SPA navigation to /login WITHOUT clicking logout -> switch to User B ---
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/login');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await page.waitForURL(/\/login$/);
+    await page.locator('#login-username').waitFor({ state: 'visible' });
+
+    delayDeveloperGets = true;
+    await installLeakObserver();
     await page.fill('#login-username', emptyProfileDev);
     await page.fill('#login-password', emptyProfilePwd);
     await page.getByTestId('login-submit-btn').click();
     await page.waitForURL(/\/dashboard$/);
+    await page.getByTestId('dashboard-view').waitFor({ state: 'visible' });
 
-    await page.goto(`${uiBase}/developer/config`, { waitUntil: 'networkidle' });
+    // Navigate in-SPA to /developer/pats & /developer/config as User B
+    await page.locator('#app-sidebar a[href="/developer/pats"]').click();
+    await page.waitForURL(/\/developer\/pats$/);
+    await page.getByTestId('pats-empty-state').waitFor({ state: 'visible' });
+
+    await page.locator('#app-sidebar a[href="/developer/config"]').click();
+    await page.waitForURL(/\/developer\/config$/);
     await page.getByTestId('no-authorized-profiles-alert').waitFor({ state: 'visible' });
     await page.getByTestId('snippet-no-profile-notice').waitFor({ state: 'visible' });
-    console.log('PASS: Zero-authorized-profile user empty state verified on /developer/config');
+
+    const scenarioAHits = await collectAndStopLeakObserver();
+    delayDeveloperGets = false;
+    assert.deepEqual(
+      scenarioAHits,
+      [],
+      `Scenario A leaked User A cached metadata to User B: ${JSON.stringify(scenarioAHits)}`,
+    );
+    console.log('PASS: Security P1 Scenario A — Direct /login account switch isolated cache with zero transient flash');
+
+    // --- Scenario B: User A session invalidated -> real 401 -> SPA redirect to /login -> User B login ---
+    await page.getByTestId('console-logout-btn').click();
+    await page.waitForURL(/\/login$/);
+    await page.fill('#login-username', devUser);
+    await page.fill('#login-password', devPwd);
+    await page.getByTestId('login-submit-btn').click();
+    await page.waitForURL(/\/dashboard$/);
+
+    // Populate User A caches on both developer pages in-SPA
+    await page.locator('#app-sidebar a[href="/developer/config"]').click();
+    await page.waitForURL(/\/developer\/config$/);
+    await page.getByTestId('profile-chip-prod_analytics').waitFor({ state: 'visible' });
+
+    await page.locator('#app-sidebar a[href="/developer/pats"]').click();
+    await page.waitForURL(/\/developer\/pats$/);
+    await page.getByTestId('pat-table-row').first().waitFor({ state: 'visible' });
+
+    // Invalidate User A's live session in real MySQL (auth_version bump -> real HTTP 401)
+    mysqlQuery(`UPDATE sys_users SET auth_version = auth_version + 1 WHERE id = ${devId}`);
+
+    // Trigger real authenticated API call in-SPA -> 401 handler wipes cache & redirects to /login?returnUrl=...
+    await page.getByRole('button', { name: '刷新' }).click();
+    await page.waitForURL(/\/login\?returnUrl=%2Fdeveloper%2Fpats$/);
+    await page.locator('#login-username').waitFor({ state: 'visible' });
+
+    delayDeveloperGets = true;
+    await installLeakObserver();
+    await page.fill('#login-username', emptyProfileDev);
+    await page.fill('#login-password', emptyProfilePwd);
+    await page.getByTestId('login-submit-btn').click();
+
+    // Returns directly to /developer/pats via returnUrl — MUST show zero trace of User A!
+    await page.waitForURL(/\/developer\/pats$/);
+    await page.getByTestId('pats-empty-state').waitFor({ state: 'visible' });
+
+    await page.locator('#app-sidebar a[href="/developer/config"]').click();
+    await page.waitForURL(/\/developer\/config$/);
+    await page.getByTestId('no-authorized-profiles-alert').waitFor({ state: 'visible' });
+
+    const scenarioBHits = await collectAndStopLeakObserver();
+    delayDeveloperGets = false;
+    assert.deepEqual(
+      scenarioBHits,
+      [],
+      `Scenario B leaked User A cached metadata after 401 to User B: ${JSON.stringify(scenarioBHits)}`,
+    );
+    console.log('PASS: Security P1 Scenario B — 401 invalidation cleared all caches & User B saw zero User A flash');
 
     assert.equal(pageErrors.length, 0, `Unexpected browser pageerrors: ${pageErrors.join('; ')}`);
   } catch (error) {

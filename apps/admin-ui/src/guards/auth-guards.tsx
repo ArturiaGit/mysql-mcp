@@ -1,9 +1,10 @@
 import type { CurrentUserResponseDTO, SystemRole, UserStatus } from '@mysql-mcp/shared-types';
 import { useQueryClient } from '@tanstack/react-query';
-import { createContext, useContext, type ReactNode } from 'react';
-import { Link, Navigate, useLocation } from 'react-router';
+import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router';
 import { useCurrentUser } from '@/api/auth';
 import { isApiClientError, sanitizeReturnUrl } from '@/api/client';
+import { resetSessionCacheOnUnauthorized } from '@/api/session-cache';
 import { Button } from '@/components/ui/button';
 import { Alert, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/form-controls';
 import { Icon } from '@/components/ui/icon';
@@ -28,16 +29,27 @@ export function useActiveUser(): Extract<CurrentUserResponseDTO, { status: 'ACTI
   return user;
 }
 
+function UnauthorizedRedirect({ to }: { to: string }) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    resetSessionCacheOnUnauthorized(queryClient);
+    navigate(to, { replace: true });
+  }, [navigate, queryClient, to]);
+
+  return null;
+}
+
 /**
  * L1 AuthGuard:
- * - 401 -> clear cache and redirect to /login?returnUrl=...
+ * - 401 -> abort in-flight requests, clear entire query cache, and redirect to /login?returnUrl=...
  * - Network timeout / 5xx -> NEVER kick to /login; show full-viewport reconnect card
  * - 403 ERR_AUTH_ACCOUNT_DISABLED -> redirect to /forbidden
  * - 200 -> provide CurrentUserResponseDTO to downstream guards
  */
 export function AuthGuard({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const queryClient = useQueryClient();
   const { data: user, isPending, isError, error, refetch, isFetching } = useCurrentUser();
 
   if (isPending) {
@@ -59,14 +71,13 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   if (isError) {
     if (isApiClientError(error)) {
       if (error.status === 401) {
-        queryClient.removeQueries({ queryKey: ['auth'] });
         const currentPath = `${location.pathname}${location.search}${location.hash}`;
         const safeReturn = sanitizeReturnUrl(currentPath, '/dashboard');
         const target =
           safeReturn === '/dashboard'
             ? '/login'
             : `/login?returnUrl=${encodeURIComponent(safeReturn)}`;
-        return <Navigate to={target} replace />;
+        return <UnauthorizedRedirect to={target} />;
       }
 
       if (error.status === 403 && error.code === 'ERR_AUTH_ACCOUNT_DISABLED') {

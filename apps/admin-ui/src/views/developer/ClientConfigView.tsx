@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { isApiClientError } from '@/api/client';
-import { PATS_QUERY_KEY, useMyProfileOptions } from '@/api/pats';
+import { patsQueryKey, useMyProfileOptions } from '@/api/pats';
 import { ClientSnippetGenerator } from '@/components/domain/client-snippet';
 import { PatCreateModal } from '@/components/domain/pat-modal';
 import { Badge } from '@/components/ui/badge';
@@ -16,11 +16,15 @@ import {
   CardTitle,
 } from '@/components/ui/form-controls';
 import { Icon } from '@/components/ui/icon';
+import { useActiveUser } from '@/guards/auth-guards';
 import { ConsoleShell } from '@/layouts/ConsoleShell';
 
 export default function ClientConfigView() {
+  const user = useActiveUser();
   const queryClient = useQueryClient();
-  const { data: profileOptions = [], isLoading, isFetching, error, refetch } = useMyProfileOptions();
+  const { data: profileOptions = [], isLoading, isFetching, error, refetch } = useMyProfileOptions(
+    user.id,
+  );
   const [selectedProfileName, setSelectedProfileName] = useState('');
   const [createPatOpen, setCreatePatOpen] = useState(false);
 
@@ -199,7 +203,7 @@ export default function ClientConfigView() {
           onOpenChange={setCreatePatOpen}
           profiles={profileOptions}
           onPatCreated={() => {
-            void queryClient.invalidateQueries({ queryKey: PATS_QUERY_KEY });
+            void queryClient.invalidateQueries({ queryKey: patsQueryKey(user.id) });
           }}
         />
       </div>

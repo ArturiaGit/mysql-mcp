@@ -15,8 +15,15 @@ import {
   ProfileOptionsResponseSchema,
 } from './schemas/pat.schema';
 
-export const PATS_QUERY_KEY = ['developer', 'pats'] as const;
-export const MY_PROFILE_OPTIONS_QUERY_KEY = ['developer', 'profile-options'] as const;
+export const DEVELOPER_QUERY_SCOPE = ['developer'] as const;
+
+export function patsQueryKey(userId: EntityId | null | undefined) {
+  return ['developer', userId ?? 'anonymous', 'pats'] as const;
+}
+
+export function myProfileOptionsQueryKey(userId: EntityId | null | undefined) {
+  return ['developer', userId ?? 'anonymous', 'profile-options'] as const;
+}
 
 export async function fetchMyPats(signal?: AbortSignal): Promise<PatListItemDTO[]> {
   return apiRequest<PatListItemDTO[]>('/api/v1/pats', {
@@ -57,19 +64,23 @@ export async function fetchMyProfileOptions(signal?: AbortSignal): Promise<Profi
   });
 }
 
-export function useMyPats() {
+export function useMyPats(userId: EntityId | null | undefined) {
+  const hasValidUser = typeof userId === 'string' && userId.length > 0;
   return useQuery({
-    queryKey: PATS_QUERY_KEY,
+    queryKey: patsQueryKey(userId),
     queryFn: ({ signal }) => fetchMyPats(signal),
+    enabled: hasValidUser,
     retry: false,
     staleTime: 15_000,
   });
 }
 
-export function useMyProfileOptions() {
+export function useMyProfileOptions(userId: EntityId | null | undefined) {
+  const hasValidUser = typeof userId === 'string' && userId.length > 0;
   return useQuery({
-    queryKey: MY_PROFILE_OPTIONS_QUERY_KEY,
+    queryKey: myProfileOptionsQueryKey(userId),
     queryFn: ({ signal }) => fetchMyProfileOptions(signal),
+    enabled: hasValidUser,
     retry: false,
     staleTime: 30_000,
   });

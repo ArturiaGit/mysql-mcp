@@ -1,8 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { AUTH_ME_QUERY_KEY, loginWithPassword, toCurrentUserResponse } from '@/api/auth';
+import { loginWithPassword, toCurrentUserResponse } from '@/api/auth';
 import { isApiClientError, sanitizeReturnUrl } from '@/api/client';
+import { resetSessionCacheForLogin } from '@/api/session-cache';
 import { LoginRequestSchema } from '@/api/schemas/auth.schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -112,7 +113,7 @@ export default function LoginView() {
         password,
       });
       const currentUser = toCurrentUserResponse(response.user);
-      queryClient.setQueryData(AUTH_ME_QUERY_KEY, currentUser);
+      resetSessionCacheForLogin(queryClient, currentUser);
       const nextRoute = postLoginRedirectPath(currentUser, rawReturnUrl);
       navigate(nextRoute, { replace: true });
     } catch (error: unknown) {
