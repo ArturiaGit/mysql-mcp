@@ -21,10 +21,10 @@
 > - **`SERVER_PEPPER` 配置（方案 2A）**：`apps/admin-api` 引入独立必填环境变量 `SERVER_PEPPER`（`Buffer.byteLength >= 32`），缺失或不足时对齐 M1 `ADMIN_API_SECRET` 的 Fail-Closed Ready 模式（`/health/live = 200`、`/health/ready = 503` 且拒绝挂载 `/api/v1/*` 业务路由）；专门用于 `HMAC-SHA-256(SERVER_PEPPER, rawToken)`；PAT 原文遵循 `DATABASE_DESIGN_SPEC.md` §L734 固定 `^mcp_pat_[0-9a-f]{64}$`（`token_prefix` 取前 16 位）；同步补齐 E2E（`m0-lab` / `m1-auth`）与 CI 环境变量注入。
 > - **PAT 吊销分阶段验收（方案 1A）**：M2 验收真实 MySQL `revoked_at` 原子写入 + 同事务 `PAT_REVOKE` 审计 + 强类型可注入的事务提交后失效回调契约（`markPatRevokedSync` / `cancelQueriesByPat`，实测仅在事务提交成功后触发、回滚不触发）；真实网关数据面内存失效与在途 SQL 物理 `KILL` 断流归属 M6 门禁（已登记至 `todos/M6-mcp-data-plane.md`）。
 
-- [ ] `GET /api/v1/pats`（仅返回 `token_prefix` 与脱敏摘要，永不回传可恢复明文）
-- [ ] `POST /api/v1/pats`（256-bit CSPRNG + `HMAC-SHA-256(SERVER_PEPPER, rawToken)` 落库 `sys_pats`，仅创建响应返回一次 `rawToken`，同事务写审计）
-- [ ] `POST /api/v1/pats/:id/revoke`（受 L3 密码有效守卫约束；仅允许本人或超管吊销，原子更新 `revoked_at` + 同事务写审计 + 提交后触发可测试失效回调）
-- [ ] `GET /api/v1/profiles/my-options`（仅返回当前用户有访问权的 `{ id, name, displayName }` 轻量选项，不泄露底层 Host/Port/SSH 配置）
+- [x] `GET /api/v1/pats`（仅返回 `token_prefix` 与脱敏摘要，永不回传可恢复明文）
+- [x] `POST /api/v1/pats`（256-bit CSPRNG + `HMAC-SHA-256(SERVER_PEPPER, rawToken)` 落库 `sys_pats`，仅创建响应返回一次 `rawToken`，同事务写审计）
+- [x] `POST /api/v1/pats/:id/revoke`（受 L3 密码有效守卫约束；仅允许本人或超管吊销，原子更新 `revoked_at` + 同事务写审计 + 提交后触发可测试失效回调）
+- [x] `GET /api/v1/profiles/my-options`（仅返回当前用户有访问权的 `{ id, name, displayName }` 轻量选项，不泄露底层 Host/Port/SSH 配置）
 
 ---
 

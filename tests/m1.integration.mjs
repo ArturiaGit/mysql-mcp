@@ -7,7 +7,7 @@ import { createMetadataPool, createMetadataQueryExecutor, readMetadataConfig } f
 
 const config = readMetadataConfig(process.env);
 assert(config, 'M1 integration requires the isolated Docker MySQL 8.0 database');
-const testEnv = { NODE_ENV: 'production', ADMIN_API_SECRET: randomBytes(32).toString('hex'),
+const testEnv = { NODE_ENV: 'production', ADMIN_API_SECRET: randomBytes(32).toString('hex'), SERVER_PEPPER: process.env.SERVER_PEPPER ?? randomBytes(32).toString('hex'),
   GATEWAY_MASTER_KEYS: JSON.stringify({ active_key_id: 'test', keys: { test: randomBytes(32).toString('hex') } }) };
 const testPassword = () => 'Aa1!' + randomBytes(18).toString('base64url');
 const cookiePair = (response) => {

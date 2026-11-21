@@ -65,6 +65,19 @@ export interface UpdatePasswordPolicyResponseDTO {
   isExpirationEnabled: boolean;
 }
 
+export interface PatListItemDTO {
+  id: EntityId;
+  name: string;
+  token_prefix: string;
+  expires_at: string | null;
+  last_used_at: string | null;
+  created_at: string;
+}
+
+export interface CreatePatRequestDTO { name: string; expiresDays?: number; }
+export interface CreatePatResponseDTO { pat: PatListItemDTO; rawToken: string; }
+export interface ProfileOptionDTO { id: EntityId; name: string; displayName: string; }
+
 export interface ActionSuccessDTO { success: true; }
 export interface AuthErrorDetailsDTO { remaining_attempts?: number; retry_after_sec?: number; }
 

@@ -55,22 +55,28 @@ jobs:
       - run: pnpm test:guardrails
       - run: pnpm test
       - run: pnpm --filter @mysql-mcp/admin-ui test
-      - name: Set ephemeral database credentials
+      - name: Set ephemeral test credentials
         run: |
           root_password=$(openssl rand -hex 32)
           app_password=$(openssl rand -hex 32)
+          server_pepper=$(openssl rand -hex 32)
           echo "::add-mask::$root_password"
           echo "::add-mask::$app_password"
+          echo "::add-mask::$server_pepper"
           {
             echo "MYSQL_ROOT_PASSWORD=$root_password"
             echo "METADATA_DB_PASSWORD=$app_password"
+            echo "SERVER_PEPPER=$server_pepper"
             echo 'METADATA_DB_USER=m0_integration'
             echo 'METADATA_DB_PORT=13306'
           } >> "$GITHUB_ENV"
       - run: node scripts/m0/mysql-up.mjs
       - run: pnpm test:integration
       - run: pnpm test:m1
-      # The backend suite leaves a dirty PENDING fixture. Browser suites each bootstrap their own database.
+      - name: Reset MySQL before M2 contract tests
+        run: docker compose down --volumes && node scripts/m0/mysql-up.mjs
+      - run: pnpm test:m2
+      # Each browser suite bootstraps a fresh database.
       - name: Reset MySQL before frontend verification
         run: docker compose down --volumes && node scripts/m0/mysql-up.mjs
       - name: Frontend build, gzip budget and browser E2E

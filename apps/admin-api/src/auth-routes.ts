@@ -1,12 +1,13 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
-import type { CurrentUserResponseDTO, SystemRole, UserProfileDTO } from '@mysql-mcp/shared-types';
+import type { CreatePatRequestDTO, CurrentUserResponseDTO, SystemRole, UserProfileDTO } from '@mysql-mcp/shared-types';
 import { z } from 'zod';
 import { cookie, CSRF_COOKIE, equalSecret, parseCookies, PASSWORD_MAX_DAYS, PASSWORD_MIN_DAYS, SESSION_COOKIE, SESSION_TTL_SECONDS } from './auth-domain.js';
 import type { AuthService } from './auth-service.js';
+import type { PatService } from './pat-service.js';
 import { ApiError } from './errors.js';
 
-interface RouteOptions { service: AuthService; secureCookies: boolean; ready: () => boolean; }
+interface RouteOptions { service: AuthService; patService: PatService; secureCookies: boolean; ready: () => boolean; }
 interface GuardPolicy {
   restricted?: 'all' | 'rejected';
   allowExpired?: boolean;
@@ -21,8 +22,12 @@ const loginSchema = z.strictObject({ username, password });
 const changeSchema = z.strictObject({ oldPassword: password, newPassword: password, revokeAllPats: z.boolean().optional() });
 const policySchema = z.strictObject({ passwordExpiresDays: z.number().int().min(PASSWORD_MIN_DAYS).max(PASSWORD_MAX_DAYS).nullable() });
 const resubmitSchema = z.strictObject({ ...contact, reason: z.string().trim().min(1).max(512) });
+const createPatSchema = z.strictObject({ name: z.string().trim().min(1).max(64), expiresDays: z.number().int().min(1).max(365).default(90) }) satisfies z.ZodType<CreatePatRequestDTO>;
+const patIdSchema = z.strictObject({
+  id: z.string().regex(/^[1-9][0-9]{0,19}$/).refine((id) => id.length < 20 || id <= '18446744073709551615'),
+});
 
-export async function registerAuthRoutes(app: FastifyInstance, { service, secureCookies, ready }: RouteOptions): Promise<void> {
+export async function registerAuthRoutes(app: FastifyInstance, { service, patService, secureCookies, ready }: RouteOptions): Promise<void> {
   await app.register(rateLimit, { global: false, max: 100, timeWindow: 60_000 });
   const users = new WeakMap<FastifyRequest, UserProfileDTO>();
   const guard = (policy: GuardPolicy = {}) => async (request: FastifyRequest) => {
@@ -99,10 +104,18 @@ export async function registerAuthRoutes(app: FastifyInstance, { service, secure
     return { success: true };
   });
 
-  // TC-BE-16 exercises the guard on this reserved M2 route. No PAT data is served in M1.
-  app.setNotFoundHandler({ preHandler: async (request: FastifyRequest) => {
-    if (request.method === 'GET' && request.url.split('?', 1)[0] === '/api/v1/pats') await guard()(request);
-  } }, () => { throw new ApiError(404, 'ERR_NOT_FOUND'); });
+  app.get('/api/v1/pats', { preHandler: guard() }, async (request) => patService.list(current(request).id));
+  app.post('/api/v1/pats', { preHandler: guard() }, async (request) => {
+    const input = parse(createPatSchema, request.body);
+    return patService.create(current(request).id, input.name, input.expiresDays);
+  });
+  app.post('/api/v1/pats/:id/revoke', { preHandler: guard() }, async (request) => {
+    const params = patIdSchema.safeParse(request.params);
+    if (!params.success) throw new ApiError(404, 'ERR_NOT_FOUND');
+    await patService.revoke(current(request).id, params.data.id);
+    return { success: true };
+  });
+  app.get('/api/v1/profiles/my-options', { preHandler: guard() }, async (request) => patService.myOptions(current(request).id));
 }
 
 function sessionId(request: FastifyRequest): string | undefined {
