@@ -44,7 +44,7 @@ jobs:
           tar -czf release/mysql-mcp.tar.gz package.json pnpm-lock.yaml pnpm-workspace.yaml compose.yaml \
             docs/sql/001_metadata_schema.sql apps/*/dist apps/*/package.json packages/*/package.json \
             packages/core-engine/dist packages/shared-types/dist
-      - uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0.22.2
+      - uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           path: .
           format: cyclonedx-json
