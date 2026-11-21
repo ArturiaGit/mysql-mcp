@@ -104,18 +104,18 @@ export async function registerAuthRoutes(app: FastifyInstance, { service, patSer
     return { success: true };
   });
 
-  app.get('/api/v1/pats', { preHandler: guard() }, async (request) => patService.list(current(request).id));
-  app.post('/api/v1/pats', { preHandler: guard() }, async (request) => {
+  app.get('/api/v1/pats', { config: { rateLimit: { max: 120, timeWindow: 60_000 } }, preHandler: guard() }, async (request) => patService.list(current(request).id));
+  app.post('/api/v1/pats', { config: { rateLimit: { max: 20, timeWindow: 60_000 } }, preHandler: guard() }, async (request) => {
     const input = parse(createPatSchema, request.body);
     return patService.create(current(request).id, input.name, input.expiresDays);
   });
-  app.post('/api/v1/pats/:id/revoke', { preHandler: guard() }, async (request) => {
+  app.post('/api/v1/pats/:id/revoke', { config: { rateLimit: { max: 60, timeWindow: 60_000 } }, preHandler: guard() }, async (request) => {
     const params = patIdSchema.safeParse(request.params);
     if (!params.success) throw new ApiError(404, 'ERR_NOT_FOUND');
     await patService.revoke(current(request).id, params.data.id);
     return { success: true };
   });
-  app.get('/api/v1/profiles/my-options', { preHandler: guard() }, async (request) => patService.myOptions(current(request).id));
+  app.get('/api/v1/profiles/my-options', { config: { rateLimit: { max: 120, timeWindow: 60_000 } }, preHandler: guard() }, async (request) => patService.myOptions(current(request).id));
 }
 
 function sessionId(request: FastifyRequest): string | undefined {

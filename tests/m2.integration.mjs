@@ -280,5 +280,35 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
     const hash = hashes.get(pat.id);
     assert(hash && !serialized.includes(hash) && !serialized.includes(rawToken), 'PAT material in audit');
   }
+
+  await t.test('isolated issuance limiter admits 20 requests, then returns 429 without metadata writes', async (subtest) => {
+    const limitedApp = createServer(config, env);
+    subtest.after(() => limitedApp.close());
+    const limitedBase = await limitedApp.listen({ host: '127.0.0.1', port: 0 });
+    assert.equal((await request(limitedBase, '/health/ready')).status, 200);
+    const issuer = await login(limitedBase, 'alice', alicePassword);
+    const writeCounts = async () => {
+      const [[counts]] = await db.query(`SELECT (SELECT COUNT(*) FROM sys_pats) AS pats,
+        (SELECT COUNT(*) FROM sys_user_approvals) AS approvals`);
+      return counts;
+    };
+    const before = await writeCounts();
+    for (let attempt = 1; attempt <= 20; attempt += 1) {
+      const response = await post(limitedBase, pats, issuer, { name: `rate-limit accepted ${attempt}` });
+      assert.equal(response.status, 200, `issuance request ${attempt} should be admitted`);
+      await response.body?.cancel();
+    }
+    const admitted = await writeCounts();
+    assert.equal(BigInt(admitted.pats) - BigInt(before.pats), 20n);
+    assert.equal(BigInt(admitted.approvals) - BigInt(before.approvals), 20n);
+
+    const rejected = await post(limitedBase, pats, issuer, { name: 'rate-limit rejected' });
+    assert.equal(rejected.status, 429);
+    const retryAfter = rejected.headers.get('retry-after');
+    assert.match(retryAfter ?? '', /^[1-9][0-9]*$/);
+    assert(Number(retryAfter) <= 60, 'retry-after must be inside the configured minute');
+    await rejected.body?.cancel();
+    assert.deepEqual(await writeCounts(), admitted, 'the rejected request must not write a PAT or an approval');
+  });
   console.log(`MySQL ${version}; M2: four routes, fail-closed probes, audit rollback, post-commit callbacks and field projections verified`);
 });
