@@ -1,7 +1,7 @@
 # M3：审批工单中心与用户全生命周期（超管防自残）
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[ ] 进行中（阶段 1 后端、阶段 2 前端真实联调均已通过，阶段 3 独立 QA 验收中）`
+- **状态**：`[x] 已完成`（后端真实 MySQL 验收、前端直连联调、独立 QA 回归复验与独立安全二审复核通过）
 - **对应接口数**：8 项 | **对应前端视图**：2 个
 - **失效 Hook 分阶段验收（对齐 M2 方案 1A）**：M3 验证独立 `main.ts` 在 `NODE_ENV=production` 时 Fail-Fast、`createServer` 缺少任一生产 Hook 时 readiness Fail-Closed 且不挂载业务路由，以及事务提交后的同步墓碑先于异步取消、墓碑故障注入后的 Fail-Closed 与 best-effort 断流；真实数据面 `RegistryHub` + `QueryLifecycleCoordinator` 单进程宿主接线及在途查询断流归属 M6 门禁。
 
@@ -44,7 +44,7 @@
 
 ## 4. 模块联调验收剧本
 
-- [ ] **完整入驻闭环**：匿名注册 → 管理员 `/approvals` 驳回（空理由拦截） → 用户 `/approvals/re` 重提 → 管理员批准并赋权 → 新用户登录成功进入控制台
-- [ ] **防自残与并发锁序验收**：
+- [x] **完整入驻闭环**：匿名注册 → 管理员 `/approvals` 驳回（空理由拦截） → 用户 `/approvals/re` 重提 → 管理员批准并赋权 → 新用户登录成功进入控制台
+- [x] **防自残与并发锁序验收**：
   - 登录超管在 `/users` 查看自己行与唯一超管行，确认冻结/删除按钮处于 `disabled` 并展示明确 Tooltip 解释；
   - 模拟双超管并发互冻 / 试图绕过前端直调 `PUT /users/:id/status` 或 `DELETE /users/:id`，验证 `ERR_LAST_SUPER_ADMIN` 拦截与管理审计失败回滚（`TC-BE-17`）
