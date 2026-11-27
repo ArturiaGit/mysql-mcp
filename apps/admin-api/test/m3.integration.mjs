@@ -240,6 +240,8 @@ test('M3 governance on real MySQL 8.0', async (t) => {
       assert.deepEqual(list.items.map(({ id }) => id), [special.user_id]);
     }
     assert.equal(ok(await call(app, 'GET', `${users}?search=${encodeURIComponent("!%' OR 1=1")}`, admin)).total, 0);
+    const unfilteredUniqueSuperAdminList = ok(await call(app, 'GET', `${users}?page=1&pageSize=20`, admin));
+    assert.equal(unfilteredUniqueSuperAdminList.items.find(({ id }) => id === admin.user.id)?.is_last_super_admin, true);
     const superList = ok(await call(app, 'GET', `${users}?role=SUPER_ADMIN&page=1&pageSize=1`, admin));
     assert.equal(superList.total, 1);
     assert.equal(superList.items[0].id, admin.user.id);
@@ -407,6 +409,8 @@ test('M3 governance on real MySQL 8.0', async (t) => {
       const idB = await fixture(username, superRole);
       const sessionB = await login(app, username, fixturePassword);
       const idA = sessionA.user.id;
+      const unfilteredDualSuperAdminList = ok(await call(app, 'GET', `${users}?page=1&pageSize=20`, sessionA));
+      assert.equal(unfilteredDualSuperAdminList.items.filter(({ is_last_super_admin }) => is_last_super_admin).length, 0);
       assert.equal(ok(await call(app, 'GET', `${users}?role=SUPER_ADMIN`, sessionA)).items.filter(({ is_last_super_admin }) => is_last_super_admin).length, 0);
       const mutate = (target, actor) => {
         if (operation === 'freeze') return statusChange(target.user.id, actor, 'DISABLED', target.user.version);

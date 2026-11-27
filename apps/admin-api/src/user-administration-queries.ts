@@ -11,7 +11,7 @@ interface ListedUser extends MetadataRow, Omit<UserListItemDTO, 'roles' | 'must_
   password_updated_at: Date;
   created_at: Date;
   updated_at: Date;
-  is_last_super_admin: number;
+  is_last_super_admin: number | string;
 }
 interface UserRoleRow extends MetadataRow, UserRoleSummaryDTO { user_id: EntityId; }
 interface RoleRow extends MetadataRow, Omit<RoleDTO, 'profileIds' | 'created_at' | 'updated_at'> {
@@ -87,7 +87,7 @@ export class UserAdministrationQueries {
           must_change_password: row.must_change_password === 1, password_expires_days: row.password_expires_days,
           is_password_expired: expiry !== null && now > expiry.getTime(), version: row.version,
           roles: (roles.get(row.id) ?? []).map(({ id, role_name, display_name }) => ({ id, role_name, display_name })),
-          is_last_super_admin: row.is_last_super_admin === 1,
+          is_last_super_admin: row.is_last_super_admin === 1 || row.is_last_super_admin === '1',
           created_at: row.created_at.toISOString(), updated_at: row.updated_at.toISOString(),
         };
       }), page, total);
