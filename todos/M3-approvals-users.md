@@ -14,9 +14,15 @@
 - **原型局部参考**：`ui-showcase.html`（仅权限护栏演示块）；`admin-console-demo.html`（仅 `users` 页与 `#reviewDialog`，**不实现虚构的 `inviteUser` 按钮与演示角色名**）
 ---
 
-## 2. 后端交付清单（8 项接口）
+## 2. 后端交付清单（8 项接口 + 1 项只读角色目录前置）
 
-- [ ] 严格落实 **`SUPER_ADMIN` 角色锁 → 按 ID 锁用户 → 锁绑定当前读** 并发锁序与同事务管理审计，并实现以下 8 项接口：
+> **Owner 拍板执行口径（已确认）**：
+> - **重置密码（方案 1A）**：以 `API_CONTRACT_SPEC.md` §6.3.5 与 `DATABASE_DESIGN_SPEC.md` §7.6 正文为准——`POST /api/v1/users/:id/reset-password` 保留该用户名下的 PAT 与 `USER` 限流规则，提交后仅执行全用户 Web Session 清退、授权快照失效与取消在途 SQL（`PASSWORD_RESET`）；删除 PAT 与 `USER` 限流规则仅归属 `DELETE /api/v1/users/:id`（`DATABASE_DESIGN_SPEC.md` §13.1 同组文案为模块级汇总描述）。
+> - **停用账号取消原因（方案 2A）**：`PUT /api/v1/users/:id/status` 置 `DISABLED` 时，统一采用 `ACCOUNT_DISABLED`（已同步修正 `scripts/be_parts/part4_database_and_dal.md` 并重新合成 `docs/BACKEND_ARCHITECTURE_SPEC.md`）；其余取消原因统一为 `USER_ROLES_CHANGED`（改角色）、`PASSWORD_RESET`（管理员重置密码）、`USER_DELETED`（删除用户）。
+> - **前置只读角色目录（对齐 `API_CONTRACT_SPEC.md` §6.6.1）**：在 M3 提前实现只读 `GET /api/v1/roles`（守卫 `L4 SUPER_ADMIN / SECURITY_ADMIN`），供 `/approvals` 与 `/users` 从数据库读取真实角色列表，严禁前端硬编码内置角色 ID；角色写操作与 ACL 仍在 M5 交付。
+
+- [ ] 严格落实 **`SUPER_ADMIN` 角色锁 → 按 ID 锁用户 → 锁绑定当前读** 并发锁序与同事务管理审计，并实现以下 8 项接口（及前置只读 `GET /api/v1/roles`）：
+  - [ ] `GET /api/v1/roles`（前置只读，对齐 §6.6.1，供审批赋权与用户角色编辑读取真实角色列表）
   - [ ] `GET /api/v1/approvals/pending`
   - [ ] `POST /api/v1/approvals/:id/approve`（赋予角色、同步失效关联状态）
   - [ ] `POST /api/v1/approvals/:id/reject`（强制校验非空 `reason`）

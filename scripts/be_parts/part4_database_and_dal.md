@@ -292,7 +292,7 @@ export class UserService {
 
     // 【闭环 BE-R07 第 2 步】：在任何异步 DB 重载之前，立即同步触发在途查询取消！
     if (newStatus === 'DISABLED') {
-      this.lifecycle.cancelQueriesByUser(targetUserId, 'USER_DISABLED');
+      this.lifecycle.cancelQueriesByUser(targetUserId, 'ACCOUNT_DISABLED');
     }
 
     // 【闭环 BE-R07 第 3 步】：异步从元数据库重载最新用户权限；若重载失败，墓碑继续保持 Fail-Closed 拒绝状态
