@@ -295,7 +295,7 @@ CHECK 只做单行域约束，不能替代跨表用户存在、角色绑定、�
 
 ### 5.5 `sys_pats` — 个人访问令牌
 
-仅存 HMAC-SHA256 摘要及展示前缀；摘要与密码哈希不能互用。新签发必须设置 expires_at；历史 NULL 按原有语义兼容并单独治理。吊销不物理删除，用户删除时 CASCADE。
+仅存 HMAC-SHA256 摘要及展示前缀；摘要与密码哈希不能互用。新签发必须设置 expires_at；历史 NULL 按原有语义兼容并单独治理。吊销不物理删除，用户删除时 CASCADE。`active_name` 为只读生成列，客户端不得写入，用于数据库层保证同用户下未吊销 PAT 名称唯一（吊销后允许复用同名）。
 
 | 字段 | 物理定义 | 说明 |
 | :--- | :--- | :--- |
@@ -307,12 +307,14 @@ CHECK 只做单行域约束，不能替代跨表用户存在、角色绑定、�
 | `expires_at` | `DATETIME(3) DEFAULT NULL` | 到期时间 (NULL表示永不过期) |
 | `last_used_at` | `DATETIME(3) DEFAULT NULL` | 语义见本节及§6映射；默认值以物理定义为准 |
 | `revoked_at` | `DATETIME(3) DEFAULT NULL` | 主动吊销时间 (非NULL表示已吊销) |
+| `active_name` | ``VARCHAR(64) GENERATED ALWAYS AS (CASE WHEN `revoked_at` IS NULL THEN `name` ELSE NULL END) STORED`` | 数据库约束每用户下未吊销PAT名称唯一 |
 | `created_at` | `DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)` | 创建或事件时间，UTC |
 
 **主键、唯一性、访问索引和外键：**
 
 - ``PRIMARY KEY (`id`)``。
 - ``UNIQUE KEY `uk_token_hash` (`token_hash`)``。
+- ``UNIQUE KEY `uk_user_active_name` (`user_id`, `active_name`)``。
 - ``KEY `idx_user_revoked` (`user_id`, `revoked_at`)``。
 - ``CONSTRAINT `fk_pat_user` FOREIGN KEY (`user_id`) REFERENCES `sys_users` (`id`) ON DELETE CASCADE``。
 

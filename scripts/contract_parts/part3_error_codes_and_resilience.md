@@ -49,7 +49,7 @@ export interface StandardErrorResponse {
 | **`401 Unauthorized`** | 身份未认证 | 会话 Cookie 不存在或已过期、PAT 签名验证失败、登录身份凭据无效 |
 | **`403 Forbidden`** | 权限拒绝 / 状态限制 | CSRF 校验失败、账号处于待审/驳回/停用、密码超期或改密锁定、RBAC 角色权限不足、SSRF 私网拦截 |
 | **`404 Not Found`** | 实体不存在 | 请求的 URL 路由不存在、指定的 ID 实体在数据库中不存在 |
-| **`409 Conflict`** | 资源状态冲突 | 乐观锁版本不一致 (409 CAS)、注册用户名已存在、重名数据源、审批工单状态已被他人流转 |
+| **`409 Conflict`** | 资源状态冲突 | 乐观锁版本不一致 (409 CAS)、注册用户名已存在、重名数据源、同用户未吊销 PAT 重名、审批工单状态已被他人流转 |
 | **`429 Too Many Requests`** | 触发频控限流 | 登录 IP/账号防爆破锁定、用户 QPM 桶满、Profile 资源桶满、Agent 死循环熔断 |
 | **`499 Client Closed`** | 客户端主动取消 | 客户端显式掐断 HTTP 连接或 MCP 客户端发送取消通知 |
 | **`500 Internal Error`** | 服务端内部未捕获故障 | 内部断言失败、意外文件 I/O 崩溃、加密密钥环严重故障 |
@@ -57,7 +57,7 @@ export interface StandardErrorResponse {
 
 ### 3.3 全量标准错误码自愈交互大表 (Error Code Matrix)
 
-全系统 44 项核心错误码详尽归一化定义如下，前端 HTTP 拦截器与业务表单必须以此表驱动视觉交互：
+全系统 45 项核心错误码详尽归一化定义如下，前端 HTTP 拦截器与业务表单必须以此表驱动视觉交互：
 
 | 错误编码 (`code`) | HTTP 状态 | 触发模块 | 触发业务场景与判断逻辑 | 默认错误提示 (`message`) | 前端交互自愈指引 (`action_guidance`) | 附加字段 |
 | :--- | :---: | :---: | :--- | :--- | :--- | :---: |
@@ -80,6 +80,7 @@ export interface StandardErrorResponse {
 | `ERR_LAST_SUPER_ADMIN` | 400 | 防自残事务锁 | 尝试停用、删除或降级系统中仅存的最后 1 名超管 | 操作已被阻止：系统必须保留至少 1 名活跃超级管理员。 | 请先激活或指派其他超级管理员账号，再对当前账号执行变更。 | 无 |
 | `ERR_CONCURRENCY_CONFLICT` | 409 | 乐观锁校验器 | PUT 提交的 version 小于当前元数据库内版本 | 配置已被其他管理员更新，产生并发冲突。 | 检测到版本冲突，已保留您的修改草稿。请比对差异后重新提交。 | `details.current_version` |
 | `ERR_DUPLICATE_NAME` | 409 | 资源校验器 | 数据源或角色英文标识已被占用 | 资源英文唯一标识重复。 | 该唯一名称已被占用，请输入一个未使用的英文名称。 | 无 |
+| `ERR_PAT_NAME_EXISTS` | 409 | 令牌中心 | 当前用户已存在同名的未吊销个人访问令牌 | 该令牌名称已被占用，请更换其他名称。 | 同一账号下有效令牌名称不可重复；吊销旧令牌后方可复用同名。 | 无 |
 | `ERR_CREDENTIAL_REENTRY_REQUIRED` | 400 | 数据源服务 | 修改了 host/port/user 但未录入新密码/私钥 | 修改连接目标后，必须重新输入密码或私钥。 | 为防凭据被恶意复用探测未授权内网主机，修改端点必须重新录入凭据。 | 无 |
 | `ERR_PROFILE_IMMUTABLE_FIELD` | 400 | 数据源服务 | 尝试修改 Profile 的 name 或 environment 等不可变字段 | 数据源基础标识禁止修改。 | 数据源唯一标识与环境属性创建后不可变更，请保持原值。 | `details.immutable_fields` |
 | `ERR_ROLE_IMMUTABLE_FIELD` | 400 | 策略管理 | 尝试修改角色的唯一英文标识 role_name | 角色唯一英文标识禁止修改。 | 角色唯一英文标识创建后不可变更，请保持原值。 | `details.immutable_fields` |
