@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
 import { registerUnauthorizedHandler, sanitizeReturnUrl } from '@/api/client';
+import { resetSessionCacheOnUnauthorized } from '@/api/session-cache';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { ProtectedRoute } from '@/guards/auth-guards';
 
@@ -12,6 +13,8 @@ const PendingApprovalView = lazy(() => import('@/views/auth/PendingApprovalView'
 const ResubmitApprovalView = lazy(() => import('@/views/auth/ResubmitApprovalView'));
 const AccountDisabledView = lazy(() => import('@/views/auth/AccountDisabledView'));
 const DashboardView = lazy(() => import('@/views/DashboardView'));
+const MyTokensView = lazy(() => import('@/views/developer/MyTokensView'));
+const ClientConfigView = lazy(() => import('@/views/developer/ClientConfigView'));
 const ModulePlaceholderView = lazy(() => import('@/views/ModulePlaceholderView'));
 const RouteUnavailableView = lazy(() => import('@/views/RouteUnavailableView'));
 
@@ -42,7 +45,7 @@ function UnauthorizedBridge() {
 
   useEffect(() => {
     registerUnauthorizedHandler((currentPath) => {
-      qc.removeQueries({ queryKey: ['auth'] });
+      resetSessionCacheOnUnauthorized(qc);
       const safeReturn = sanitizeReturnUrl(currentPath, '/dashboard');
       const target =
         safeReturn === '/dashboard' || safeReturn === '/login'
@@ -209,12 +212,7 @@ export function App() {
                 path="/developer/pats"
                 element={
                   <ProtectedRoute>
-                    <ModulePlaceholderView
-                      sectionLabel="开发者自服务"
-                      pageLabel="个人访问令牌 (PAT)"
-                      milestone="M2"
-                      description="个人访问令牌签发与单次展示保护弹窗"
-                    />
+                    <MyTokensView />
                   </ProtectedRoute>
                 }
               />
@@ -222,12 +220,7 @@ export function App() {
                 path="/developer/config"
                 element={
                   <ProtectedRoute>
-                    <ModulePlaceholderView
-                      sectionLabel="开发者自服务"
-                      pageLabel="客户端接入配置"
-                      milestone="M2"
-                      description="MCP 客户端三态配置片段生成器"
-                    />
+                    <ClientConfigView />
                   </ProtectedRoute>
                 }
               />

@@ -48,7 +48,19 @@ export default function DashboardView() {
               当前会话已通过四级安全守卫（Auth → Status → MustChangePwd → Role），管控面实时直连后端。
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/developer/pats">
+                <Icon name="key" className="size-3.5" />
+                <span>个人访问令牌</span>
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/developer/config">
+                <Icon name="terminal" className="size-3.5" />
+                <span>客户端接入配置</span>
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/change-password">
                 <Icon name="lock" className="size-3.5" />

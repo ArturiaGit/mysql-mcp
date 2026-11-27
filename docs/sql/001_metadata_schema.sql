@@ -102,9 +102,12 @@ CREATE TABLE `sys_pats` (
   `expires_at` DATETIME(3) DEFAULT NULL COMMENT '到期时间 (NULL表示永不过期)',
   `last_used_at` DATETIME(3) DEFAULT NULL,
   `revoked_at` DATETIME(3) DEFAULT NULL COMMENT '主动吊销时间 (非NULL表示已吊销)',
+  `active_name` VARCHAR(64) GENERATED ALWAYS AS
+    (CASE WHEN `revoked_at` IS NULL THEN `name` ELSE NULL END) STORED COMMENT '数据库约束每用户下未吊销PAT名称唯一',
   `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_token_hash` (`token_hash`),
+  UNIQUE KEY `uk_user_active_name` (`user_id`, `active_name`),
   KEY `idx_user_revoked` (`user_id`, `revoked_at`),
   CONSTRAINT `fk_pat_user` FOREIGN KEY (`user_id`) REFERENCES `sys_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='个人访问令牌安全表';

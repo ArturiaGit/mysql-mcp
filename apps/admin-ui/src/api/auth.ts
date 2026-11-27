@@ -14,6 +14,7 @@ import type {
 } from '@mysql-mcp/shared-types';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest, clearActiveCsrfToken, refreshCsrfToken } from './client';
+import { sessionRequestManager } from './session-request';
 import {
   ActionSuccessSchema,
   CurrentUserResponseSchema,
@@ -51,6 +52,8 @@ export async function fetchCurrentUser(signal?: AbortSignal): Promise<CurrentUse
 }
 
 export async function loginWithPassword(payload: LoginRequestDTO): Promise<LoginResponseDTO> {
+  // Abort any in-flight traffic from a prior session BEFORE switching session cookies on the wire.
+  sessionRequestManager.abortAndRotate();
   const result = await apiRequest<LoginResponseDTO>('/api/v1/auth/login', {
     method: 'POST',
     body: payload,

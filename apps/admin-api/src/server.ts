@@ -3,22 +3,33 @@ import { z } from 'zod';
 import { createMetadataPool, createMetadataQueryExecutor, type MetadataDbConfig } from '@mysql-mcp/core-engine';
 import { CryptoKeyring } from '@mysql-mcp/security';
 import { AuthService } from './auth-service.js';
+import { PatService, type PatRevocationHooks } from './pat-service.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { BootstrapService } from './bootstrap-service.js';
 import { ApiError, errorBody } from './errors.js';
 
 const keyringConfig = z.object({ active_key_id: z.string(), keys: z.record(z.string(), z.string()) });
 
-export function createServer(config?: MetadataDbConfig, env: NodeJS.ProcessEnv = process.env) {
+interface AdminApiDependencies { patRevocationHooks?: PatRevocationHooks; }
+
+export function createServer(
+  config?: MetadataDbConfig,
+  env: NodeJS.ProcessEnv = process.env,
+  { patRevocationHooks }: AdminApiDependencies = {},
+) {
   const proxies = env.TRUSTED_PROXY_CIDRS?.split(',').map(value => value.trim()).filter(Boolean);
   const app = Fastify({ logger: false, trustProxy: proxies?.length ? proxies : false });
   const pool = config && createMetadataPool(config);
   const secret = env.ADMIN_API_SECRET;
+  const pepper = env.SERVER_PEPPER;
   let initialized = false;
   let draining = false;
   let bootstrap: BootstrapService | undefined;
-  if (pool && secret && Buffer.byteLength(secret) >= 32) {
-    const auth = new AuthService(pool, createMetadataQueryExecutor(pool), secret);
+  if (pool && secret && Buffer.byteLength(secret, 'utf8') >= 32 && pepper && Buffer.byteLength(pepper, 'utf8') >= 32) {
+    const db = createMetadataQueryExecutor(pool);
+    const auth = new AuthService(pool, db, secret);
+    // The standalone M2 server has no data-plane runtime; the M6 host supplies these hooks.
+    const patService = new PatService(pool, db, pepper, patRevocationHooks);
     app.addHook('onReady', async () => {
       try {
         const raw: unknown = JSON.parse(env.GATEWAY_MASTER_KEYS ?? 'null');
@@ -35,7 +46,7 @@ export function createServer(config?: MetadataDbConfig, env: NodeJS.ProcessEnv =
       }
     });
     app.register(async (authRoutes) => {
-      await registerAuthRoutes(authRoutes, { service: auth, secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining });
+      await registerAuthRoutes(authRoutes, { service: auth, patService, secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining });
     });
   }
   app.setErrorHandler((error, _request, reply) => {

@@ -42,6 +42,7 @@
 ### 2.4 契约防漂移、未决决策与 Git 门禁
 - 实施阶段发现设计矛盾或功能缺口时，是否暂停上报并按 `scripts/*_parts/` → `combine_*.js` → `generate_readiness_contracts.py --check` 流程更新真源（严禁手改 `docs/*.md`）；
 - 触及 `AGENTS.md` §4 未决决策项（`RD-08`）时，禁止擅自硬编码写死；
+- Git 提交信息（`<subject>` 与正文）、PR 标题与描述、Review 意见及 Issue / Commit 评论等 Git / GitHub 协作信息必须统一使用中文（`<type>(<scope>)` 前缀及技术术语/路径保持英文原文）；
 - 严禁 `--no-verify` 跳过钩子，严禁混入 `.env*`、私钥、测试凭据或临时截图/调试产物。
 
 ---

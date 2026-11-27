@@ -43,3 +43,4 @@
   - `SELECT SLEEP(10)` / CTE 穿透黑名单表 / `information_schema` 刺探均被拦截并返回标准报错；
   - 取消/断连能触发 Admin 通道 KILL 与连接物理销毁；
   - 放行与拦截记录均真实写入 `sys_audit_logs`
+- [ ] **M2 → M6 PAT 吊销真实断流接线验收（方案 1A 挂账收口）**：将 `apps/admin-api` 的 `PatService` 接入真实 `RegistryHub.markPatRevokedSync` 与 `QueryLifecycleCoordinator.cancelQueriesByPat`，实测调用 `POST /api/v1/pats/:id/revoke` 后，数据面立即拒绝该 PAT 的后续请求并同步 `KILL` 物理打断该 PAT 关联的在途 SQL

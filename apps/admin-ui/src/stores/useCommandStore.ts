@@ -1,21 +1,12 @@
 import { create } from 'zustand';
+import type { IconName } from '@/components/ui/icon';
 
 export interface CommandItem {
   id: string;
   title: string;
   tag: string;
   keywords: string;
-  iconName:
-    | 'box'
-    | 'sliders'
-    | 'table'
-    | 'activity'
-    | 'key'
-    | 'palette'
-    | 'sun'
-    | 'help'
-    | 'shield'
-    | 'heart-pulse';
+  iconName: IconName;
   action: () => void;
 }
 
