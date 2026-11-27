@@ -22,6 +22,22 @@ export type {
   UserProfileDTO,
 } from './auth.js';
 
+export type {
+  ApproveUserRequestDTO,
+  ConflictErrorDetailsDTO,
+  PaginatedDTO,
+  PendingApprovalDTO,
+  RejectUserRequestDTO,
+  ResetPasswordRequestDTO,
+  ResetPasswordResponseDTO,
+  RoleDTO,
+  UpdateUserRolesRequestDTO,
+  UpdateUserStatusRequestDTO,
+  UserListItemDTO,
+  UserRoleSummaryDTO,
+  VersionedActionSuccessDTO,
+} from './user-administration.js';
+
 export type EntityId = string;
 export type UserStatus = 'PENDING' | 'ACTIVE' | 'REJECTED' | 'DISABLED';
 export type ProfileStatus = 'ACTIVE' | 'DISABLED';
