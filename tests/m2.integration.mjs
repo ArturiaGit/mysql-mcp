@@ -307,7 +307,14 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
     const retryAfter = rejected.headers.get('retry-after');
     assert.match(retryAfter ?? '', /^[1-9][0-9]*$/);
     assert(Number(retryAfter) <= 60, 'retry-after must be inside the configured minute');
-    await rejected.body?.cancel();
+    const body = await rejected.json();
+    assert.equal(body.code, 'ERR_RATE_LIMIT_USER');
+    assert.equal(Number.isInteger(body.retry_after_sec) && body.retry_after_sec > 0, true);
+    assert.equal(String(body.retry_after_sec), retryAfter);
+    assert.equal(typeof body.message, 'string');
+    assert(body.message.length > 0 && body.message !== '请求未能完成。');
+    assert.equal(typeof body.action_guidance, 'string');
+    assert(body.action_guidance.length > 0 && body.action_guidance !== '请检查输入或联系管理员。');
     assert.deepEqual(await writeCounts(), admitted, 'the rejected request must not write a PAT or an approval');
   });
   console.log(`MySQL ${version}; M2: four routes, fail-closed probes, audit rollback, post-commit callbacks and field projections verified`);

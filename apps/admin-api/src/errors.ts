@@ -21,6 +21,7 @@ const guidance: Partial<Record<ErrorCode, readonly [string, string]>> = {
   ERR_SAME_AS_OLD_PASSWORD: ['新旧密码相同。', '请设置不同的新密码。'],
   ERR_NOT_FOUND: ['资源不存在。', '请检查请求路径。'],
   ERR_RBAC_FORBIDDEN: ['无权执行此操作。', '请联系管理员确认资源权限。'],
+  ERR_RATE_LIMIT_USER: ['请求过于频繁，已触发限流保护。', '请等待冷却倒计时结束后重试。'],
 };
 
 export class ApiError extends Error {

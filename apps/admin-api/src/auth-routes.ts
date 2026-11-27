@@ -28,7 +28,14 @@ const patIdSchema = z.strictObject({
 });
 
 export async function registerAuthRoutes(app: FastifyInstance, { service, patService, secureCookies, ready }: RouteOptions): Promise<void> {
-  await app.register(rateLimit, { global: false, max: 100, timeWindow: 60_000 });
+  await app.register(rateLimit, {
+    global: false,
+    max: 100,
+    timeWindow: 60_000,
+    errorResponseBuilder: (_request, context) => new ApiError(429, 'ERR_RATE_LIMIT_USER', {
+      retry_after_sec: Math.max(1, Math.ceil(context.ttl / 1000)),
+    }),
+  });
   const users = new WeakMap<FastifyRequest, UserProfileDTO>();
   const guard = (policy: GuardPolicy = {}) => async (request: FastifyRequest) => {
     const user = await service.authenticate(sessionId(request));
