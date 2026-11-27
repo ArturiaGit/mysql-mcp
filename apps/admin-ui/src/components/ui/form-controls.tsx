@@ -190,7 +190,7 @@ export function Switch({ className, labelId, checked, ...props }: SwitchProps) {
   );
 }
 
-export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface CheckboxProps extends Omit<ComponentProps<'input'>, 'type'> {
   label: string;
 }
 

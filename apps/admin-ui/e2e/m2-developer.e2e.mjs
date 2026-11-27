@@ -309,20 +309,32 @@ async function run() {
     const modalSnippet = await page.getByTestId('snippet-code-claude-desktop').innerText();
     assert(modalSnippet.includes(rawToken), 'Modal immediate snippet must include freshly issued rawToken');
 
-    // Esc while unchecked MUST be intercepted and expand in-place retention prompt
+    // Esc while unchecked MUST be intercepted and show text-only reminder (NO extra buttons!)
     await page.keyboard.press('Escape');
-    await page.getByTestId('pat-discard-prompt').waitFor({ state: 'visible' });
-    await page.getByTestId('pat-keep-saving-btn').click();
-    await page.getByTestId('pat-discard-prompt').waitFor({ state: 'hidden' });
+    await page.getByTestId('pat-confirm-reminder').waitFor({ state: 'visible' });
+    assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open on Esc before checkbox');
+    assert.equal(
+      await page.getByTestId('pat-confirm-reminder').locator('button').count(),
+      0,
+      'Reminder banner must be text-only with zero buttons',
+    );
+    assert.equal(await page.locator('[data-testid="pat-force-discard-btn"]').count(), 0);
+    assert.equal(await page.locator('[data-testid="pat-keep-saving-btn"]').count(), 0);
 
-    // Backdrop click while unchecked MUST also be intercepted
+    // Top-right close button (X) while unchecked MUST also be blocked
+    await page.getByTestId('pat-modal-close-btn').click();
+    assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open on X click before checkbox');
+    assert.equal(await page.getByTestId('pat-confirm-reminder').isVisible(), true);
+
+    // Backdrop click while unchecked MUST also be blocked
     await page.mouse.click(8, 8);
-    await page.getByTestId('pat-discard-prompt').waitFor({ state: 'visible' });
+    assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open on backdrop click before checkbox');
+    assert.equal(await page.getByTestId('pat-confirm-reminder').isVisible(), true);
 
-    // Copy + check backup confirmation -> unlocks done button and hides discard prompt
+    // Copy + check backup confirmation -> unlocks done button and hides reminder
     await page.getByTestId('pat-copy-raw-btn').click();
     await page.getByTestId('pat-backup-confirm-checkbox').check();
-    await page.getByTestId('pat-discard-prompt').waitFor({ state: 'hidden' });
+    await page.getByTestId('pat-confirm-reminder').waitFor({ state: 'hidden' });
     assert.equal(await page.getByTestId('pat-done-btn').isDisabled(), false);
 
     await page.getByTestId('pat-done-btn').click();
@@ -357,7 +369,30 @@ async function run() {
       `SELECT CAST(details AS CHAR) FROM sys_user_approvals WHERE user_id = ${devId} AND action = 'CONFIG_UPDATE' AND target_type = 'PAT' ORDER BY id DESC LIMIT 1`,
     );
     assert(auditDetails.includes('PAT_CREATE') && !auditDetails.includes(rawToken) && !auditDetails.includes(expectedHash));
-    console.log('PASS: Script 1 — PAT issuance, Esc/backdrop safeguard, zero-leak close, reload prefix-only & real MySQL hash verified');
+    console.log('PASS: Script 1 — PAT issuance, strict checkbox-gated Esc/X/backdrop block (zero extra buttons), zero-leak close & real MySQL hash verified');
+
+    // Duplicate active PAT name -> real backend 409 ERR_PAT_NAME_EXISTS inline error & draft preservation
+    await page.getByTestId('open-create-pat-btn').click();
+    await page.getByTestId('pat-create-modal').waitFor({ state: 'visible' });
+    await page.getByTestId('pat-name-input').fill('Cursor-Agent-Dev');
+    await page.getByTestId('pat-expires-days-input').fill('45');
+    await page.getByTestId('pat-create-submit-btn').click();
+    await page.getByTestId('pat-name-error').waitFor({ state: 'visible' });
+    const dupErrorText = (await page.getByTestId('pat-name-error').innerText()).trim();
+    assert(
+      dupErrorText.includes('该令牌名称已被占用') && dupErrorText.includes('吊销旧令牌后方可复用同名'),
+      `Expected 409 ERR_PAT_NAME_EXISTS inline error, got: ${dupErrorText}`,
+    );
+    assert.equal(await page.getByTestId('pat-name-input').inputValue(), 'Cursor-Agent-Dev', 'Form draft name must be preserved on 409');
+    assert.equal(await page.getByTestId('pat-expires-days-input').inputValue(), '45', 'Form draft expiry must be preserved on 409');
+    // Editing name automatically clears the inline error
+    await page.getByTestId('pat-name-input').fill('Cursor-Agent-Dev-Alt');
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="pat-name-error"]')?.textContent ?? '').trim() === '',
+    );
+    await page.getByTestId('pat-modal-close-btn').click();
+    await page.getByTestId('pat-create-modal').waitFor({ state: 'hidden' });
+    console.log('PASS: Script 1b — Duplicate active PAT name blocked with 409 ERR_PAT_NAME_EXISTS inline form guidance');
 
     // ------------------------------------------------------------------
     // Script 2: Ordinary ACTIVE developer opens /developer/config
@@ -454,7 +489,19 @@ async function run() {
       `SELECT COUNT(*) FROM sys_user_approvals WHERE user_id = ${devId} AND action = 'PAT_REVOKE' AND target_type = 'PAT' AND target_id = ${patId}`,
     );
     assert.equal(revokeAuditCount, '1', 'PAT_REVOKE audit record must be written in real MySQL');
-    console.log('PASS: Script 3 — Dangerous REVOKE confirmation dialog revoked PAT in real MySQL & refreshed UI');
+
+    // After revocation, reusing the same PAT name MUST succeed (active-only uniqueness)
+    await page.getByTestId('open-create-pat-btn').click();
+    await page.getByTestId('pat-create-modal').waitFor({ state: 'visible' });
+    await page.getByTestId('pat-name-input').fill('Cursor-Agent-Dev');
+    await page.getByTestId('pat-expires-days-input').fill('30');
+    await page.getByTestId('pat-create-submit-btn').click();
+    await page.getByTestId('pat-reveal-danger-banner').waitFor({ state: 'visible' });
+    await page.getByTestId('pat-backup-confirm-checkbox').check();
+    await page.getByTestId('pat-done-btn').click();
+    await page.getByTestId('pat-create-modal').waitFor({ state: 'hidden' });
+    await page.getByTestId('pat-table-row').first().waitFor({ state: 'visible' });
+    console.log('PASS: Script 3 — Dangerous REVOKE confirmation dialog revoked PAT in real MySQL, refreshed UI, and allowed post-revoke name reuse');
 
     // ------------------------------------------------------------------
     // Security P1 Regression: Cross-user React Query cache isolation (in-SPA, ZERO page reload!)

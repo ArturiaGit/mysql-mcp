@@ -15,7 +15,7 @@ export interface PatModalState {
   rawToken: string | null;
   secretMasked: boolean;
   backupConfirmed: boolean;
-  discardPromptVisible: boolean;
+  confirmReminderVisible: boolean;
 }
 
 export type PatModalAction =
@@ -24,12 +24,11 @@ export type PatModalAction =
   | { type: 'SET_EXPIRES_DAYS'; value: string }
   | { type: 'SET_VALIDATION_ERRORS'; nameError: string; expiresError: string }
   | { type: 'SUBMIT_START' }
-  | { type: 'SUBMIT_ERROR'; message: string }
+  | { type: 'SUBMIT_ERROR'; message?: string; nameError?: string }
   | { type: 'SUBMIT_SUCCESS'; pat: PatListItemDTO; rawToken: string }
   | { type: 'TOGGLE_SECRET_MASK' }
   | { type: 'SET_BACKUP_CONFIRMED'; checked: boolean }
-  | { type: 'SHOW_DISCARD_PROMPT' }
-  | { type: 'HIDE_DISCARD_PROMPT' };
+  | { type: 'SHOW_CONFIRM_REMINDER' };
 
 export function createInitialPatModalState(): PatModalState {
   return {
@@ -44,15 +43,16 @@ export function createInitialPatModalState(): PatModalState {
     rawToken: null,
     secretMasked: false,
     backupConfirmed: false,
-    discardPromptVisible: false,
+    confirmReminderVisible: false,
   };
 }
 
 /**
- * Determines whether closing the modal can proceed directly without interception:
+ * Determines whether closing the modal is permitted:
  * - While submitting: blocked (prevent in-flight abandonment / orphaned token).
- * - In reveal phase with an active rawToken and unchecked backup confirmation: blocked -> expand discard prompt.
- * - Otherwise: safe to close (and caller must immediately dispatch RESET_AND_CLEAR_SECRET).
+ * - In reveal phase with an active rawToken: strictly requires `backupConfirmed === true`
+ *   (no skip-confirmation force-close path).
+ * - Otherwise: safe to close (caller must immediately dispatch RESET_AND_CLEAR_SECRET).
  */
 export function canClosePatModalSafely(state: PatModalState): boolean {
   if (state.submitting) {
@@ -108,7 +108,8 @@ export function patModalReducer(state: PatModalState, action: PatModalAction): P
       return {
         ...state,
         submitting: false,
-        submitError: action.message,
+        nameError: action.nameError ?? '',
+        submitError: action.message ?? '',
       };
 
     case 'SUBMIT_SUCCESS':
@@ -123,7 +124,7 @@ export function patModalReducer(state: PatModalState, action: PatModalAction): P
         rawToken: action.rawToken,
         secretMasked: false,
         backupConfirmed: false,
-        discardPromptVisible: false,
+        confirmReminderVisible: false,
       };
 
     case 'TOGGLE_SECRET_MASK':
@@ -136,22 +137,16 @@ export function patModalReducer(state: PatModalState, action: PatModalAction): P
       return {
         ...state,
         backupConfirmed: action.checked,
-        discardPromptVisible: action.checked ? false : state.discardPromptVisible,
+        confirmReminderVisible: action.checked ? false : state.confirmReminderVisible,
       };
 
-    case 'SHOW_DISCARD_PROMPT':
+    case 'SHOW_CONFIRM_REMINDER':
       if (state.phase !== 'reveal' || state.rawToken === null || state.backupConfirmed) {
         return state;
       }
       return {
         ...state,
-        discardPromptVisible: true,
-      };
-
-    case 'HIDE_DISCARD_PROMPT':
-      return {
-        ...state,
-        discardPromptVisible: false,
+        confirmReminderVisible: true,
       };
   }
 }

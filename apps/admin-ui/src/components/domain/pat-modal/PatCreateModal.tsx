@@ -40,6 +40,9 @@ import {
   patModalReducer,
 } from './pat-modal-state';
 
+const DUPLICATE_PAT_NAME_FALLBACK =
+  '该令牌名称已被占用，请更换其他名称。同一账号下有效令牌名称不可重复；吊销旧令牌后方可复用同名。';
+
 export interface PatCreateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -63,7 +66,7 @@ export function PatCreateModal({
   const nameInputRef = useRef<HTMLInputElement>(null);
   const expiresInputRef = useRef<HTMLInputElement>(null);
   const copyBtnRef = useRef<HTMLButtonElement>(null);
-  const keepBtnRef = useRef<HTMLButtonElement>(null);
+  const backupCheckboxRef = useRef<HTMLInputElement>(null);
   const requestSeqRef = useRef(0);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -99,8 +102,8 @@ export function PatCreateModal({
       clearSecretAndReset();
       return true;
     }
-    dispatch({ type: 'SHOW_DISCARD_PROMPT' });
-    queueMicrotask(() => keepBtnRef.current?.focus());
+    dispatch({ type: 'SHOW_CONFIRM_REMINDER' });
+    queueMicrotask(() => backupCheckboxRef.current?.focus());
     return false;
   }, [clearSecretAndReset]);
 
@@ -108,11 +111,6 @@ export function PatCreateModal({
     if (handleBeforeClose()) {
       onOpenChange(false);
     }
-  };
-
-  const handleForceDiscardAndClose = () => {
-    clearSecretAndReset();
-    onOpenChange(false);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -156,6 +154,15 @@ export function PatCreateModal({
       queueMicrotask(() => copyBtnRef.current?.focus());
     } catch (error: unknown) {
       if (seq !== requestSeqRef.current) {
+        return;
+      }
+      if (isApiClientError(error) && error.code === 'ERR_PAT_NAME_EXISTS') {
+        const duplicateMessage =
+          error.message && error.actionGuidance
+            ? `${error.message}${error.actionGuidance}`
+            : DUPLICATE_PAT_NAME_FALLBACK;
+        dispatch({ type: 'SUBMIT_ERROR', nameError: duplicateMessage });
+        queueMicrotask(() => nameInputRef.current?.focus());
         return;
       }
       const message = isApiClientError(error)
@@ -263,7 +270,9 @@ export function PatCreateModal({
                       dispatch({ type: 'SET_NAME', value: event.target.value })
                     }
                   />
-                  <FieldError id="pat-name-error">{state.nameError}</FieldError>
+                  <FieldError id="pat-name-error" data-testid="pat-name-error">
+                    {state.nameError}
+                  </FieldError>
                 </Field>
 
                 <Field invalid={Boolean(state.expiresError)}>
@@ -396,59 +405,41 @@ export function PatCreateModal({
                 />
               </div>
 
-              <Checkbox
-                id="pat-backup-confirm-checkbox"
-                data-testid="pat-backup-confirm-checkbox"
-                checked={state.backupConfirmed}
-                onChange={(event) =>
-                  dispatch({
-                    type: 'SET_BACKUP_CONFIRMED',
-                    checked: event.target.checked,
-                  })
+              <div
+                className={
+                  state.confirmReminderVisible
+                    ? 'rounded-md border border-warning/50 bg-warning-soft/50 px-2.5 py-1.5 transition-colors'
+                    : undefined
                 }
-                label="我已复制并妥善保存此令牌。我了解关闭后系统无法再次显示该令牌。"
-              />
+              >
+                <Checkbox
+                  ref={backupCheckboxRef}
+                  id="pat-backup-confirm-checkbox"
+                  data-testid="pat-backup-confirm-checkbox"
+                  checked={state.backupConfirmed}
+                  aria-describedby={
+                    state.confirmReminderVisible ? 'pat-confirm-reminder-text' : undefined
+                  }
+                  onChange={(event) =>
+                    dispatch({
+                      type: 'SET_BACKUP_CONFIRMED',
+                      checked: event.target.checked,
+                    })
+                  }
+                  label="我已复制并妥善保存此令牌。我了解关闭后系统无法再次显示该令牌。"
+                />
+              </div>
 
-              {/* Exit Interception Panel */}
-              {state.discardPromptVisible && (
-                <div
-                  role="alertdialog"
-                  aria-labelledby="pat-discard-title"
-                  aria-describedby="pat-discard-reason"
-                  data-testid="pat-discard-prompt"
-                  className="rounded-md border border-warning/40 bg-warning-soft p-3 text-xs text-warning"
+              {/* Strict text-only reminder (NO extra close/keep buttons) */}
+              {state.confirmReminderVisible && (
+                <Alert
+                  variant="warning"
+                  role="alert"
+                  id="pat-confirm-reminder-text"
+                  data-testid="pat-confirm-reminder"
                 >
-                  <p id="pat-discard-title" className="font-semibold">
-                    尚未确认保存令牌明文
-                  </p>
-                  <p id="pat-discard-reason" className="mt-1 leading-relaxed">
-                    当前令牌明文尚未确认保存。关闭窗口仅清除屏幕上的明文显示，不会吊销该令牌。确认放弃保存此令牌明文？
-                  </p>
-                  <div className="mt-2.5 flex items-center justify-end gap-2">
-                    <Button
-                      variant="destructive"
-                      size="xs"
-                      data-testid="pat-force-discard-btn"
-                      aria-describedby="pat-discard-reason"
-                      onClick={handleForceDiscardAndClose}
-                    >
-                      清除明文并关闭
-                    </Button>
-                    <Button
-                      ref={keepBtnRef}
-                      variant="outline"
-                      size="xs"
-                      data-testid="pat-keep-saving-btn"
-                      aria-describedby="pat-discard-reason"
-                      onClick={() => {
-                        dispatch({ type: 'HIDE_DISCARD_PROMPT' });
-                        copyBtnRef.current?.focus();
-                      }}
-                    >
-                      继续保存
-                    </Button>
-                  </div>
-                </div>
+                  尚未确认保存。请先复制上方令牌明文，并勾选“我已复制并妥善保存此令牌”后再关闭窗口。
+                </Alert>
               )}
             </DialogBody>
 
@@ -457,7 +448,7 @@ export function PatCreateModal({
                 variant="default"
                 data-testid="pat-done-btn"
                 disabled={!state.backupConfirmed}
-                onClick={handleForceDiscardAndClose}
+                onClick={handleRequestClose}
               >
                 <Icon name="check" className="size-3.5" />
                 <span>已保存，完成</span>
