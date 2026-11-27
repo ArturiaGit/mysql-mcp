@@ -25,7 +25,7 @@
 >   2. **同用户未吊销 PAT 名称唯一（方案 A + 方案 1）**：`sys_pats` 新增生成列 `active_name` 与唯一索引 `uk_user_active_name (user_id, active_name)`，同一用户下未吊销有效令牌名称不可重复（吊销后可复用同名、不同用户互不影响）；重复签发返回 `409 ERR_PAT_NAME_EXISTS`，前端表单直接提示名称已占用。
 
 - [x] `GET /api/v1/pats`（仅返回 `token_prefix` 与脱敏摘要，永不回传可恢复明文）
-- [ ] `POST /api/v1/pats`（256-bit CSPRNG + `HMAC-SHA-256(SERVER_PEPPER, rawToken)` 落库 `sys_pats`，仅创建响应返回一次 `rawToken`，同事务写审计；同用户未吊销重名返回 `409 ERR_PAT_NAME_EXISTS`）
+- [x] `POST /api/v1/pats`（256-bit CSPRNG + `HMAC-SHA-256(SERVER_PEPPER, rawToken)` 落库 `sys_pats`，仅创建响应返回一次 `rawToken`，同事务写审计；同用户未吊销重名返回 `409 ERR_PAT_NAME_EXISTS`）
 - [x] `POST /api/v1/pats/:id/revoke`（受 L3 密码有效守卫约束；仅允许本人或超管吊销，原子更新 `revoked_at` + 同事务写审计 + 提交后触发可测试失效回调）
 - [x] `GET /api/v1/profiles/my-options`（仅返回当前用户有访问权的 `{ id, name, displayName }` 轻量选项，不泄露底层 Host/Port/SSH 配置）
 

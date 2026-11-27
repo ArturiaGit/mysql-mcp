@@ -281,6 +281,47 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
     assert(hash && !serialized.includes(hash) && !serialized.includes(rawToken), 'PAT material in audit');
   }
 
+  await t.test('active PAT name uniqueness per user: 409 on active duplicate, reusable after revoke, isolated across users', async (subtest) => {
+    const uniqueApp = createServer(config, env);
+    subtest.after(() => uniqueApp.close());
+    const uniqueBase = await uniqueApp.listen({ host: '127.0.0.1', port: 0 });
+    assert.equal((await request(uniqueBase, '/health/ready')).status, 200);
+    const uniqueAlice = await login(uniqueBase, 'alice', alicePassword);
+    const uniqueBob = await login(uniqueBase, 'bob', bobPassword);
+    const writeCounts = async () => {
+      const [[counts]] = await db.query(`SELECT (SELECT COUNT(*) FROM sys_pats) AS pats,
+        (SELECT COUNT(*) FROM sys_user_approvals) AS approvals`);
+      return counts;
+    };
+    const sharedName = 'ci-deploy-token';
+    const original = await issue(uniqueBase, uniqueAlice, { name: sharedName, expiresDays: 30 }, 30);
+    const beforeDuplicate = await writeCounts();
+
+    const duplicate = await post(uniqueBase, pats, uniqueAlice, { name: sharedName, expiresDays: 30 });
+    assert.equal(duplicate.status, 409);
+    const duplicateBody = await duplicate.json();
+    assert.equal(duplicateBody.code, 'ERR_PAT_NAME_EXISTS');
+    assert.equal(duplicateBody.message, '该令牌名称已被占用，请更换其他名称。');
+    assert.equal(duplicateBody.action_guidance, '同一账号下有效令牌名称不可重复；吊销旧令牌后方可复用同名。');
+    assert.equal('rawToken' in duplicateBody, false);
+    assert.deepEqual(await writeCounts(), beforeDuplicate, 'duplicate active PAT name must not write PAT or approval rows');
+
+    const otherUserPat = await issue(uniqueBase, uniqueBob, { name: sharedName, expiresDays: 30 }, 30);
+    assert.equal(otherUserPat.pat.name, sharedName);
+    assert.notEqual(otherUserPat.pat.id, original.pat.id);
+
+    const revoked = await post(uniqueBase, revoke(original.pat.id), uniqueAlice);
+    assert.equal(revoked.status, 200);
+    assert.deepEqual(await revoked.json(), { success: true });
+
+    const reissued = await issue(uniqueBase, uniqueAlice, { name: sharedName, expiresDays: 30 }, 30);
+    assert.equal(reissued.pat.name, sharedName);
+    assert.notEqual(reissued.pat.id, original.pat.id);
+
+    assert.deepEqual(await (await request(uniqueBase, pats, { session: uniqueAlice })).json(), [reissued.pat, locked.pat]);
+    assert.deepEqual(await (await request(uniqueBase, pats, { session: uniqueBob })).json(), [otherUserPat.pat]);
+  });
+
   await t.test('isolated issuance limiter admits 20 requests, then returns 429 without metadata writes', async (subtest) => {
     const limitedApp = createServer(config, env);
     subtest.after(() => limitedApp.close());

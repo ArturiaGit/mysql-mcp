@@ -18,6 +18,7 @@ const guidance: Partial<Record<ErrorCode, readonly [string, string]>> = {
   ERR_AUTH_ACCOUNT_REJECTED: ['申请已被驳回。', '请补充信息后重新提交。'],
   ERR_AUTH_ACCOUNT_DISABLED: ['账号已停用。', '请联系管理员。'],
   ERR_AUTH_USERNAME_EXISTS: ['用户名已存在。', '请更换用户名。'],
+  ERR_PAT_NAME_EXISTS: ['该令牌名称已被占用，请更换其他名称。', '同一账号下有效令牌名称不可重复；吊销旧令牌后方可复用同名。'],
   ERR_SAME_AS_OLD_PASSWORD: ['新旧密码相同。', '请设置不同的新密码。'],
   ERR_NOT_FOUND: ['资源不存在。', '请检查请求路径。'],
   ERR_RBAC_FORBIDDEN: ['无权执行此操作。', '请联系管理员确认资源权限。'],

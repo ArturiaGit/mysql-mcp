@@ -51,11 +51,18 @@ export class PatService {
     const tokenHash = hashPatToken(rawToken, this.pepper);
     const pat = await withMetadataTransaction(this.pool, async (tx) => {
       await lockActiveUser(tx, userId);
-      await tx.query(
-        `INSERT INTO sys_pats (user_id, name, token_prefix, token_hash, expires_at)
-         VALUES (?, ?, ?, ?, TIMESTAMPADD(DAY, ?, UTC_TIMESTAMP(3)))`,
-        [userId, name, tokenPrefix, tokenHash, expiresDays],
-      );
+      try {
+        await tx.query(
+          `INSERT INTO sys_pats (user_id, name, token_prefix, token_hash, expires_at)
+           VALUES (?, ?, ?, ?, TIMESTAMPADD(DAY, ?, UTC_TIMESTAMP(3)))`,
+          [userId, name, tokenPrefix, tokenHash, expiresDays],
+        );
+      } catch (error) {
+        if (isDuplicateActivePatNameError(error)) {
+          throw new ApiError(409, 'ERR_PAT_NAME_EXISTS');
+        }
+        throw error;
+      }
       const [[inserted]] = await tx.query<(MetadataRow & { id: EntityId })[]>('SELECT CAST(LAST_INSERT_ID() AS CHAR) AS id');
       if (!inserted) throw new Error('Missing PAT ID');
       const [[row]] = await tx.query<PatRow[]>(
@@ -126,6 +133,17 @@ async function lockActiveUser(tx: MetadataQueryExecutor, userId: EntityId): Prom
   if (state.must_change_password === 1 || (expiry !== null && Date.now() > expiry.getTime())) {
     throw new ApiError(403, 'ERR_MUST_CHANGE_PASSWORD');
   }
+}
+
+export function isDuplicateActivePatNameError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  const code = 'code' in error ? error.code : undefined;
+  const errno = 'errno' in error ? error.errno : undefined;
+  if (code !== 'ER_DUP_ENTRY' || errno !== 1062) return false;
+  const detail = 'sqlMessage' in error && typeof error.sqlMessage === 'string'
+    ? error.sqlMessage
+    : error instanceof Error ? error.message : '';
+  return /for key '(?:[^']+\.)?uk_user_active_name'$/.test(detail);
 }
 
 function toPatDTO(row: PatRow): PatListItemDTO {
