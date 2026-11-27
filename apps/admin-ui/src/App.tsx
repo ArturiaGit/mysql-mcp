@@ -15,6 +15,8 @@ const AccountDisabledView = lazy(() => import('@/views/auth/AccountDisabledView'
 const DashboardView = lazy(() => import('@/views/DashboardView'));
 const MyTokensView = lazy(() => import('@/views/developer/MyTokensView'));
 const ClientConfigView = lazy(() => import('@/views/developer/ClientConfigView'));
+const ApprovalsView = lazy(() => import('@/views/governance/ApprovalsView'));
+const UsersView = lazy(() => import('@/views/governance/UsersView'));
 const ModulePlaceholderView = lazy(() => import('@/views/ModulePlaceholderView'));
 const RouteUnavailableView = lazy(() => import('@/views/RouteUnavailableView'));
 
@@ -134,12 +136,7 @@ export function App() {
                 path="/approvals"
                 element={
                   <ProtectedRoute requiredRoles={['SUPER_ADMIN', 'SECURITY_ADMIN']}>
-                    <ModulePlaceholderView
-                      sectionLabel="安全与管控"
-                      pageLabel="审批工单中心"
-                      milestone="M3"
-                      description="待审批与历史注册工单审核"
-                    />
+                    <ApprovalsView />
                   </ProtectedRoute>
                 }
               />
@@ -147,12 +144,7 @@ export function App() {
                 path="/users"
                 element={
                   <ProtectedRoute requiredRoles={['SUPER_ADMIN']}>
-                    <ModulePlaceholderView
-                      sectionLabel="安全与管控"
-                      pageLabel="用户与角色"
-                      milestone="M3"
-                      description="用户全生命周期管理与超管防自残保护"
-                    />
+                    <UsersView />
                   </ProtectedRoute>
                 }
               />
