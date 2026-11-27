@@ -5,6 +5,7 @@ import { createPatToken, hashPatToken } from '@mysql-mcp/security';
 import type { CreatePatResponseDTO, EntityId, PatListItemDTO, ProfileOptionDTO } from '@mysql-mcp/shared-types';
 import { passwordExpiry } from './auth-domain.js';
 import { ApiError } from './errors.js';
+import { invalidateAfterCommit } from './post-commit-invalidation.js';
 
 interface PatRow extends MetadataRow {
   id: EntityId;
@@ -33,6 +34,7 @@ export class PatService {
     private readonly pool: MetadataPool,
     private readonly db: MetadataQueryExecutor,
     private readonly pepper: string,
+    private readonly onInvalidationFailure: () => void,
     private readonly revocationHooks?: PatRevocationHooks,
   ) {}
 
@@ -106,9 +108,10 @@ export class PatService {
         [userId, userId, id, JSON.stringify({ operation: 'PAT_REVOKE' })],
       );
     });
-    if (this.revocationHooks) {
-      this.revocationHooks.markPatRevokedSync(id);
-      await this.revocationHooks.cancelQueriesByPat(id, 'PAT_REVOKED');
+    const hooks = this.revocationHooks;
+    if (hooks) {
+      await invalidateAfterCommit(this.onInvalidationFailure, [() => hooks.markPatRevokedSync(id)],
+        [() => hooks.cancelQueriesByPat(id, 'PAT_REVOKED')]);
     }
   }
 

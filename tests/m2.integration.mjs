@@ -8,6 +8,10 @@ import { hashPassword } from '../packages/security/dist/index.js';
 const config = readMetadataConfig(process.env);
 assert(config, 'M2 integration requires an isolated Docker MySQL 8.0 database');
 const password = () => `Aa1!${randomBytes(18).toString('base64url')}`;
+const noOpHooks = {
+  userInvalidationHooks: { markUserInvalidatedSync() {}, cancelQueriesByUser() {} },
+  patRevocationHooks: { markPatRevokedSync() {}, cancelQueriesByPat() {} },
+};
 const env = {
   NODE_ENV: 'production', ADMIN_API_SECRET: randomBytes(32).toString('hex'),
   SERVER_PEPPER: process.env.SERVER_PEPPER ?? ('密'.repeat(10) + randomBytes(1).toString('hex')),
@@ -75,7 +79,7 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
     const short = '密'.repeat(10) + 'a';
     assert.equal(Buffer.byteLength(short, 'utf8'), 31);
     for (const pepper of [undefined, short]) {
-      const app = createServer(config, { ...env, SERVER_PEPPER: pepper });
+      const app = createServer(config, { ...env, SERVER_PEPPER: pepper }, noOpHooks);
       try {
         const base = await app.listen({ host: '127.0.0.1', port: 0 });
         const live = await request(base, '/health/live');
@@ -95,7 +99,7 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
   });
 
   const events = [];
-  const app = createServer(config, env, { patRevocationHooks: {
+  const app = createServer(config, env, { ...noOpHooks, patRevocationHooks: {
     markPatRevokedSync(id) { events.push({ kind: 'mark', id }); },
     async cancelQueriesByPat(id, reason) {
       events.push({ kind: 'cancel', id, reason });
@@ -282,7 +286,7 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
   }
 
   await t.test('active PAT name uniqueness per user: 409 on active duplicate, reusable after revoke, isolated across users', async (subtest) => {
-    const uniqueApp = createServer(config, env);
+    const uniqueApp = createServer(config, env, noOpHooks);
     subtest.after(() => uniqueApp.close());
     const uniqueBase = await uniqueApp.listen({ host: '127.0.0.1', port: 0 });
     assert.equal((await request(uniqueBase, '/health/ready')).status, 200);
@@ -323,7 +327,7 @@ test('real MySQL 8.0 M2: pepper admission, PAT contracts, commit/rollback hooks 
   });
 
   await t.test('isolated issuance limiter admits 20 requests, then returns 429 without metadata writes', async (subtest) => {
-    const limitedApp = createServer(config, env);
+    const limitedApp = createServer(config, env, noOpHooks);
     subtest.after(() => limitedApp.close());
     const limitedBase = await limitedApp.listen({ host: '127.0.0.1', port: 0 });
     assert.equal((await request(limitedBase, '/health/ready')).status, 200);

@@ -2,6 +2,11 @@ import { readMetadataConfig, readPort } from '@mysql-mcp/core-engine';
 import { createServer } from './server.js';
 
 async function main(): Promise<void> {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('admin-api standalone production startup refused; the data-plane host must supply user and PAT invalidation hooks');
+    process.exitCode = 1;
+    return;
+  }
   const port = readPort(process.env.ADMIN_API_PORT, 8081);
   const app = createServer(readMetadataConfig(process.env));
   try {

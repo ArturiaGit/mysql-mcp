@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import test from 'node:test';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { createServer } from '../dist/server.js';
 import { createMetadataPool, createMetadataQueryExecutor, readMetadataConfig, withMetadataTransaction } from '@mysql-mcp/core-engine';
 import { hashPassword } from '@mysql-mcp/security';
@@ -90,15 +92,56 @@ test('M3 governance on real MySQL 8.0', async (t) => {
   const fixturePassword = password();
   const encoded = await hashPassword(fixturePassword);
   const events = [];
-  const app = createServer(config, {
+  let failingUserTombstone = false;
+  const apiEnv = {
     NODE_ENV: 'production', ADMIN_API_SECRET: randomBytes(32).toString('hex'), SERVER_PEPPER: randomBytes(32).toString('hex'),
     GATEWAY_MASTER_KEYS: JSON.stringify({ active_key_id: 'test', keys: { test: randomBytes(32).toString('hex') } }),
     BOOTSTRAP_ADMIN_USERNAME: 'm3admin', BOOTSTRAP_ADMIN_PASSWORD: bootstrapPassword,
-  }, {
+  };
+  await t.test('production needs both invalidation hooks to register business routes', async () => {
+    for (const hooks of [
+      { patRevocationHooks: { markPatRevokedSync() {}, cancelQueriesByPat() {} } },
+      { userInvalidationHooks: { markUserInvalidatedSync() {}, cancelQueriesByUser() {} } },
+    ]) {
+      const unready = createServer(config, apiEnv, hooks);
+      try {
+        await unready.ready();
+        assert.equal((await unready.inject('/health/live')).statusCode, 200);
+        const ready = await unready.inject('/health/ready');
+        assert.equal(ready.statusCode, 503);
+        assert.deepEqual(ready.json(), { status: 'not_ready' });
+        assert.equal((await unready.inject('/api/v1/auth/csrf')).statusCode, 404);
+        assert.equal(unready.hasRoute({ method: 'POST', url: '/api/v1/auth/login' }), false);
+      } finally {
+        await unready.close();
+      }
+    }
+  });
+  await t.test('standalone production entry exits without listening or leaking credentials', () => {
+    const entry = fileURLToPath(new URL('../dist/main.js', import.meta.url));
+    const refused = spawnSync(process.execPath, [entry], {
+      encoding: 'utf8', timeout: 10000, env: { ...process.env, ...apiEnv },
+    });
+    assert.ifError(refused.error);
+    assert.equal(refused.status, 1);
+    assert(!refused.stdout, 'the refused entry wrote unexpected stdout');
+    assert(refused.stderr.trim() ===
+      'admin-api standalone production startup refused; the data-plane host must supply user and PAT invalidation hooks',
+    'the refused entry must emit only the fixed diagnostic');
+  });
+
+  const app = createServer(config, apiEnv, {
     userInvalidationHooks: {
-      markUserInvalidatedSync(id) { events.push(['user-mark', id]); },
+      markUserInvalidatedSync(id) {
+        events.push(['user-mark', id]);
+        if (failingUserTombstone) throw new Error('private test failure');
+      },
       async cancelQueriesByUser(id, reason) {
         events.push(['user-cancel', id, reason]);
+        if (failingUserTombstone) {
+          const ready = await app.inject('/health/ready');
+          events.push(['ready-during-cancel', ready.statusCode]);
+        }
         const observed = await userState(db, id);
         if (reason === 'USER_DELETED') assert.equal(observed, undefined);
         if (reason === 'ACCOUNT_DISABLED') assert.equal(observed?.status, 'DISABLED');
@@ -228,6 +271,24 @@ test('M3 governance on real MySQL 8.0', async (t) => {
     assert(history.every(({ decided_at }) => decided_at instanceof Date));
     assert.deepEqual(events.splice(0), [['user-mark', row.user_id], ['user-mark', row.user_id]]);
   });
+
+  for (const scenario of [
+    { username: 'm3samebinding', previousRoles: [developer], approver: admin },
+    { username: 'm3replacebinding', previousRoles: [superRole, securityRole], approver: security },
+  ]) {
+    await t.test(`approval replaces preassigned roles and audits the grant (${scenario.username})`, async () => {
+      const row = await register(scenario.username);
+      const { version } = await userState(db, row.user_id);
+      ok(await call(app, 'PUT', `${users}/${row.user_id}/roles`, admin, { roleIds: scenario.previousRoles, version }));
+      assert.deepEqual(await assignedRoles(db, row.user_id), scenario.previousRoles);
+      ok(await call(app, 'POST', `${approvals}/${row.id}/approve`, scenario.approver, { roleIds: [developer] }));
+      assert.deepEqual(await assignedRoles(db, row.user_id), [developer]);
+      assert.equal((await userState(db, row.user_id)).status, 'ACTIVE');
+      const [[decision]] = await db.query('SELECT action, details, operator_id FROM sys_user_approvals WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [row.id]);
+      assert.deepEqual(decision, { action: 'APPROVE', details: { roleIds: [developer] }, operator_id: scenario.approver.user.id });
+      events.length = 0;
+    });
+  }
 
   await t.test('user projection, escaped search, role and status filters and version conflicts', async () => {
     const special = await register('m3_under', { email: 'test@example.test' });
@@ -484,6 +545,63 @@ test('M3 governance on real MySQL 8.0', async (t) => {
       assert.equal(total, '0');
     } finally {
       await db.query('ALTER TABLE sys_user_approvals DROP CHECK m3_fail_admin_audit');
+    }
+  });
+
+  await t.test('post-commit tombstone failure closes readiness, blocks routes and still attempts cancellation', async () => {
+    const targetId = await fixture('tombstonefailure', developer);
+    const currentAdmin = await login(app, 'm3admin', adminPassword);
+    const baseline = await userState(db, targetId);
+    events.length = 0;
+    failingUserTombstone = true;
+    try {
+      error(await statusChange(targetId, currentAdmin, 'DISABLED', baseline.version), 503, 'ERR_INTERNAL_SERVER');
+    } finally {
+      failingUserTombstone = false;
+    }
+    assert.deepEqual(events.slice(0, 2), [['user-mark', targetId], ['user-cancel', targetId, 'ACCOUNT_DISABLED']]);
+    assert.deepEqual(events.slice(2), [['ready-during-cancel', 503], ['user-cancel-committed', targetId]]);
+    assert.deepEqual(await userState(db, targetId), { ...baseline, status: 'DISABLED', version: baseline.version + 1, auth_version: baseline.auth_version + 1 });
+    assert.equal((await app.inject('/health/live')).statusCode, 200);
+    const ready = await app.inject('/health/ready');
+    assert.equal(ready.statusCode, 503);
+    assert.deepEqual(ready.json(), { status: 'not_ready' });
+    error(await call(app, 'GET', `${base}/auth/csrf`), 503, 'ERR_INTERNAL_SERVER');
+    error(await call(app, 'GET', users, currentAdmin), 503, 'ERR_INTERNAL_SERVER');
+    error(await call(app, 'PUT', `${users}/${targetId}/status`, currentAdmin, { status: 'ACTIVE', version: baseline.version + 1 }),
+      503, 'ERR_INTERNAL_SERVER');
+    events.length = 0;
+  });
+
+  await t.test('direct PAT revocation shares fail-closed tombstone handling and best-effort cancellation', async (subtest) => {
+    const patEvents = [];
+    let failTombstone = false;
+    const hosted = createServer(config, apiEnv, {
+      userInvalidationHooks: { markUserInvalidatedSync() {}, cancelQueriesByUser() {} },
+      patRevocationHooks: {
+        markPatRevokedSync(id) {
+          patEvents.push(['mark', id]);
+          if (failTombstone) throw new Error('private test failure');
+        },
+        async cancelQueriesByPat(id, reason) {
+          patEvents.push(['cancel', id, reason]);
+          throw new Error('private cancellation failure');
+        },
+      },
+    });
+    subtest.after(() => hosted.close());
+    ok(await hosted.inject('/health/ready'));
+    const target = await login(hosted, 'auditrollback', fixturePassword);
+    for (const name of ['cancellation failure', 'tombstone failure']) {
+      const { pat } = ok(await call(hosted, 'POST', `${base}/pats`, target, { name }));
+      failTombstone = name === 'tombstone failure';
+      const response = await call(hosted, 'POST', `${base}/pats/${pat.id}/revoke`, target);
+      if (failTombstone) error(response, 503, 'ERR_INTERNAL_SERVER');
+      else ok(response);
+      assert.deepEqual(patEvents.splice(0), [['mark', pat.id], ['cancel', pat.id, 'PAT_REVOKED']]);
+      const [[state]] = await db.query('SELECT revoked_at FROM sys_pats WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [pat.id]);
+      assert(state.revoked_at instanceof Date);
+      assert.equal((await hosted.inject('/health/ready')).statusCode, failTombstone ? 503 : 200);
     }
   });
 });

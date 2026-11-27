@@ -29,13 +29,22 @@ export function createServer(
   const pepper = env.SERVER_PEPPER;
   let initialized = false;
   let draining = false;
+  let invalidationFailed = false;
+  const onInvalidationFailure = () => { invalidationFailed = true; };
+  const ready = () => initialized && !draining && !invalidationFailed;
+  const hooksReady = env.NODE_ENV !== 'production' || (
+    typeof userInvalidationHooks?.markUserInvalidatedSync === 'function'
+    && typeof userInvalidationHooks.cancelQueriesByUser === 'function'
+    && typeof patRevocationHooks?.markPatRevokedSync === 'function'
+    && typeof patRevocationHooks.cancelQueriesByPat === 'function'
+  );
   let bootstrap: BootstrapService | undefined;
-  if (pool && secret && Buffer.byteLength(secret, 'utf8') >= 32 && pepper && Buffer.byteLength(pepper, 'utf8') >= 32) {
+  if (pool && secret && Buffer.byteLength(secret, 'utf8') >= 32 && pepper && Buffer.byteLength(pepper, 'utf8') >= 32 && hooksReady) {
     const db = createMetadataQueryExecutor(pool);
     const auth = new AuthService(pool, db, secret);
     // The standalone control plane has no data-plane runtime; the M6 host supplies these hooks.
-    const patService = new PatService(pool, db, pepper, patRevocationHooks);
-    const userAdministration = new UserAdministrationService(pool, db, auth, userInvalidationHooks, patRevocationHooks);
+    const patService = new PatService(pool, db, pepper, onInvalidationFailure, patRevocationHooks);
+    const userAdministration = new UserAdministrationService(pool, db, auth, onInvalidationFailure, userInvalidationHooks, patRevocationHooks);
     const userQueries = new UserAdministrationQueries(pool);
     app.addHook('onReady', async () => {
       try {
@@ -55,7 +64,7 @@ export function createServer(
     app.register(async (authRoutes) => {
       await registerAuthRoutes(authRoutes, {
         service: auth, patService, userAdministration, userQueries,
-        secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining,
+        secureCookies: env.NODE_ENV === 'production', ready,
       });
     });
   }
@@ -71,9 +80,9 @@ export function createServer(
   if (pool) app.addHook('onClose', async () => pool.close());
   app.get('/health/live', async (_request, reply) => reply.header('cache-control', 'no-store').send({ status: 'ok' }));
   app.get('/health/ready', async (_request, reply) => {
-    const ready = initialized && !draining && await bootstrap?.isReady() === true && !draining;
-    return reply.header('cache-control', 'no-store').code(ready ? 200 : 503)
-      .send({ status: ready ? 'ready' : 'not_ready' });
+    const healthy = ready() && await bootstrap?.isReady() === true && ready();
+    return reply.header('cache-control', 'no-store').code(healthy ? 200 : 503)
+      .send({ status: healthy ? 'ready' : 'not_ready' });
   });
   return app;
 }

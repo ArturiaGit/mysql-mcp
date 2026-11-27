@@ -3,6 +3,7 @@
 - **主进度索引**：[`../TODO.md`](../TODO.md)
 - **状态**：`[ ] 进行中（阶段 1 后端、阶段 2 前端真实联调均已通过，阶段 3 独立 QA 验收中）`
 - **对应接口数**：8 项 | **对应前端视图**：2 个
+- **失效 Hook 分阶段验收（对齐 M2 方案 1A）**：M3 验证独立 `main.ts` 在 `NODE_ENV=production` 时 Fail-Fast、`createServer` 缺少任一生产 Hook 时 readiness Fail-Closed 且不挂载业务路由，以及事务提交后的同步墓碑先于异步取消、墓碑故障注入后的 Fail-Closed 与 best-effort 断流；真实数据面 `RegistryHub` + `QueryLifecycleCoordinator` 单进程宿主接线及在途查询断流归属 M6 门禁。
 
 ---
 

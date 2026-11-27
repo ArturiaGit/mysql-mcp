@@ -9,6 +9,7 @@ import type {
 import { hasStrongPassword, passwordExpiry } from './auth-domain.js';
 import { boundedArgon, type AuthService } from './auth-service.js';
 import { ApiError } from './errors.js';
+import { invalidateAfterCommit } from './post-commit-invalidation.js';
 import type { PatRevocationHooks } from './pat-service.js';
 
 export interface GovernanceSession { user: { id: EntityId }; authVersion: number; }
@@ -51,6 +52,7 @@ export class UserAdministrationService {
     private readonly pool: MetadataPool,
     private readonly db: MetadataQueryExecutor,
     private readonly auth: AuthService,
+    private readonly onInvalidationFailure: () => void,
     private readonly invalidation?: UserInvalidationHooks,
     private readonly patRevocation?: PatRevocationHooks,
   ) {}
@@ -81,8 +83,9 @@ export class UserAdministrationService {
 
       const decided = decision.action === 'APPROVE'
         ? await tx.query<MetadataWriteResult>(
-          `UPDATE sys_user_approvals SET action = 'APPROVE', operator_id = ?, decided_at = UTC_TIMESTAMP(3)
-           WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND action IN ('SUBMIT', 'RESUBMIT')`, [session.user.id, approvalId],
+          `UPDATE sys_user_approvals SET action = 'APPROVE', operator_id = ?, decided_at = UTC_TIMESTAMP(3), details = ?
+           WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND action IN ('SUBMIT', 'RESUBMIT')`,
+          [session.user.id, JSON.stringify({ roleIds }), approvalId],
         )
         : await tx.query<MetadataWriteResult>(
           `UPDATE sys_user_approvals SET action = 'REJECT', reason = ?, operator_id = ?, decided_at = UTC_TIMESTAMP(3)
@@ -96,7 +99,10 @@ export class UserAdministrationService {
         [approved ? 'ACTIVE' : 'REJECTED', approved, targetId],
       );
       if (updated.affectedRows !== 1) throw approvalConflict();
-      if (approved) await insertBindings(tx, targetId, roleIds);
+      if (approved) {
+        await tx.query('DELETE FROM sys_user_roles WHERE user_id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [targetId]);
+        await insertBindings(tx, targetId, roleIds);
+      }
     });
     await this.invalidate(targetId);
     return { success: true };
@@ -182,14 +188,14 @@ export class UserAdministrationService {
   }
 
   private async invalidate(id: EntityId, reason?: UserCancellationReason, patIds: readonly EntityId[] = []): Promise<void> {
-    if (reason) this.auth.revokeUserSessions(id);
-    const tasks = await Promise.allSettled([
-      attempt(() => this.invalidation?.markUserInvalidatedSync(id)),
-      ...patIds.map((patId) => attempt(() => this.patRevocation?.markPatRevokedSync(patId))),
-      ...(reason ? [attempt(() => this.invalidation?.cancelQueriesByUser(id, reason))] : []),
-      ...patIds.map((patId) => attempt(() => this.patRevocation?.cancelQueriesByPat(patId, 'PAT_REVOKED'))),
+    await invalidateAfterCommit(this.onInvalidationFailure, [
+      () => { if (reason) this.auth.revokeUserSessions(id); },
+      () => this.invalidation?.markUserInvalidatedSync(id),
+      ...patIds.map((patId) => () => this.patRevocation?.markPatRevokedSync(patId)),
+    ], [
+      ...(reason ? [() => this.invalidation?.cancelQueriesByUser(id, reason)] : []),
+      ...patIds.map((patId) => () => this.patRevocation?.cancelQueriesByPat(patId, 'PAT_REVOKED')),
     ]);
-    if (tasks.some((task) => task.status === 'rejected')) console.warn('admin-api post-commit invalidation callback failed');
   }
 }
 
@@ -321,5 +327,3 @@ export function generateTemporaryPassword(): string {
   } while (!hasStrongPassword(value));
   return value;
 }
-
-async function attempt(effect: () => void | Promise<void>): Promise<void> { await effect(); }
