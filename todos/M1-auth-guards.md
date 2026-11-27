@@ -1,7 +1,7 @@
 # M1：系统自举、认证会话与四级守卫闭环
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[x] 已完成（后端真实 MySQL 验收 + 前端高保真直连联调 + QA 独立复测 PASS，待 Arturia 审阅批准推送/合入 main）`
+- **状态**：`[x] 已完成`（后端真实 MySQL 验收、前端直连联调、独立 QA 与安全检查通过，已合入 `main` · [PR #7](https://github.com/ArturiaGit/mysql-mcp/pull/7)）
 - **对应接口数**：9 项 | **对应前端视图**：6 个（Auth / 状态页）
 
 ---

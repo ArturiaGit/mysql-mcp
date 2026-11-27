@@ -1,7 +1,7 @@
 # M2：开发者个人中心与 PAT 自服务闭环
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[x] 已完成（后端/前端/QA 独立复审/安全二审全部 PASS，形式 A 顶部悬浮 Toast 已上线预览，待 Owner 复验批准推送 PR）`
+- **状态**：`[x] 已完成`（后端真实 MySQL 验收、前端直连联调、独立 QA、安全二审及 Owner 预览验收通过，已合入 `main` · [PR #8](https://github.com/ArturiaGit/mysql-mcp/pull/8)）
 - **对应接口数**：4 项 | **对应前端视图**：2 个
 
 ---

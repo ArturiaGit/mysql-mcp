@@ -77,3 +77,4 @@
 
 - **[M0-01]** 根工作区 `pnpm typecheck` 必须完整覆盖 `apps/admin-ui` 及所有工作区包，禁止漏检前端类型。
 - **[M0-02]** Light / Dark 双模式下的语义告警色（如 `--color-warning`）必须满足 WCAG 2.1 AA 文本对比度；任何令牌调整须先经批准同步 `scripts/fe_parts/` 并重新合成校验，避免代码与真源漂移。
+- **[M2-01]** 里程碑收口时须同步更新 `README.md` 的里程碑徽章、阶段概述、门禁命令与 Roadmap，确保 Roadmap 与 `TODO.md` 总表进度一致、徽章反映最新已完成里程碑。验收定稿须清理旧徽章及 `todos/M*.md` 顶部的待推送、待合入等临时文案。
