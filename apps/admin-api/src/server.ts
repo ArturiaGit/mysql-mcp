@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createMetadataPool, createMetadataQueryExecutor, type MetadataDbConfig } from '@mysql-mcp/core-engine';
 import { CryptoKeyring } from '@mysql-mcp/security';
 import { AuthService } from './auth-service.js';
+import { UserAdministrationService, type UserInvalidationHooks } from './user-administration-service.js';
+import { UserAdministrationQueries } from './user-administration-queries.js';
 import { PatService, type PatRevocationHooks } from './pat-service.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { BootstrapService } from './bootstrap-service.js';
@@ -10,12 +12,15 @@ import { ApiError, errorBody } from './errors.js';
 
 const keyringConfig = z.object({ active_key_id: z.string(), keys: z.record(z.string(), z.string()) });
 
-interface AdminApiDependencies { patRevocationHooks?: PatRevocationHooks; }
+interface AdminApiDependencies {
+  patRevocationHooks?: PatRevocationHooks;
+  userInvalidationHooks?: UserInvalidationHooks;
+}
 
 export function createServer(
   config?: MetadataDbConfig,
   env: NodeJS.ProcessEnv = process.env,
-  { patRevocationHooks }: AdminApiDependencies = {},
+  { patRevocationHooks, userInvalidationHooks }: AdminApiDependencies = {},
 ) {
   const proxies = env.TRUSTED_PROXY_CIDRS?.split(',').map(value => value.trim()).filter(Boolean);
   const app = Fastify({ logger: false, trustProxy: proxies?.length ? proxies : false });
@@ -28,8 +33,10 @@ export function createServer(
   if (pool && secret && Buffer.byteLength(secret, 'utf8') >= 32 && pepper && Buffer.byteLength(pepper, 'utf8') >= 32) {
     const db = createMetadataQueryExecutor(pool);
     const auth = new AuthService(pool, db, secret);
-    // The standalone M2 server has no data-plane runtime; the M6 host supplies these hooks.
+    // The standalone control plane has no data-plane runtime; the M6 host supplies these hooks.
     const patService = new PatService(pool, db, pepper, patRevocationHooks);
+    const userAdministration = new UserAdministrationService(pool, db, auth, userInvalidationHooks, patRevocationHooks);
+    const userQueries = new UserAdministrationQueries(pool);
     app.addHook('onReady', async () => {
       try {
         const raw: unknown = JSON.parse(env.GATEWAY_MASTER_KEYS ?? 'null');
@@ -46,7 +53,10 @@ export function createServer(
       }
     });
     app.register(async (authRoutes) => {
-      await registerAuthRoutes(authRoutes, { service: auth, patService, secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining });
+      await registerAuthRoutes(authRoutes, {
+        service: auth, patService, userAdministration, userQueries,
+        secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining,
+      });
     });
   }
   app.setErrorHandler((error, _request, reply) => {
