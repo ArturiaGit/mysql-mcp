@@ -1,7 +1,7 @@
 # M3：审批工单中心与用户全生命周期（超管防自残）
 
 - **主进度索引**：[`../TODO.md`](../TODO.md)
-- **状态**：`[ ] 未开始`
+- **状态**：`[ ] 进行中（阶段 1 后端真实 MySQL 8.0 验收通过，阶段 2 前端开发中）`
 - **对应接口数**：8 项 | **对应前端视图**：2 个
 
 ---
@@ -21,16 +21,16 @@
 > - **停用账号取消原因（方案 2A）**：`PUT /api/v1/users/:id/status` 置 `DISABLED` 时，统一采用 `ACCOUNT_DISABLED`（已同步修正 `scripts/be_parts/part4_database_and_dal.md` 并重新合成 `docs/BACKEND_ARCHITECTURE_SPEC.md`）；其余取消原因统一为 `USER_ROLES_CHANGED`（改角色）、`PASSWORD_RESET`（管理员重置密码）、`USER_DELETED`（删除用户）。
 > - **前置只读角色目录（对齐 `API_CONTRACT_SPEC.md` §6.6.1）**：在 M3 提前实现只读 `GET /api/v1/roles`（守卫 `L4 SUPER_ADMIN / SECURITY_ADMIN`），供 `/approvals` 与 `/users` 从数据库读取真实角色列表，严禁前端硬编码内置角色 ID；角色写操作与 ACL 仍在 M5 交付。
 
-- [ ] 严格落实 **`SUPER_ADMIN` 角色锁 → 按 ID 锁用户 → 锁绑定当前读** 并发锁序与同事务管理审计，并实现以下 8 项接口（及前置只读 `GET /api/v1/roles`）：
-  - [ ] `GET /api/v1/roles`（前置只读，对齐 §6.6.1，供审批赋权与用户角色编辑读取真实角色列表）
-  - [ ] `GET /api/v1/approvals/pending`
-  - [ ] `POST /api/v1/approvals/:id/approve`（赋予角色、同步失效关联状态）
-  - [ ] `POST /api/v1/approvals/:id/reject`（强制校验非空 `reason`）
-  - [ ] `GET /api/v1/users`（返回 `is_last_super_admin` 标记，过滤/脱敏敏感列）
-  - [ ] `PUT /api/v1/users/:id/status`（`DISABLED` / `ACTIVE` + `version` 乐观锁 + 本人/最后超管保护）
-  - [ ] `PUT /api/v1/users/:id/roles`（防自残、防越权提权、`version` 乐观锁）
-  - [ ] `DELETE /api/v1/users/:id`（本人与最后超管保护）
-  - [ ] `POST /api/v1/users/:id/reset-password`（仅 `SUPER_ADMIN`，返回一次性临时密码，`409` 乐观锁校验）
+- [x] 严格落实 **`SUPER_ADMIN` 角色锁 → 按 ID 锁用户 → 锁绑定当前读** 并发锁序与同事务管理审计，并实现以下 8 项接口（及前置只读 `GET /api/v1/roles`）：
+  - [x] `GET /api/v1/roles`（前置只读，对齐 §6.6.1，供审批赋权与用户角色编辑读取真实角色列表）
+  - [x] `GET /api/v1/approvals/pending`
+  - [x] `POST /api/v1/approvals/:id/approve`（赋予角色、同步失效关联状态）
+  - [x] `POST /api/v1/approvals/:id/reject`（强制校验非空 `reason`）
+  - [x] `GET /api/v1/users`（返回 `is_last_super_admin` 标记，过滤/脱敏敏感列）
+  - [x] `PUT /api/v1/users/:id/status`（`DISABLED` / `ACTIVE` + `version` 乐观锁 + 本人/最后超管保护）
+  - [x] `PUT /api/v1/users/:id/roles`（防自残、防越权提权、`version` 乐观锁）
+  - [x] `DELETE /api/v1/users/:id`（本人与最后超管保护）
+  - [x] `POST /api/v1/users/:id/reset-password`（仅 `SUPER_ADMIN`，返回一次性临时密码，`409` 乐观锁校验）
 
 ---
 
