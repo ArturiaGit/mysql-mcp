@@ -240,3 +240,154 @@ describe('SessionRequestManager & handleLogout abort-before-logout contract', ()
     expect(navigateSpy).toHaveBeenCalledWith('/login?warning=session_unconfirmed');
   });
 });
+
+describe('cross-session mutation generation binding (P1 security regression)', () => {
+  it('aborts old POST mutation and rejects stale CSRF write when abortAndRotate() occurs during CSRF prefetch', async () => {
+    const manager = new SessionRequestManager();
+    clearActiveCsrfToken();
+
+    let resolveCsrf: ((value: Response) => void) | undefined;
+    let markCsrfStarted: (() => void) | undefined;
+    const csrfStartedPromise = new Promise<void>((resolve) => {
+      markCsrfStarted = resolve;
+    });
+
+    let postCalls = 0;
+    const mockFetch: typeof fetch = vi.fn(async (input) => {
+      const url = String(input);
+      if (url === '/api/v1/auth/csrf') {
+        markCsrfStarted?.();
+        return new Promise<Response>((resolve) => {
+          resolveCsrf = resolve;
+        });
+      }
+      postCalls += 1;
+      return jsonResponse({ pat: { id: '1' }, rawToken: 'should_never_happen' }, 200);
+    });
+
+    const pendingMutation = apiRequest('/api/v1/pats', {
+      method: 'POST',
+      body: { name: 'UserA-Stale-PAT', expiresDays: 30 },
+      fetchImpl: mockFetch,
+      requestManager: manager,
+    });
+
+    await csrfStartedPromise;
+    // Simulate account switch to User B while User A's mutation is waiting for CSRF prefetch
+    manager.abortAndRotate();
+    setActiveCsrfToken('user_b_fresh_csrf');
+
+    // Now resolve User A's stale CSRF response
+    resolveCsrf?.(jsonResponse({ csrfToken: 'user_a_stale_csrf' }, 200));
+
+    await expect(pendingMutation).rejects.toMatchObject({ name: 'AbortError' });
+    expect(postCalls).toBe(0);
+    // User A's stale CSRF token MUST NOT overwrite User B's CSRF cache
+    expect(getActiveCsrfToken()).toBe('user_b_fresh_csrf');
+  });
+
+  it('aborts old POST mutation before retry when abortAndRotate() occurs after 403 ERR_CSRF_INVALID', async () => {
+    const manager = new SessionRequestManager();
+    setActiveCsrfToken('user_a_expired_csrf');
+
+    let postCalls = 0;
+    let csrfRefreshCalls = 0;
+    let resolveCsrfRefresh: ((value: Response) => void) | undefined;
+    let markCsrfRefreshStarted: (() => void) | undefined;
+    const csrfRefreshStarted = new Promise<void>((resolve) => {
+      markCsrfRefreshStarted = resolve;
+    });
+
+    const mockFetch: typeof fetch = vi.fn(async (input) => {
+      const url = String(input);
+      if (url === '/api/v1/pats') {
+        postCalls += 1;
+        if (postCalls === 1) {
+          return jsonResponse(
+            { code: 'ERR_CSRF_INVALID', message: 'CSRF invalid', action_guidance: 'retry' },
+            403,
+          );
+        }
+        return jsonResponse({ pat: { id: '999' }, rawToken: 'must_never_issue_for_user_b' }, 200);
+      }
+      if (url === '/api/v1/auth/csrf') {
+        csrfRefreshCalls += 1;
+        markCsrfRefreshStarted?.();
+        return new Promise<Response>((resolve) => {
+          resolveCsrfRefresh = resolve;
+        });
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    const pendingMutation = apiRequest('/api/v1/pats', {
+      method: 'POST',
+      body: { name: 'UserA-Retry-Hijack-PAT', expiresDays: 30 },
+      fetchImpl: mockFetch,
+      requestManager: manager,
+    });
+
+    await csrfRefreshStarted;
+    // Rotate session to User B BEFORE retry executes
+    manager.abortAndRotate();
+    setActiveCsrfToken('user_b_csrf');
+
+    // Even if the in-flight CSRF refresh resolves after rotation, old mutation MUST abort and NEVER retry POST
+    resolveCsrfRefresh?.(jsonResponse({ csrfToken: 'stale_retry_csrf' }, 200));
+
+    await expect(pendingMutation).rejects.toMatchObject({ name: 'AbortError' });
+    expect(postCalls).toBe(1);
+    expect(csrfRefreshCalls).toBe(1);
+    expect(getActiveCsrfToken()).toBe('user_b_csrf');
+  });
+
+  it('aborts immediately when abortAndRotate() occurs while awaiting first POST 403 response before CSRF refresh starts', async () => {
+    const manager = new SessionRequestManager();
+    setActiveCsrfToken('user_a_csrf');
+
+    let postCalls = 0;
+    let csrfRefreshCalls = 0;
+    let resolveFirstPost: ((value: Response) => void) | undefined;
+    let markPostStarted: (() => void) | undefined;
+    const postStarted = new Promise<void>((resolve) => {
+      markPostStarted = resolve;
+    });
+
+    const mockFetch: typeof fetch = vi.fn(async (input) => {
+      const url = String(input);
+      if (url === '/api/v1/pats') {
+        postCalls += 1;
+        markPostStarted?.();
+        return new Promise<Response>((resolve) => {
+          resolveFirstPost = resolve;
+        });
+      }
+      if (url === '/api/v1/auth/csrf') {
+        csrfRefreshCalls += 1;
+        return jsonResponse({ csrfToken: 'should_not_be_fetched' }, 200);
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+
+    const pendingMutation = apiRequest('/api/v1/pats', {
+      method: 'POST',
+      body: { name: 'UserA-Inflight-PAT', expiresDays: 30 },
+      fetchImpl: mockFetch,
+      requestManager: manager,
+    });
+
+    await postStarted;
+    manager.abortAndRotate();
+    // Simulate a mock fetch that ignores signal and resolves with 403 ERR_CSRF_INVALID anyway
+    resolveFirstPost?.(
+      jsonResponse(
+        { code: 'ERR_CSRF_INVALID', message: 'CSRF invalid', action_guidance: 'retry' },
+        403,
+      ),
+    );
+
+    await expect(pendingMutation).rejects.toMatchObject({ name: 'AbortError' });
+    expect(postCalls).toBe(1);
+    expect(csrfRefreshCalls).toBe(0);
+  });
+});

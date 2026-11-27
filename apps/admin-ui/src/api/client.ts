@@ -5,7 +5,11 @@ import {
   StandardErrorResponseSchema,
   type ValidationErrorItem,
 } from './schemas/auth.schema';
-import { sessionRequestManager, type SessionRequestManager } from './session-request';
+import {
+  sessionRequestManager,
+  type SessionRequestBinding,
+  type SessionRequestManager,
+} from './session-request';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const CONTROL_OR_BACKSLASH = /[\\\u0000-\u001F\u007F]/;
@@ -48,6 +52,17 @@ export function isApiClientError(error: unknown): error is ApiClientError {
   return error instanceof ApiClientError;
 }
 
+function createSessionAbortError(): DOMException {
+  return new DOMException('Session rotated or logged out', 'AbortError');
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof DOMException && error.name === 'AbortError') ||
+    (error instanceof Error && error.name === 'AbortError')
+  );
+}
+
 /**
  * Strictly sanitizes post-login redirect targets to prevent open redirects,
  * backslash smuggling, ASCII control characters, cross-origin URLs, and
@@ -86,8 +101,14 @@ export function sanitizeReturnUrl(
   }
 }
 
+interface CsrfRefreshEntry {
+  manager: SessionRequestManager;
+  generation: number;
+  promise: Promise<string>;
+}
+
 let activeCsrfToken: string | null = null;
-let csrfRefreshPromise: Promise<string> | null = null;
+let csrfRefreshEntry: CsrfRefreshEntry | null = null;
 let unauthorizedHandler: ((currentPath: string) => void) | null = null;
 
 export function setActiveCsrfToken(token: string | null): void {
@@ -100,25 +121,68 @@ export function getActiveCsrfToken(): string | null {
 
 export function clearActiveCsrfToken(): void {
   activeCsrfToken = null;
+  csrfRefreshEntry = null;
 }
 
 export function registerUnauthorizedHandler(handler: ((currentPath: string) => void) | null): void {
   unauthorizedHandler = handler;
 }
 
-export async function refreshCsrfToken(fetchImpl: typeof fetch = fetch): Promise<string> {
-  if (!csrfRefreshPromise) {
-    csrfRefreshPromise = fetchImpl('/api/v1/auth/csrf', {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-    })
-      .then(async (response) => {
+export interface CsrfRequestOptions {
+  signal?: AbortSignal;
+  requestManager?: SessionRequestManager;
+  binding?: SessionRequestBinding;
+}
+
+function assertCsrfSessionCurrent(
+  manager: SessionRequestManager,
+  expectedGeneration: number,
+  signal?: AbortSignal,
+  binding?: SessionRequestBinding,
+): void {
+  if (signal?.aborted) {
+    throw createSessionAbortError();
+  }
+  if (binding && !manager.isCurrent(binding)) {
+    throw createSessionAbortError();
+  }
+  if (manager.getGeneration() !== expectedGeneration) {
+    throw createSessionAbortError();
+  }
+}
+
+export async function refreshCsrfToken(
+  fetchImpl: typeof fetch = fetch,
+  options: CsrfRequestOptions = {},
+): Promise<string> {
+  const manager = options.requestManager ?? sessionRequestManager;
+  const binding = options.binding;
+  const expectedGeneration = binding ? binding.generation : manager.getGeneration();
+  const signal = options.signal ?? binding?.signal;
+
+  assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
+
+  if (
+    !csrfRefreshEntry ||
+    csrfRefreshEntry.manager !== manager ||
+    csrfRefreshEntry.generation !== expectedGeneration
+  ) {
+    const refreshPromise = Promise.resolve()
+      .then(async () => {
+        assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
+        const response = await fetchImpl('/api/v1/auth/csrf', {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+          signal,
+        });
+        assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
         if (!response.ok) {
           throw await buildErrorFromResponse(response);
         }
         const json: unknown = await response.json();
+        assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
         const parsed = CsrfTokenSchema.safeParse(json);
         if (!parsed.success) {
           throw new ApiClientError({
@@ -128,21 +192,44 @@ export async function refreshCsrfToken(fetchImpl: typeof fetch = fetch): Promise
             actionGuidance: '请刷新页面后重试。',
           });
         }
+        // Only write to shared CSRF cache if session generation is still active
+        assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
         activeCsrfToken = parsed.data.csrfToken;
         return parsed.data.csrfToken;
       })
       .finally(() => {
-        csrfRefreshPromise = null;
+        if (csrfRefreshEntry?.promise === refreshPromise) {
+          csrfRefreshEntry = null;
+        }
       });
+
+    csrfRefreshEntry = {
+      manager,
+      generation: expectedGeneration,
+      promise: refreshPromise,
+    };
   }
-  return csrfRefreshPromise;
+
+  const token = await csrfRefreshEntry.promise;
+  assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
+  return token;
 }
 
-export async function getOrRefreshCsrfToken(fetchImpl: typeof fetch = fetch): Promise<string> {
+export async function getOrRefreshCsrfToken(
+  fetchImpl: typeof fetch = fetch,
+  options: CsrfRequestOptions = {},
+): Promise<string> {
+  const manager = options.requestManager ?? sessionRequestManager;
+  const binding = options.binding;
+  const expectedGeneration = binding ? binding.generation : manager.getGeneration();
+  const signal = options.signal ?? binding?.signal;
+
+  assertCsrfSessionCurrent(manager, expectedGeneration, signal, binding);
+
   if (activeCsrfToken) {
     return activeCsrfToken;
   }
-  return refreshCsrfToken(fetchImpl);
+  return refreshCsrfToken(fetchImpl, options);
 }
 
 async function buildErrorFromResponse(response: Response): Promise<ApiClientError> {
@@ -176,13 +263,12 @@ async function buildErrorFromResponse(response: Response): Promise<ApiClientErro
 }
 
 function combineSignals(
-  useSessionSignal: boolean,
+  sessionSignal: AbortSignal | undefined,
   callerSignal: AbortSignal | undefined,
-  manager: SessionRequestManager,
 ): AbortSignal | undefined {
   const signals: AbortSignal[] = [];
-  if (useSessionSignal) {
-    signals.push(manager.getSignal());
+  if (sessionSignal) {
+    signals.push(sessionSignal);
   }
   if (callerSignal) {
     signals.push(callerSignal);
@@ -217,8 +303,29 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions<T> 
     requestManager = sessionRequestManager,
   } = options;
 
+  // Capture session binding ONCE at request start; never re-read a rotated signal on retries.
+  const sessionBinding = useSessionSignal ? requestManager.beginRequest() : undefined;
+  const requestSignal = combineSignals(sessionBinding?.signal, signal);
+
+  const assertRequestActive = (): void => {
+    if (sessionBinding && !requestManager.isCurrent(sessionBinding)) {
+      throw createSessionAbortError();
+    }
+    if (signal?.aborted) {
+      throw createSessionAbortError();
+    }
+  };
+
+  const csrfOptions: CsrfRequestOptions = {
+    signal: requestSignal,
+    requestManager,
+    binding: sessionBinding,
+  };
+
   const isMutating = MUTATING_METHODS.has(method);
   const executeOnce = async (csrfToken: string | null): Promise<Response> => {
+    assertRequestActive();
+
     const headers: Record<string, string> = {
       Accept: 'application/json',
     };
@@ -230,17 +337,19 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions<T> 
     }
 
     try {
-      return await fetchImpl(path, {
+      const res = await fetchImpl(path, {
         method,
         credentials: 'include',
         cache: 'no-store',
         headers,
         body: body !== undefined ? JSON.stringify(body) : undefined,
-        signal: combineSignals(useSessionSignal, signal, requestManager),
+        signal: requestSignal,
       });
+      assertRequestActive();
+      return res;
     } catch (error: unknown) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        throw error;
+      if (isAbortError(error) || (sessionBinding && !requestManager.isCurrent(sessionBinding))) {
+        throw isAbortError(error) ? error : createSessionAbortError();
       }
       throw new ApiClientError({
         status: 0,
@@ -252,11 +361,14 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions<T> 
     }
   };
 
-  let token = isMutating ? await getOrRefreshCsrfToken(fetchImpl) : null;
+  assertRequestActive();
+  let token = isMutating ? await getOrRefreshCsrfToken(fetchImpl, csrfOptions) : null;
+  assertRequestActive();
   let response = await executeOnce(token);
 
   if (!response.ok) {
     let apiError = await buildErrorFromResponse(response);
+    assertRequestActive();
 
     if (
       isMutating &&
@@ -264,14 +376,17 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions<T> 
       response.status === 403 &&
       apiError.code === 'ERR_CSRF_INVALID'
     ) {
-      token = await refreshCsrfToken(fetchImpl);
+      token = await refreshCsrfToken(fetchImpl, csrfOptions);
+      assertRequestActive();
       response = await executeOnce(token);
       if (!response.ok) {
         apiError = await buildErrorFromResponse(response);
+        assertRequestActive();
       }
     }
 
     if (!response.ok) {
+      assertRequestActive();
       if (
         response.status === 401 &&
         !skipUnauthorizedRedirect &&
@@ -289,6 +404,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions<T> 
   }
 
   const payload: unknown = await response.json();
+  assertRequestActive();
   if (schema) {
     const parsed = schema.safeParse(payload);
     if (!parsed.success) {
@@ -336,7 +452,7 @@ export async function handleLogout(
   // Step 2: send server logout using independent timeout signal
   let serverLogoutOk = false;
   try {
-    const token = await getOrRefreshCsrfToken(fetchImpl);
+    const token = await getOrRefreshCsrfToken(fetchImpl, { requestManager });
     const response = await fetchImpl('/api/v1/auth/logout', {
       method: 'POST',
       headers: {
@@ -352,7 +468,7 @@ export async function handleLogout(
     } else if (response.status === 403) {
       const error = await buildErrorFromResponse(response);
       if (error.code === 'ERR_CSRF_INVALID') {
-        const refreshedToken = await refreshCsrfToken(fetchImpl);
+        const refreshedToken = await refreshCsrfToken(fetchImpl, { requestManager });
         const retryResponse = await fetchImpl('/api/v1/auth/logout', {
           method: 'POST',
           headers: {
