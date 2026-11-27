@@ -309,29 +309,59 @@ async function run() {
     const modalSnippet = await page.getByTestId('snippet-code-claude-desktop').innerText();
     assert(modalSnippet.includes(rawToken), 'Modal immediate snippet must include freshly issued rawToken');
 
-    // Esc while unchecked MUST be intercepted and show text-only reminder (NO extra buttons!)
+    // Capture dialog scrollHeight BEFORE triggering Top-Layer floating Toast
+    const dialogScrollHeightBefore = await page.evaluate(() => {
+      const dlg = document.querySelector('dialog[open]');
+      return dlg ? dlg.scrollHeight : -1;
+    });
+    assert(dialogScrollHeightBefore > 0, 'Open <dialog> must have positive scrollHeight');
+
+    // Esc while unchecked MUST be intercepted and show Top-Layer position:fixed Toast (NO extra buttons, NO height growth!)
     await page.keyboard.press('Escape');
     await page.getByTestId('pat-confirm-reminder').waitFor({ state: 'visible' });
     assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open on Esc before checkbox');
     assert.equal(
       await page.getByTestId('pat-confirm-reminder').locator('button').count(),
       0,
-      'Reminder banner must be text-only with zero buttons',
+      'Floating Toast must be text-only with zero buttons',
     );
     assert.equal(await page.locator('[data-testid="pat-force-discard-btn"]').count(), 0);
     assert.equal(await page.locator('[data-testid="pat-keep-saving-btn"]').count(), 0);
 
-    // Top-right close button (X) while unchecked MUST also be blocked
+    const toastLayout = await page.evaluate(() => {
+      const toast = document.querySelector('[data-testid="pat-confirm-reminder"]');
+      const dlg = document.querySelector('dialog[open]');
+      if (!toast || !dlg) return null;
+      return {
+        position: getComputedStyle(toast).position,
+        insideDialog: dlg.contains(toast),
+        scrollHeightAfter: dlg.scrollHeight,
+      };
+    });
+    assert(toastLayout, 'Toast & open dialog must exist');
+    assert.equal(toastLayout.position, 'fixed', `Expected Toast position:fixed, got ${toastLayout.position}`);
+    assert.equal(toastLayout.insideDialog, true, 'Floating Toast must render inside <dialog> Top Layer');
+    assert.equal(
+      toastLayout.scrollHeightAfter,
+      dialogScrollHeightBefore,
+      `Floating Toast must NOT increase dialog scrollHeight (${dialogScrollHeightBefore} -> ${toastLayout.scrollHeightAfter})`,
+    );
+
+    // Floating Toast auto-dismisses after ~3s while modal remains open & close stays blocked
+    await page.getByTestId('pat-confirm-reminder').waitFor({ state: 'hidden', timeout: 5_000 });
+    assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open after Toast auto-dismisses');
+
+    // Top-right close button (X) while unchecked MUST also be blocked and re-show floating Toast
     await page.getByTestId('pat-modal-close-btn').click();
+    await page.getByTestId('pat-confirm-reminder').waitFor({ state: 'visible' });
     assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open on X click before checkbox');
-    assert.equal(await page.getByTestId('pat-confirm-reminder').isVisible(), true);
 
     // Backdrop click while unchecked MUST also be blocked
     await page.mouse.click(8, 8);
     assert.equal(await page.getByTestId('pat-create-modal').isVisible(), true, 'Modal must stay open on backdrop click before checkbox');
     assert.equal(await page.getByTestId('pat-confirm-reminder').isVisible(), true);
 
-    // Copy + check backup confirmation -> unlocks done button and hides reminder
+    // Copy + check backup confirmation -> immediately hides floating Toast and unlocks done button
     await page.getByTestId('pat-copy-raw-btn').click();
     await page.getByTestId('pat-backup-confirm-checkbox').check();
     await page.getByTestId('pat-confirm-reminder').waitFor({ state: 'hidden' });

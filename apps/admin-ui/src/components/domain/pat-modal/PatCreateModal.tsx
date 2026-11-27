@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/form-controls';
 import { Icon } from '@/components/ui/icon';
 import { copyToClipboard } from '@/lib/clipboard';
+import { cn } from '@/lib/cn';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   canClosePatModalSafely,
@@ -42,6 +43,8 @@ import {
 
 const DUPLICATE_PAT_NAME_FALLBACK =
   '该令牌名称已被占用，请更换其他名称。同一账号下有效令牌名称不可重复；吊销旧令牌后方可复用同名。';
+
+const CONFIRM_REMINDER_AUTO_DISMISS_MS = 3_000;
 
 export interface PatCreateModalProps {
   open: boolean;
@@ -93,6 +96,17 @@ export function PatCreateModal({
     };
   }, []);
 
+  // Auto-dismiss Top-Layer floating confirmation Toast after 3s (restarts cleanly on re-trigger)
+  useEffect(() => {
+    if (!state.confirmReminderVisible) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => {
+      dispatch({ type: 'HIDE_CONFIRM_REMINDER' });
+    }, CONFIRM_REMINDER_AUTO_DISMISS_MS);
+    return () => window.clearTimeout(timer);
+  }, [state.confirmReminderVisible, state.confirmReminderSeq]);
+
   const handleBeforeClose = useCallback((): boolean => {
     const current = stateRef.current;
     if (current.submitting) {
@@ -103,7 +117,13 @@ export function PatCreateModal({
       return true;
     }
     dispatch({ type: 'SHOW_CONFIRM_REMINDER' });
-    queueMicrotask(() => backupCheckboxRef.current?.focus());
+    queueMicrotask(() => {
+      const checkbox = backupCheckboxRef.current;
+      if (checkbox) {
+        checkbox.scrollIntoView({ block: 'nearest' });
+        checkbox.focus();
+      }
+    });
     return false;
   }, [clearSecretAndReset]);
 
@@ -206,6 +226,23 @@ export function PatCreateModal({
       ariaDescribedBy="pat-create-dialog-description"
       className={isReveal ? 'w-[min(600px,calc(100vw-32px))]' : 'w-[min(480px,calc(100vw-32px))]'}
     >
+      {/* Top-Layer floating Toast rendered inside <dialog> (out of document flow, zero height shift, zero buttons) */}
+      {isReveal && state.confirmReminderVisible && (
+        <div
+          key={state.confirmReminderSeq}
+          role="alert"
+          aria-live="assertive"
+          id="pat-confirm-reminder-text"
+          data-testid="pat-confirm-reminder"
+          className="pointer-events-none fixed top-5 left-1/2 z-50 flex w-[min(480px,calc(100vw-32px))] -translate-x-1/2 items-start gap-2.5 rounded-md border border-warning/60 bg-warning-soft px-3.5 py-2.5 text-xs leading-relaxed text-warning shadow-[var(--shadow-popover)]"
+        >
+          <Icon name="alert-triangle" className="mt-0.5 size-4 shrink-0" />
+          <p className="min-w-0 flex-1 font-medium">
+            尚未确认保存。请先复制上方令牌明文，并勾选“我已复制并妥善保存此令牌”后再关闭窗口。
+          </p>
+        </div>
+      )}
+
       <div data-testid="pat-create-modal" data-phase={state.phase}>
         <DialogHeader>
           <div className="min-w-0">
@@ -405,12 +442,15 @@ export function PatCreateModal({
                 />
               </div>
 
+              {/* Constant-geometry wrapper so highlighting never shifts modal scrollHeight */}
               <div
-                className={
+                data-highlighted={state.confirmReminderVisible ? 'true' : 'false'}
+                className={cn(
+                  'rounded-md border px-2.5 py-1.5 transition-colors duration-150',
                   state.confirmReminderVisible
-                    ? 'rounded-md border border-warning/50 bg-warning-soft/50 px-2.5 py-1.5 transition-colors'
-                    : undefined
-                }
+                    ? 'border-warning/60 bg-warning-soft/60'
+                    : 'border-transparent bg-transparent',
+                )}
               >
                 <Checkbox
                   ref={backupCheckboxRef}
@@ -429,18 +469,6 @@ export function PatCreateModal({
                   label="我已复制并妥善保存此令牌。我了解关闭后系统无法再次显示该令牌。"
                 />
               </div>
-
-              {/* Strict text-only reminder (NO extra close/keep buttons) */}
-              {state.confirmReminderVisible && (
-                <Alert
-                  variant="warning"
-                  role="alert"
-                  id="pat-confirm-reminder-text"
-                  data-testid="pat-confirm-reminder"
-                >
-                  尚未确认保存。请先复制上方令牌明文，并勾选“我已复制并妥善保存此令牌”后再关闭窗口。
-                </Alert>
-              )}
             </DialogBody>
 
             <DialogFooter>

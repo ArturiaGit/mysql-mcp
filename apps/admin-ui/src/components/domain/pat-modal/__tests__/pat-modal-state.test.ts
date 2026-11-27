@@ -18,7 +18,7 @@ const SAMPLE_PAT: PatListItemDTO = {
 
 const SAMPLE_RAW_TOKEN = `mcp_pat_${'8f3a9e2d'.repeat(8)}`;
 
-describe('pat-modal strict checkbox-gated safeguard reducer', () => {
+describe('pat-modal strict checkbox-gated safeguard & floating Toast reducer', () => {
   it('starts in input phase with default 90 days and no secret in memory', () => {
     const state = createInitialPatModalState();
     expect(state.phase).toBe('input');
@@ -26,6 +26,7 @@ describe('pat-modal strict checkbox-gated safeguard reducer', () => {
     expect(state.rawToken).toBeNull();
     expect(state.createdPat).toBeNull();
     expect(state.confirmReminderVisible).toBe(false);
+    expect(state.confirmReminderSeq).toBe(0);
     expect(canClosePatModalSafely(state)).toBe(true);
   });
 
@@ -71,7 +72,7 @@ describe('pat-modal strict checkbox-gated safeguard reducer', () => {
     expect(state.nameError).toBe('');
   });
 
-  it('strictly blocks close in reveal phase until backup checkbox is checked and shows text-only reminder', () => {
+  it('shows and refreshes floating reminder Toast, auto-hides without unlocking close, and unlocks only when checked', () => {
     let state = createInitialPatModalState();
     state = patModalReducer(state, { type: 'SUBMIT_START' });
     state = patModalReducer(state, {
@@ -84,15 +85,29 @@ describe('pat-modal strict checkbox-gated safeguard reducer', () => {
     expect(state.rawToken).toBe(SAMPLE_RAW_TOKEN);
     expect(state.backupConfirmed).toBe(false);
     expect(state.confirmReminderVisible).toBe(false);
+    expect(state.confirmReminderSeq).toBe(0);
     expect(canClosePatModalSafely(state)).toBe(false);
 
-    // Unconfirmed Esc / X / backdrop shows text-only reminder and keeps close blocked
+    // Unconfirmed Esc / X / backdrop triggers floating Toast and increments seq
     state = patModalReducer(state, { type: 'SHOW_CONFIRM_REMINDER' });
     expect(state.confirmReminderVisible).toBe(true);
+    expect(state.confirmReminderSeq).toBe(1);
+    expect(canClosePatModalSafely(state)).toBe(false);
+
+    // Re-triggering refreshes seq for timer restart
+    state = patModalReducer(state, { type: 'SHOW_CONFIRM_REMINDER' });
+    expect(state.confirmReminderVisible).toBe(true);
+    expect(state.confirmReminderSeq).toBe(2);
+
+    // Auto-dismiss hides Toast while close MUST remain blocked and rawToken intact
+    state = patModalReducer(state, { type: 'HIDE_CONFIRM_REMINDER' });
+    expect(state.confirmReminderVisible).toBe(false);
     expect(state.rawToken).toBe(SAMPLE_RAW_TOKEN);
     expect(canClosePatModalSafely(state)).toBe(false);
 
-    // Checking backup confirmation hides reminder and unlocks safe close
+    // Re-show then check backup confirmation -> immediately hides Toast and unlocks safe close
+    state = patModalReducer(state, { type: 'SHOW_CONFIRM_REMINDER' });
+    expect(state.confirmReminderVisible).toBe(true);
     state = patModalReducer(state, { type: 'SET_BACKUP_CONFIRMED', checked: true });
     expect(state.backupConfirmed).toBe(true);
     expect(state.confirmReminderVisible).toBe(false);
@@ -114,6 +129,7 @@ describe('pat-modal strict checkbox-gated safeguard reducer', () => {
     expect(state.createdPat).toBeNull();
     expect(state.backupConfirmed).toBe(false);
     expect(state.confirmReminderVisible).toBe(false);
+    expect(state.confirmReminderSeq).toBe(0);
   });
 
   it('masks PAT token while preserving prefix and last 4 characters', () => {

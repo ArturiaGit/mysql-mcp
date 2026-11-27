@@ -16,6 +16,7 @@ export interface PatModalState {
   secretMasked: boolean;
   backupConfirmed: boolean;
   confirmReminderVisible: boolean;
+  confirmReminderSeq: number;
 }
 
 export type PatModalAction =
@@ -28,7 +29,8 @@ export type PatModalAction =
   | { type: 'SUBMIT_SUCCESS'; pat: PatListItemDTO; rawToken: string }
   | { type: 'TOGGLE_SECRET_MASK' }
   | { type: 'SET_BACKUP_CONFIRMED'; checked: boolean }
-  | { type: 'SHOW_CONFIRM_REMINDER' };
+  | { type: 'SHOW_CONFIRM_REMINDER' }
+  | { type: 'HIDE_CONFIRM_REMINDER' };
 
 export function createInitialPatModalState(): PatModalState {
   return {
@@ -44,6 +46,7 @@ export function createInitialPatModalState(): PatModalState {
     secretMasked: false,
     backupConfirmed: false,
     confirmReminderVisible: false,
+    confirmReminderSeq: 0,
   };
 }
 
@@ -125,6 +128,7 @@ export function patModalReducer(state: PatModalState, action: PatModalAction): P
         secretMasked: false,
         backupConfirmed: false,
         confirmReminderVisible: false,
+        confirmReminderSeq: 0,
       };
 
     case 'TOGGLE_SECRET_MASK':
@@ -147,6 +151,16 @@ export function patModalReducer(state: PatModalState, action: PatModalAction): P
       return {
         ...state,
         confirmReminderVisible: true,
+        confirmReminderSeq: state.confirmReminderSeq + 1,
+      };
+
+    case 'HIDE_CONFIRM_REMINDER':
+      if (!state.confirmReminderVisible) {
+        return state;
+      }
+      return {
+        ...state,
+        confirmReminderVisible: false,
       };
   }
 }
