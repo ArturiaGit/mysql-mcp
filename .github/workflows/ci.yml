@@ -43,12 +43,11 @@ jobs:
           tip="${PR_HEAD:-$GITHUB_SHA}"
           if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
             git fetch origin main --quiet
-            for commit in $(git rev-list --reverse --no-merges origin/main.."$tip"); do
-              git log --format=%B -1 "$commit" | pnpm exec commitlint --verbose
-            done
-          else
-            pnpm exec commitlint --from "$base" --to "$tip" --verbose
+            base=origin/main
           fi
+          git rev-list --reverse --no-merges "$base..$tip" | while IFS= read -r commit; do
+            git log --format=%B -1 "$commit" | pnpm exec commitlint --verbose
+          done
       - run: python scripts/generate_readiness_contracts.py --check
       - run: pnpm typecheck
       - run: pnpm lint
@@ -86,7 +85,9 @@ jobs:
           if [[ "$REQUIRE_FRONTEND" == true ]]; then
             pnpm --filter @mysql-mcp/admin-ui build
             pnpm --filter @mysql-mcp/admin-ui test:e2e:m1
-            docker compose down --volumes && node scripts/m0/mysql-up.mjs
+            docker compose down --volumes && node scripts/m0/mysql-up.mjs || exit 1
+            pnpm --filter @mysql-mcp/admin-ui test:e2e:m2
+            docker compose down --volumes && node scripts/m0/mysql-up.mjs || exit 1
             pnpm ci:frontend --require-frontend
           else
             pnpm ci:frontend
