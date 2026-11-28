@@ -8,7 +8,26 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { ToastViewport } from '@/components/ui/toast';
 import { useHealthProbe } from '@/hooks/useHealthProbe';
+import { getUserStatusLabel } from '@/lib/user-display';
 import { useShellStore } from '@/stores/useShellStore';
+
+export type AuthTopbarStatusVariant = 'safe' | 'warning' | 'danger';
+
+export interface AuthTopbarStatusPresentation {
+  label: string;
+  title: CurrentUserResponseDTO['status'];
+  variant: AuthTopbarStatusVariant;
+}
+
+export function getAuthTopbarStatusPresentation(
+  status: CurrentUserResponseDTO['status'],
+): AuthTopbarStatusPresentation {
+  return {
+    label: getUserStatusLabel(status),
+    title: status,
+    variant: status === 'ACTIVE' ? 'safe' : status === 'PENDING' ? 'warning' : 'danger',
+  };
+}
 
 export interface AuthLayoutProps {
   pageLabel: string;
@@ -27,6 +46,7 @@ export function AuthLayout({ pageLabel, user, children }: AuthLayoutProps) {
   const isReady = health?.ready.ok === true;
   const isLive = health?.live.ok === true;
   const nextThemeLabel = theme === 'dark' ? '切换至浅色主题' : '切换至暗色主题';
+  const statusBadge = user ? getAuthTopbarStatusPresentation(user.status) : null;
 
   const onLogout = async () => {
     setLoggingOut(true);
@@ -79,23 +99,18 @@ export function AuthLayout({ pageLabel, user, children }: AuthLayoutProps) {
                   : 'ADMIN-API OFFLINE'}
           </Badge>
 
-          {user && (
+          {user && statusBadge && (
             <>
               <span className="hidden items-center gap-1.5 rounded-md border border-border-line bg-bg-card px-2.5 py-1 text-xs md:inline-flex">
                 <Icon name="user-check" className="size-3.5 text-primary" />
                 <span className="font-mono text-fg-main">{user.username}</span>
                 <Badge
-                  variant={
-                    user.status === 'ACTIVE'
-                      ? 'safe'
-                      : user.status === 'PENDING'
-                        ? 'warning'
-                        : 'danger'
-                  }
-                  mono
+                  variant={statusBadge.variant}
+                  title={statusBadge.title}
+                  data-testid="auth-topbar-user-status-badge"
                   className="px-1.5 py-0 text-[10px]"
                 >
-                  {user.status}
+                  {statusBadge.label}
                 </Badge>
               </span>
 

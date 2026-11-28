@@ -36,7 +36,9 @@ describe('user-display helpers', () => {
     });
 
     expect(getUserStatusLabel('ACTIVE')).toBe('活跃');
+    expect(getUserStatusLabel('PENDING')).toBe('待审批');
     expect(getUserStatusLabel('REJECTED')).toBe('已驳回');
+    expect(getUserStatusLabel('DISABLED')).toBe('已停用');
   });
 
   it('prefers trimmed display_name and falls back to role_name when missing or blank', () => {

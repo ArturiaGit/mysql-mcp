@@ -243,6 +243,36 @@ async function run() {
       assert(!/\p{Extended_Pictographic}/u.test(text), `Emoji detected on ${label}`);
     };
 
+    const assertAuthTopbarStatusBadge = async (
+      targetPage,
+      expectedLabel,
+      expectedCode,
+      expectedVariantClass,
+      routeLabel,
+    ) => {
+      const topbarBadge = targetPage.getByTestId('auth-topbar-user-status-badge');
+      await topbarBadge.waitFor({ state: 'visible' });
+      assert.equal(
+        (await topbarBadge.innerText()).trim(),
+        expectedLabel,
+        `Expected AuthLayout topbar status badge on ${routeLabel} to display "${expectedLabel}"`,
+      );
+      assert.equal(
+        await topbarBadge.getAttribute('title'),
+        expectedCode,
+        `Expected AuthLayout topbar status badge title on ${routeLabel} to be "${expectedCode}"`,
+      );
+      const className = (await topbarBadge.getAttribute('class')) ?? '';
+      assert(
+        className.includes(expectedVariantClass),
+        `Expected AuthLayout topbar status badge on ${routeLabel} to keep semantic variant "${expectedVariantClass}", got "${className}"`,
+      );
+      assert(
+        !className.includes('font-mono'),
+        `Expected AuthLayout topbar status badge on ${routeLabel} NOT to use font-mono, got "${className}"`,
+      );
+    };
+
     const loginAs = async (username, password) => {
       await page.goto(`${uiBase}/login`, { waitUntil: 'networkidle' });
       await page.fill('#login-username', username);
@@ -266,6 +296,7 @@ async function run() {
     // ------------------------------------------------------------------
     await loginAs(adminUser, adminInitPwd);
     await page.waitForURL(/\/change-password$/);
+    await assertAuthTopbarStatusBadge(page, '活跃', 'ACTIVE', 'text-safe', '/change-password');
     await page.fill('#old-password', adminInitPwd);
     await page.fill('#new-password', adminPwd);
     await page.fill('#confirm-password', adminPwd);
@@ -406,6 +437,7 @@ async function run() {
       'Expected /approvals/re status badge to display Chinese label 已驳回',
     );
     assert.equal(await rejectedBadge.getAttribute('title'), 'REJECTED');
+    await assertAuthTopbarStatusBadge(page, '已驳回', 'REJECTED', 'text-danger', '/approvals/re');
     const displayedRejectReason = (await page.getByTestId('reject-reason-box').innerText()).trim();
     assert(
       displayedRejectReason.includes(rejectReasonText),
@@ -424,6 +456,7 @@ async function run() {
       'Expected /approvals/wait status badge to display Chinese label 待审批',
     );
     assert.equal(await pendingBadge.getAttribute('title'), 'PENDING');
+    await assertAuthTopbarStatusBadge(page, '待审批', 'PENDING', 'text-warning', '/approvals/wait');
 
     // Logout applicant -> SECURITY_ADMIN logs in -> verifies privilege escalation lock on SUPER_ADMIN role
     await page.getByTestId('auth-logout-btn').click();
@@ -732,6 +765,27 @@ async function run() {
     console.log(
       `PASS: 4-column action alignment verified across ACTIVE/DISABLED/PENDING/REJECTED rows (slot1 x=${slotBoxes.slot1[0].x.toFixed(1)} w=${slotBoxes.slot1[0].width.toFixed(1)}, slot2 x=${slotBoxes.slot2[0].x.toFixed(1)} w=${slotBoxes.slot2[0].width.toFixed(1)}, slot3 x=${slotBoxes.slot3[0].x.toFixed(1)} w=${slotBoxes.slot3[0].width.toFixed(1)}, slot4 x=${slotBoxes.slot4[0].x.toFixed(1)} w=${slotBoxes.slot4[0].width.toFixed(1)})`,
     );
+
+    // Verify DISABLED user login hits /forbidden with localized AuthLayout topbar & card status badges
+    const disabledContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    try {
+      const disabledPage = await disabledContext.newPage();
+      disabledPage.on('pageerror', (err) => pageErrors.push(err.message));
+      await disabledPage.goto(`${uiBase}/login`, { waitUntil: 'networkidle' });
+      await disabledPage.fill('#login-username', tempUser);
+      await disabledPage.fill('#login-password', tempPwd);
+      await disabledPage.getByTestId('login-submit-btn').click();
+      await disabledPage.waitForURL(/\/forbidden$/);
+      await disabledPage.getByTestId('account-disabled-card').waitFor({ state: 'visible' });
+      const disabledCardBadge = disabledPage.getByTestId('disabled-status-badge');
+      assert.equal((await disabledCardBadge.innerText()).trim(), '已停用');
+      assert.equal(await disabledCardBadge.getAttribute('title'), 'DISABLED');
+      await assertAuthTopbarStatusBadge(disabledPage, '已停用', 'DISABLED', 'text-danger', '/forbidden');
+      await disabledPage.getByTestId('auth-logout-btn').click();
+      await disabledPage.waitForURL(/\/login$/);
+    } finally {
+      await disabledContext.close();
+    }
 
     // Re-enable back to ACTIVE
     await page.getByTestId(`toggle-status-btn-${tempUser}`).click();
