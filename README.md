@@ -6,7 +6,7 @@
 *双平面解耦架构 · 只读 AST SQL 防火墙 · 角色/库表 ACL 策略矩阵 · 双重漏斗限流 · SSRF/SSH 安全通道 · 全链路脱敏审计*
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](./package.json)
-[![Milestone](https://img.shields.io/badge/milestone-M2%20Done-brightgreen.svg)](./TODO.md)
+[![Milestone](https://img.shields.io/badge/milestone-M3%20Done-brightgreen.svg)](./TODO.md)
 [![Node.js](https://img.shields.io/badge/Node.js-22.22.0-339933.svg?logo=node.js)](./.nvmrc)
 [![pnpm](https://img.shields.io/badge/pnpm-10.32.1-F69220.svg?logo=pnpm)](./package.json)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6.svg?logo=typescript)](./tsconfig.base.json)
@@ -22,7 +22,7 @@
 
 ## 系统概述
 
-> **M0 ~ M2 已完成并合入 `main`。** M0 交付双端工程底座、Git/CI 护栏与 14 张元数据表。M1 交付系统自举、认证会话与四级路由守卫。M2 交付开发者 PAT 自服务与客户端配置生成。下一阶段从 M3 的审批与用户管理开始，继续推进至 M7。
+> **M0 ~ M3 已完成。** M0 交付双端工程底座、Git/CI 护栏与 14 张元数据表。M1 交付系统自举、认证会话与四级路由守卫。M2 交付开发者 PAT 自服务与客户端配置生成。M3 交付审批工单中心、用户全生命周期管理、超管防自残并发锁序与提交后失效 Fail-Closed 保护。下一阶段从 M4 的数据源 Profile CRUD 与 SSRF/SSH 三模式连通性测试开始，继续推进至 M7。
 
 **MySQL MCP** 是一个面向 AI Agent 与研发团队的**零信任只读 MySQL MCP 网关与管控平台**，采用数据平面与管控平面分离架构：
 
@@ -185,11 +185,13 @@ pnpm test:guardrails
 # 真实 Docker MySQL 8.0 集成验收（14 表、PENDING 与双端 HTTP 探针）
 node scripts/m0/mysql-up.mjs && pnpm test:integration && pnpm test:m1
 docker compose down --volumes && node scripts/m0/mysql-up.mjs && pnpm test:m2
+docker compose down --volumes && node scripts/m0/mysql-up.mjs && node --test apps/admin-api/test/m3.integration.mjs
 
 # 前端生产构建与真实后端 Playwright E2E
 pnpm --filter @mysql-mcp/admin-ui build
 docker compose down --volumes && node scripts/m0/mysql-up.mjs && pnpm --filter @mysql-mcp/admin-ui test:e2e:m1
 docker compose down --volumes && node scripts/m0/mysql-up.mjs && pnpm --filter @mysql-mcp/admin-ui test:e2e:m2
+docker compose down --volumes && node scripts/m0/mysql-up.mjs && pnpm --filter @mysql-mcp/admin-ui test:e2e:m3
 
 # gzip 包体预算（vendors <= 140KB / core <= 40KB / dynamic <= 60KB）与 M0 浏览器 E2E
 docker compose down --volumes && node scripts/m0/mysql-up.mjs && pnpm ci:frontend --require-frontend
@@ -223,7 +225,7 @@ pnpm audit --audit-level=high
 - [x] **M0**：双端工程底座、Git/CI 安全护栏、Docker 14 表与 `/_lab` 组件实验室（已完成本地 QA 与远端 CI / CodeQL 验收）
 - [x] **M1**：系统自举、认证会话、Cookie/CSRF 与四级路由守卫闭环（9 接口 · 6 视图，双端联调、独立 QA 与安全检查通过，已合入 `main` · [PR #7](https://github.com/ArturiaGit/mysql-mcp/pull/7)）
 - [x] **M2**：开发者个人中心、PAT 单次展示三态弹窗与客户端配置生成（4 接口 · 2 视图，双端联调、独立 QA 与安全二审通过，已合入 `main` · [PR #8](https://github.com/ArturiaGit/mysql-mcp/pull/8)）
-- [ ] **M3**：审批工单中心与用户全生命周期（超管防自残与并发锁序，8 接口 · 2 视图）
+- [x] **M3**：审批工单中心与用户全生命周期（超管防自残与并发锁序，8 接口 · 2 视图，双端联调、独立 QA 与安全二审通过）
 - [ ] **M4**：数据源 Profile CRUD、密钥环加密与 SSRF/SSH 三模式连通性测试（6 接口 · 1 视图）
 - [ ] **M5**：角色/库表 ACL 策略矩阵与双重漏斗限流（13 接口 · 2 视图）
 - [ ] **M6**：MCP 数据面核心引擎（AST 防火墙、连接池、11 项 MCP 工具、审计微批）

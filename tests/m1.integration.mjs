@@ -7,6 +7,10 @@ import { createMetadataPool, createMetadataQueryExecutor, readMetadataConfig } f
 
 const config = readMetadataConfig(process.env);
 assert(config, 'M1 integration requires the isolated Docker MySQL 8.0 database');
+const testHooks = {
+  userInvalidationHooks: { markUserInvalidatedSync() {}, cancelQueriesByUser() {} },
+  patRevocationHooks: { markPatRevokedSync() {}, cancelQueriesByPat() {} },
+};
 const testEnv = { NODE_ENV: 'production', ADMIN_API_SECRET: randomBytes(32).toString('hex'), SERVER_PEPPER: process.env.SERVER_PEPPER ?? randomBytes(32).toString('hex'),
   GATEWAY_MASTER_KEYS: JSON.stringify({ active_key_id: 'test', keys: { test: randomBytes(32).toString('hex') } }) };
 const testPassword = () => 'Aa1!' + randomBytes(18).toString('base64url');
@@ -60,7 +64,7 @@ test('real MySQL 8.0 M1 bootstrap and auth guard contract including TC-BE-16', a
   const lockPassword = testPassword();
   const rejectedPassword = testPassword();
   const app = createServer(config, { ...testEnv, BOOTSTRAP_ADMIN_USERNAME: 'm1admin',
-    BOOTSTRAP_ADMIN_PASSWORD: initialPassword, BOOTSTRAP_ADMIN_EMAIL: 'admin@example.test' });
+    BOOTSTRAP_ADMIN_PASSWORD: initialPassword, BOOTSTRAP_ADMIN_EMAIL: 'admin@example.test' }, testHooks);
   t.after(() => app.close());
   const base = await app.listen({ host: '127.0.0.1', port: 0 });
   assert.equal((await request(base, '/health/ready')).status, 200);
@@ -83,7 +87,7 @@ test('real MySQL 8.0 M1 bootstrap and auth guard contract including TC-BE-16', a
   assert.equal(roles.count, '5');
   const [[notification]] = await fixtureDb.query('SELECT is_encrypted FROM sys_system_settings WHERE setting_key = ?', ['notification_channels']);
   assert.equal(notification.is_encrypted, 1);
-  const restart = createServer(config, testEnv);
+  const restart = createServer(config, testEnv, testHooks);
   t.after(() => restart.close());
   assert.equal((await restart.inject('/health/ready')).statusCode, 200);
   const rotatedCsrfCookie = adminCookies.csrf;
@@ -226,13 +230,13 @@ test('real MySQL 8.0 M1 bootstrap and auth guard contract including TC-BE-16', a
   assert.equal((await request(base, '/api/v1/auth/me', 'GET', undefined, [changedCookies.sid])).status, 401);
   await fixtureDb.query("UPDATE sys_users SET status='DISABLED' WHERE username='m1admin'");
   assert.equal((await request(base, '/health/ready')).status, 503);
-  const unsafeRestart = createServer(config, { ...testEnv, INITIAL_ADMIN_PASSWORD: testPassword() });
+  const unsafeRestart = createServer(config, { ...testEnv, INITIAL_ADMIN_PASSWORD: testPassword() }, testHooks);
   t.after(() => unsafeRestart.close());
   assert.equal((await unsafeRestart.inject('/health/ready')).statusCode, 503);
   const [[adminCount]] = await fixtureDb.query("SELECT COUNT(*) AS count FROM sys_users WHERE username='admin'");
   assert.equal(adminCount.count, '0');
   await fixtureDb.query("UPDATE sys_system_settings SET setting_value='PENDING' WHERE setting_key='bootstrap_state'");
-  const nonEmpty = createServer(config, { ...testEnv, INITIAL_ADMIN_PASSWORD: testPassword() });
+  const nonEmpty = createServer(config, { ...testEnv, INITIAL_ADMIN_PASSWORD: testPassword() }, testHooks);
   t.after(() => nonEmpty.close());
   assert.equal((await nonEmpty.inject('/health/live')).statusCode, 200);
   assert.equal((await nonEmpty.inject('/health/ready')).statusCode, 503);

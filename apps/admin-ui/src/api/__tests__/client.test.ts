@@ -178,6 +178,36 @@ describe('single-flight CSRF refresh & retry boundaries', () => {
     await expect(apiRequest('/api/v1/auth/password-policy', { fetchImpl: unauthFetch })).rejects.toThrow();
     expect(unauthorizedSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('parses 409 ERR_CONCURRENCY_CONFLICT details with current_version and submitted_version', async () => {
+    setActiveCsrfToken('valid_csrf');
+    const conflictFetch: typeof fetch = vi.fn(async () =>
+      jsonResponse(
+        {
+          code: 'ERR_CONCURRENCY_CONFLICT',
+          message: '当前配置已被其他管理员更新。',
+          action_guidance: '请保留修改草稿，加载最新版本并比对后重新提交。',
+          details: { current_version: 5, submitted_version: 3 },
+        },
+        409,
+      ),
+    );
+
+    await expect(
+      apiRequest('/api/v1/users/1002/roles', {
+        method: 'PUT',
+        body: { roleIds: ['2'], version: 3 },
+        fetchImpl: conflictFetch,
+      }),
+    ).rejects.toSatisfy(
+      (err: unknown) =>
+        isApiClientError(err) &&
+        err.status === 409 &&
+        err.code === 'ERR_CONCURRENCY_CONFLICT' &&
+        err.conflictDetails?.current_version === 5 &&
+        err.conflictDetails?.submitted_version === 3,
+    );
+  });
 });
 
 describe('SessionRequestManager & handleLogout abort-before-logout contract', () => {

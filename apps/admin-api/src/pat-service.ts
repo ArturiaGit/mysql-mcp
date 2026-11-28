@@ -5,6 +5,7 @@ import { createPatToken, hashPatToken } from '@mysql-mcp/security';
 import type { CreatePatResponseDTO, EntityId, PatListItemDTO, ProfileOptionDTO } from '@mysql-mcp/shared-types';
 import { passwordExpiry } from './auth-domain.js';
 import { ApiError } from './errors.js';
+import { invalidateAfterCommit } from './post-commit-invalidation.js';
 
 interface PatRow extends MetadataRow {
   id: EntityId;
@@ -33,13 +34,14 @@ export class PatService {
     private readonly pool: MetadataPool,
     private readonly db: MetadataQueryExecutor,
     private readonly pepper: string,
+    private readonly onInvalidationFailure: () => void,
     private readonly revocationHooks?: PatRevocationHooks,
   ) {}
 
   async list(userId: EntityId): Promise<PatListItemDTO[]> {
     const [rows] = await this.db.query<PatRow[]>(
       `SELECT id, name, token_prefix, expires_at, last_used_at, created_at
-       FROM sys_pats WHERE user_id = CAST(? AS UNSIGNED) AND revoked_at IS NULL ORDER BY created_at DESC, id DESC`,
+       FROM sys_pats WHERE user_id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND revoked_at IS NULL ORDER BY created_at DESC, id DESC`,
       [userId],
     );
     return rows.map(toPatDTO);
@@ -66,7 +68,7 @@ export class PatService {
       const [[inserted]] = await tx.query<(MetadataRow & { id: EntityId })[]>('SELECT CAST(LAST_INSERT_ID() AS CHAR) AS id');
       if (!inserted) throw new Error('Missing PAT ID');
       const [[row]] = await tx.query<PatRow[]>(
-        'SELECT id, name, token_prefix, expires_at, last_used_at, created_at FROM sys_pats WHERE id = CAST(? AS UNSIGNED)',
+        'SELECT id, name, token_prefix, expires_at, last_used_at, created_at FROM sys_pats WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)',
         [inserted.id],
       );
       if (!row?.expires_at) throw new Error('Missing created PAT expiry');
@@ -86,18 +88,18 @@ export class PatService {
       // User first, then PAT, as in password change. This also serializes with role updates for the operator.
       await lockActiveUser(tx, userId);
       const [[pat]] = await tx.query<(MetadataRow & { user_id: EntityId; revoked_at: Date | null })[]>(
-        'SELECT user_id, revoked_at FROM sys_pats WHERE id = CAST(? AS UNSIGNED) FOR UPDATE', [id],
+        'SELECT user_id, revoked_at FROM sys_pats WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) FOR UPDATE', [id],
       );
       if (!pat || pat.revoked_at !== null) throw new ApiError(404, 'ERR_NOT_FOUND');
       if (pat.user_id !== userId) {
         const [[role]] = await tx.query<MetadataRow[]>(
           `SELECT 1 FROM sys_user_roles ur JOIN sys_roles r ON r.id = ur.role_id
-           WHERE ur.user_id = CAST(? AS UNSIGNED) AND r.role_name = 'SUPER_ADMIN'`, [userId],
+           WHERE ur.user_id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND r.role_name = 'SUPER_ADMIN'`, [userId],
         );
         if (!role) throw new ApiError(403, 'ERR_RBAC_FORBIDDEN');
       }
       const [updated] = await tx.query<MetadataWriteResult>(
-        'UPDATE sys_pats SET revoked_at = UTC_TIMESTAMP(3) WHERE id = CAST(? AS UNSIGNED) AND revoked_at IS NULL', [id],
+        'UPDATE sys_pats SET revoked_at = UTC_TIMESTAMP(3) WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND revoked_at IS NULL', [id],
       );
       if (updated.affectedRows !== 1) throw new ApiError(404, 'ERR_NOT_FOUND');
       await tx.query(
@@ -106,9 +108,10 @@ export class PatService {
         [userId, userId, id, JSON.stringify({ operation: 'PAT_REVOKE' })],
       );
     });
-    if (this.revocationHooks) {
-      this.revocationHooks.markPatRevokedSync(id);
-      await this.revocationHooks.cancelQueriesByPat(id, 'PAT_REVOKED');
+    const hooks = this.revocationHooks;
+    if (hooks) {
+      await invalidateAfterCommit(this.onInvalidationFailure, [() => hooks.markPatRevokedSync(id)],
+        [() => hooks.cancelQueriesByPat(id, 'PAT_REVOKED')]);
     }
   }
 
@@ -116,7 +119,7 @@ export class PatService {
     const [rows] = await this.db.query<(MetadataRow & ProfileOptionDTO)[]>(
       `SELECT p.id, p.name, p.display_name AS displayName FROM sys_profiles p WHERE p.status = 'ACTIVE'
        AND EXISTS (SELECT 1 FROM sys_role_profiles rp JOIN sys_user_roles ur ON ur.role_id = rp.role_id
-                   WHERE rp.profile_id = p.id AND ur.user_id = CAST(? AS UNSIGNED)) ORDER BY p.name, p.id`,
+                   WHERE rp.profile_id = p.id AND ur.user_id = CAST(CAST(? AS CHAR) AS UNSIGNED)) ORDER BY p.name, p.id`,
       [userId],
     );
     return rows.map(({ id, name, displayName }) => ({ id, name, displayName }));
@@ -126,7 +129,7 @@ export class PatService {
 async function lockActiveUser(tx: MetadataQueryExecutor, userId: EntityId): Promise<void> {
   const [[state]] = await tx.query<UserState[]>(
     `SELECT status, must_change_password, password_expires_days, password_updated_at
-     FROM sys_users WHERE id = CAST(? AS UNSIGNED) FOR UPDATE`, [userId],
+     FROM sys_users WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) FOR UPDATE`, [userId],
   );
   if (!state || state.status !== 'ACTIVE') throw new ApiError(403, 'ERR_AUTH_ACCOUNT_DISABLED');
   const expiry = passwordExpiry(state.password_updated_at, state.password_expires_days);

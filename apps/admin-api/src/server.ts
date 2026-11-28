@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createMetadataPool, createMetadataQueryExecutor, type MetadataDbConfig } from '@mysql-mcp/core-engine';
 import { CryptoKeyring } from '@mysql-mcp/security';
 import { AuthService } from './auth-service.js';
+import { UserAdministrationService, type UserInvalidationHooks } from './user-administration-service.js';
+import { UserAdministrationQueries } from './user-administration-queries.js';
 import { PatService, type PatRevocationHooks } from './pat-service.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { BootstrapService } from './bootstrap-service.js';
@@ -10,12 +12,15 @@ import { ApiError, errorBody } from './errors.js';
 
 const keyringConfig = z.object({ active_key_id: z.string(), keys: z.record(z.string(), z.string()) });
 
-interface AdminApiDependencies { patRevocationHooks?: PatRevocationHooks; }
+interface AdminApiDependencies {
+  patRevocationHooks?: PatRevocationHooks;
+  userInvalidationHooks?: UserInvalidationHooks;
+}
 
 export function createServer(
   config?: MetadataDbConfig,
   env: NodeJS.ProcessEnv = process.env,
-  { patRevocationHooks }: AdminApiDependencies = {},
+  { patRevocationHooks, userInvalidationHooks }: AdminApiDependencies = {},
 ) {
   const proxies = env.TRUSTED_PROXY_CIDRS?.split(',').map(value => value.trim()).filter(Boolean);
   const app = Fastify({ logger: false, trustProxy: proxies?.length ? proxies : false });
@@ -24,12 +29,23 @@ export function createServer(
   const pepper = env.SERVER_PEPPER;
   let initialized = false;
   let draining = false;
+  let invalidationFailed = false;
+  const onInvalidationFailure = () => { invalidationFailed = true; };
+  const ready = () => initialized && !draining && !invalidationFailed;
+  const hooksReady = env.NODE_ENV !== 'production' || (
+    typeof userInvalidationHooks?.markUserInvalidatedSync === 'function'
+    && typeof userInvalidationHooks.cancelQueriesByUser === 'function'
+    && typeof patRevocationHooks?.markPatRevokedSync === 'function'
+    && typeof patRevocationHooks.cancelQueriesByPat === 'function'
+  );
   let bootstrap: BootstrapService | undefined;
-  if (pool && secret && Buffer.byteLength(secret, 'utf8') >= 32 && pepper && Buffer.byteLength(pepper, 'utf8') >= 32) {
+  if (pool && secret && Buffer.byteLength(secret, 'utf8') >= 32 && pepper && Buffer.byteLength(pepper, 'utf8') >= 32 && hooksReady) {
     const db = createMetadataQueryExecutor(pool);
     const auth = new AuthService(pool, db, secret);
-    // The standalone M2 server has no data-plane runtime; the M6 host supplies these hooks.
-    const patService = new PatService(pool, db, pepper, patRevocationHooks);
+    // The standalone control plane has no data-plane runtime; the M6 host supplies these hooks.
+    const patService = new PatService(pool, db, pepper, onInvalidationFailure, patRevocationHooks);
+    const userAdministration = new UserAdministrationService(pool, db, auth, onInvalidationFailure, userInvalidationHooks, patRevocationHooks);
+    const userQueries = new UserAdministrationQueries(pool);
     app.addHook('onReady', async () => {
       try {
         const raw: unknown = JSON.parse(env.GATEWAY_MASTER_KEYS ?? 'null');
@@ -46,7 +62,10 @@ export function createServer(
       }
     });
     app.register(async (authRoutes) => {
-      await registerAuthRoutes(authRoutes, { service: auth, patService, secureCookies: env.NODE_ENV === 'production', ready: () => initialized && !draining });
+      await registerAuthRoutes(authRoutes, {
+        service: auth, patService, userAdministration, userQueries,
+        secureCookies: env.NODE_ENV === 'production', ready,
+      });
     });
   }
   app.setErrorHandler((error, _request, reply) => {
@@ -61,9 +80,9 @@ export function createServer(
   if (pool) app.addHook('onClose', async () => pool.close());
   app.get('/health/live', async (_request, reply) => reply.header('cache-control', 'no-store').send({ status: 'ok' }));
   app.get('/health/ready', async (_request, reply) => {
-    const ready = initialized && !draining && await bootstrap?.isReady() === true && !draining;
-    return reply.header('cache-control', 'no-store').code(ready ? 200 : 503)
-      .send({ status: ready ? 'ready' : 'not_ready' });
+    const healthy = ready() && await bootstrap?.isReady() === true && ready();
+    return reply.header('cache-control', 'no-store').code(healthy ? 200 : 503)
+      .send({ status: healthy ? 'ready' : 'not_ready' });
   });
   return app;
 }

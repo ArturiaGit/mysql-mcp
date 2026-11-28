@@ -57,8 +57,8 @@ export default function AccountDisabledView() {
               所有控制台业务路由与 MCP 数据面访问权限均已冻结
             </CardDescription>
           </div>
-          <Badge variant="danger" mono data-testid="disabled-status-badge">
-            DISABLED
+          <Badge variant="danger" title="DISABLED" data-testid="disabled-status-badge">
+            已停用
           </Badge>
         </CardHeader>
 

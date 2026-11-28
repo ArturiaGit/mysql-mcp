@@ -12,7 +12,7 @@
 | **M0** | 双端工程底座、Git/CI安全护栏、Docker 14 表与 `/_lab` 组件实验室 | [`todos/M0-foundation-lab.md`](todos/M0-foundation-lab.md) | 0（健康探针） | `/_lab` + 骨架 | `[x]` |
 | **M1** | 系统自举、认证会话、Cookie/CSRF 与四级路由守卫闭环 | [`todos/M1-auth-guards.md`](todos/M1-auth-guards.md) | 9 | 6（Auth/状态） | `[x]` |
 | **M2** | 开发者个人中心、PAT 单次展示三态弹窗与客户端配置生成 | [`todos/M2-developer-pat.md`](todos/M2-developer-pat.md) | 4 | 2（PAT/配置） | `[x]` |
-| **M3** | 审批工单中心与用户全生命周期（超管防自残与并发锁序） | [`todos/M3-approvals-users.md`](todos/M3-approvals-users.md) | 8 | 2（审批/用户） | `[ ]` |
+| **M3** | 审批工单中心与用户全生命周期（超管防自残与并发锁序） | [`todos/M3-approvals-users.md`](todos/M3-approvals-users.md) | 8 | 2（审批/用户） | `[x]` |
 | **M4** | 数据源 Profile CRUD、密钥环加密与 SSRF/SSH 三模式连通性测试 | [`todos/M4-profiles-ssrf-ssh.md`](todos/M4-profiles-ssrf-ssh.md) | 6 | 1（Profiles） | `[ ]` |
 | **M5** | 角色/库表 ACL 策略矩阵与双重漏斗限流（⚠️ 需先确认 `RD-08`） | [`todos/M5-rbac-acl-ratelimits.md`](todos/M5-rbac-acl-ratelimits.md) | 13 | 2（策略/限流） | `[ ]` |
 | **M6** | MCP 数据面核心引擎（AST 防火墙、连接池、11 工具、审计微批） | [`todos/M6-mcp-data-plane.md`](todos/M6-mcp-data-plane.md) | 0（11 MCP 工具） | — | `[ ]` |

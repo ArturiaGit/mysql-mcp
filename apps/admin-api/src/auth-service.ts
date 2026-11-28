@@ -73,7 +73,7 @@ export class AuthService {
     // Keep Argon2 outside row locks, then serialize the decision and counters on the current row.
     const matches = await this.verify(snapshot.password_hash, password);
     const outcome = await withMetadataTransaction<LoginOutcome>(this.pool, async (tx) => {
-      const [[row]] = await tx.query<UserRow[]>('SELECT * FROM sys_users WHERE id = ? FOR UPDATE', [snapshot.id]);
+      const [[row]] = await tx.query<UserRow[]>('SELECT * FROM sys_users WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) FOR UPDATE', [snapshot.id]);
       if (!row || row.password_hash !== snapshot.password_hash) return { error: loginFailed(1) };
       const now = Date.now();
       const locked = accountLock(row, now);
@@ -81,11 +81,11 @@ export class AuthService {
       if (!matches) {
         const count = (row.locked_until ? 0 : row.failed_login_count) + 1;
         const until = count >= 5 ? new Date(now + 900_000) : null;
-        await tx.query('UPDATE sys_users SET failed_login_count = ?, locked_until = ? WHERE id = ?', [count, until, row.id]);
+        await tx.query('UPDATE sys_users SET failed_login_count = ?, locked_until = ? WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [count, until, row.id]);
         await this.auditLogin(ip, until ? 'BRUTE_FORCE_LOCKED' : 'AUTH_FAILED', tx);
         return { error: until ? new ApiError(429, 'ERR_AUTH_ACCOUNT_LOCKED', { retry_after_sec: 900 }) : loginFailed(count) };
       }
-      await tx.query('UPDATE sys_users SET failed_login_count = 0, locked_until = NULL WHERE id = ?', [row.id]);
+      await tx.query('UPDATE sys_users SET failed_login_count = 0, locked_until = NULL WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [row.id]);
       return { user: await this.profile(row, tx), authVersion: row.auth_version };
     });
     if ('error' in outcome) throw outcome.error;
@@ -93,36 +93,40 @@ export class AuthService {
     return { user: outcome.user, ...this.issueRegeneratedSession(outcome.user.id, outcome.authVersion) };
   }
 
-  async authenticate(sid: string | undefined): Promise<UserProfileDTO> {
+  async authenticate(sid: string | undefined) {
     const session = this.liveSession(sid);
     if (!session) throw new ApiError(401, 'ERR_AUTH_UNAUTHORIZED');
-    const [[row]] = await this.db.query<UserRow[]>('SELECT * FROM sys_users WHERE id = ?', [session.userId]);
+    const [[row]] = await this.db.query<UserRow[]>('SELECT * FROM sys_users WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [session.userId]);
     if (!row || (row.status === 'ACTIVE' && row.auth_version !== session.authVersion) || this.liveSession(sid) !== session) {
       throw new ApiError(401, 'ERR_AUTH_UNAUTHORIZED');
     }
     const user = await this.profile(row, this.db);
     if (this.liveSession(sid) !== session) throw new ApiError(401, 'ERR_AUTH_UNAUTHORIZED');
-    return user;
+    return { user, authVersion: session.authVersion };
   }
 
   logout(sid: string | undefined): void { if (sid) this.sessions.delete(sid); }
 
+  revokeUserSessions(userId: EntityId): void {
+    for (const [id, session] of this.sessions) if (session.userId === userId) this.sessions.delete(id);
+  }
+
   async changePassword(user: UserProfileDTO, { oldPassword, newPassword, revokeAllPats = true }: ChangePasswordRequestDTO): Promise<number> {
-    const [[row]] = await this.db.query<UserRow[]>('SELECT * FROM sys_users WHERE id = ?', [user.id]);
+    const [[row]] = await this.db.query<UserRow[]>('SELECT * FROM sys_users WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED)', [user.id]);
     if (!row || !(await this.verify(row.password_hash, oldPassword))) throw new ApiError(400, 'ERR_OLD_PASSWORD_INVALID');
     if (!hasStrongPassword(newPassword)) throw new ApiError(400, 'ERR_PASSWORD_POLICY_VIOLATED');
     if (newPassword === oldPassword) throw new ApiError(400, 'ERR_SAME_AS_OLD_PASSWORD');
     const encoded = await this.hash(newPassword);
     await withMetadataTransaction(this.pool, async (tx) => {
       const [result] = await tx.query<MetadataWriteResult>(
-        "UPDATE sys_users SET password_hash = ?, must_change_password = 0, password_updated_at = UTC_TIMESTAMP(3), auth_version = auth_version + 1, version = version + 1 WHERE id = ? AND status = 'ACTIVE' AND auth_version = ? AND version = ?",
+        "UPDATE sys_users SET password_hash = ?, must_change_password = 0, password_updated_at = UTC_TIMESTAMP(3), auth_version = auth_version + 1, version = version + 1 WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND status = 'ACTIVE' AND auth_version = ? AND version = ?",
         [encoded, user.id, row.auth_version, user.version],
       );
       if (result.affectedRows !== 1) throw new ApiError(409, 'ERR_CONCURRENCY_CONFLICT');
-      if (revokeAllPats) await tx.query('UPDATE sys_pats SET revoked_at = UTC_TIMESTAMP(3) WHERE user_id = ? AND revoked_at IS NULL', [user.id]);
+      if (revokeAllPats) await tx.query('UPDATE sys_pats SET revoked_at = UTC_TIMESTAMP(3) WHERE user_id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND revoked_at IS NULL', [user.id]);
       await tx.query("INSERT INTO sys_user_approvals (user_id, action, operator_id, target_type, target_id, details) VALUES (?, 'STATUS_CHANGE', ?, 'USER', ?, JSON_OBJECT('event', 'PASSWORD_CHANGED'))", [user.id, user.id, user.id]);
     });
-    for (const [id, session] of this.sessions) if (session.userId === user.id) this.sessions.delete(id);
+    this.revokeUserSessions(user.id);
     return row.auth_version + 1;
   }
 
@@ -133,7 +137,7 @@ export class AuthService {
   async updatePasswordPolicy(user: UserProfileDTO, days: number | null): Promise<UpdatePasswordPolicyResponseDTO> {
     return withMetadataTransaction(this.pool, async (tx) => {
       const [result] = await tx.query<MetadataWriteResult>(
-        "UPDATE sys_users SET password_expires_days = ?, version = version + 1 WHERE id = ? AND version = ? AND status = 'ACTIVE' AND must_change_password = 0 AND (password_expires_days IS NULL OR UTC_TIMESTAMP(3) <= TIMESTAMPADD(DAY, password_expires_days, password_updated_at))",
+        "UPDATE sys_users SET password_expires_days = ?, version = version + 1 WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND version = ? AND status = 'ACTIVE' AND must_change_password = 0 AND (password_expires_days IS NULL OR UTC_TIMESTAMP(3) <= TIMESTAMPADD(DAY, password_expires_days, password_updated_at))",
         [days, user.id, user.version],
       );
       if (result.affectedRows !== 1) throw new ApiError(409, 'ERR_CONCURRENCY_CONFLICT');
@@ -148,11 +152,11 @@ export class AuthService {
       // Approval mutations share the SUPER_ADMIN → user → role bindings lock order.
       const [[superRole]] = await tx.query<(MetadataRow & { id: EntityId })[]>('SELECT id FROM sys_roles WHERE role_name = ? FOR UPDATE', ['SUPER_ADMIN']);
       if (!superRole) throw new Error('Missing SUPER_ADMIN role');
-      const [[lockedUser]] = await tx.query<(MetadataRow & Pick<UserRow, 'id' | 'version' | 'status'>)[]>('SELECT id, version, status FROM sys_users WHERE id = ? FOR UPDATE', [user.id]);
+      const [[lockedUser]] = await tx.query<(MetadataRow & Pick<UserRow, 'id' | 'version' | 'status'>)[]>('SELECT id, version, status FROM sys_users WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) FOR UPDATE', [user.id]);
       if (lockedUser?.status !== 'REJECTED' || lockedUser.version !== user.version) throw new ApiError(409, 'ERR_INVALID_STATUS_TRANSITION');
-      await tx.query('SELECT id FROM sys_user_roles WHERE user_id = ? ORDER BY role_id FOR UPDATE', [user.id]);
+      await tx.query('SELECT id FROM sys_user_roles WHERE user_id = CAST(CAST(? AS CHAR) AS UNSIGNED) ORDER BY role_id FOR UPDATE', [user.id]);
       const [result] = await tx.query<MetadataWriteResult>(
-        "UPDATE sys_users SET status = 'PENDING', apply_reason = ?, email = IF(?, ?, email), department = COALESCE(?, department), version = version + 1 WHERE id = ? AND status = 'REJECTED' AND version = ?",
+        "UPDATE sys_users SET status = 'PENDING', apply_reason = ?, email = IF(?, ?, email), department = COALESCE(?, department), version = version + 1 WHERE id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND status = 'REJECTED' AND version = ?",
         [input.reason, input.email !== undefined, input.email ?? null, input.department ?? null, user.id, user.version],
       );
       if (result.affectedRows !== 1) throw new ApiError(409, 'ERR_INVALID_STATUS_TRANSITION');
@@ -184,10 +188,10 @@ export class AuthService {
 
   private async profile(user: UserRow, db: MetadataQueryExecutor): Promise<UserProfileDTO> {
     const [roles] = await db.query<(MetadataRow & { role: SystemRole })[]>(
-      'SELECT r.role_name AS role FROM sys_user_roles ur JOIN sys_roles r ON r.id = ur.role_id WHERE ur.user_id = ? ORDER BY r.role_name', [user.id],
+      'SELECT r.role_name AS role FROM sys_user_roles ur JOIN sys_roles r ON r.id = ur.role_id WHERE ur.user_id = CAST(CAST(? AS CHAR) AS UNSIGNED) ORDER BY r.role_name', [user.id],
     );
     const [[rejection]] = user.status === 'REJECTED' ? await db.query<(MetadataRow & { reason: string | null })[]>(
-      "SELECT reason FROM sys_user_approvals WHERE user_id = ? AND action = 'REJECT' ORDER BY created_at DESC, id DESC LIMIT 1", [user.id],
+      "SELECT reason FROM sys_user_approvals WHERE user_id = CAST(CAST(? AS CHAR) AS UNSIGNED) AND action = 'REJECT' ORDER BY created_at DESC, id DESC LIMIT 1", [user.id],
     ) : [[]];
     const updatedAt = user.password_updated_at;
     const expiresAt = passwordExpiry(updatedAt, user.password_expires_days);
@@ -210,7 +214,7 @@ export class AuthService {
   private verify(encoded: string, password: string): Promise<boolean> { return boundedArgon(() => verifyPassword(encoded, password)); }
 }
 
-async function boundedArgon<T>(operation: () => Promise<T>): Promise<T> {
+export async function boundedArgon<T>(operation: () => Promise<T>): Promise<T> {
   try { return await operation(); }
   catch (error) {
     if (error instanceof Error && error.message === 'ARGON2_CAPACITY_EXCEEDED') throw new ApiError(429, 'ERR_RATE_LIMIT_USER', { retry_after_sec: 1 });

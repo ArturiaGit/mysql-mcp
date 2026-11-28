@@ -239,6 +239,10 @@ export const StandardErrorResponseSchema = z.object({
   details: z.optional(
     z.object({
       validation_errors: z.optional(z.array(ValidationErrorItemSchema)),
+      current_version: z.optional(z.number()),
+      submitted_version: z.optional(z.number()),
+      current_status: z.optional(UserStatusSchema),
+      requiredRoles: z.optional(z.array(z.string())),
     }),
   ),
 });

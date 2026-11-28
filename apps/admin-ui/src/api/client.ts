@@ -1,3 +1,4 @@
+import type { ConflictErrorDetailsDTO, UserStatus } from '@mysql-mcp/shared-types';
 import type { QueryClient } from '@tanstack/react-query';
 import type * as z from 'zod/v4-mini';
 import {
@@ -22,6 +23,9 @@ export class ApiClientError extends Error {
   public readonly remainingAttempts?: number;
   public readonly retryAfterSec?: number;
   public readonly validationErrors?: ValidationErrorItem[];
+  public readonly conflictDetails?: ConflictErrorDetailsDTO;
+  public readonly currentStatus?: UserStatus;
+  public readonly requiredRoles?: string[];
   public readonly isNetworkError: boolean;
 
   constructor(params: {
@@ -33,6 +37,9 @@ export class ApiClientError extends Error {
     remainingAttempts?: number;
     retryAfterSec?: number;
     validationErrors?: ValidationErrorItem[];
+    conflictDetails?: ConflictErrorDetailsDTO;
+    currentStatus?: UserStatus;
+    requiredRoles?: string[];
     isNetworkError?: boolean;
   }) {
     super(params.message);
@@ -44,6 +51,9 @@ export class ApiClientError extends Error {
     this.remainingAttempts = params.remainingAttempts;
     this.retryAfterSec = params.retryAfterSec;
     this.validationErrors = params.validationErrors;
+    this.conflictDetails = params.conflictDetails;
+    this.currentStatus = params.currentStatus;
+    this.requiredRoles = params.requiredRoles;
     this.isNetworkError = params.isNetworkError ?? false;
   }
 }
@@ -236,6 +246,15 @@ async function buildErrorFromResponse(response: Response): Promise<ApiClientErro
   const rawBody: unknown = await response.json().catch(() => null);
   const parsed = StandardErrorResponseSchema.safeParse(rawBody);
   if (parsed.success) {
+    const details = parsed.data.details;
+    const conflictDetails =
+      details?.current_version !== undefined && details?.submitted_version !== undefined
+        ? {
+            current_version: details.current_version,
+            submitted_version: details.submitted_version,
+          }
+        : undefined;
+
     return new ApiClientError({
       status: response.status,
       code: parsed.data.code,
@@ -244,7 +263,10 @@ async function buildErrorFromResponse(response: Response): Promise<ApiClientErro
       timestamp: parsed.data.timestamp,
       remainingAttempts: parsed.data.remaining_attempts,
       retryAfterSec: parsed.data.retry_after_sec,
-      validationErrors: parsed.data.details?.validation_errors,
+      validationErrors: details?.validation_errors,
+      conflictDetails,
+      currentStatus: details?.current_status,
+      requiredRoles: details?.requiredRoles,
     });
   }
 

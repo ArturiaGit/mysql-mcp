@@ -5,9 +5,20 @@ import { z } from 'zod';
 import { cookie, CSRF_COOKIE, equalSecret, parseCookies, PASSWORD_MAX_DAYS, PASSWORD_MIN_DAYS, SESSION_COOKIE, SESSION_TTL_SECONDS } from './auth-domain.js';
 import type { AuthService } from './auth-service.js';
 import type { PatService } from './pat-service.js';
+import { registerUserAdministrationRoutes } from './user-administration-routes.js';
+import type { UserAdministrationQueries } from './user-administration-queries.js';
+import type { UserAdministrationService } from './user-administration-service.js';
 import { ApiError } from './errors.js';
+import { entityParams, parse } from './request-validation.js';
 
-interface RouteOptions { service: AuthService; patService: PatService; secureCookies: boolean; ready: () => boolean; }
+interface RouteOptions {
+  service: AuthService;
+  patService: PatService;
+  userAdministration: UserAdministrationService;
+  userQueries: UserAdministrationQueries;
+  secureCookies: boolean;
+  ready: () => boolean;
+}
 interface GuardPolicy {
   restricted?: 'all' | 'rejected';
   allowExpired?: boolean;
@@ -23,11 +34,8 @@ const changeSchema = z.strictObject({ oldPassword: password, newPassword: passwo
 const policySchema = z.strictObject({ passwordExpiresDays: z.number().int().min(PASSWORD_MIN_DAYS).max(PASSWORD_MAX_DAYS).nullable() });
 const resubmitSchema = z.strictObject({ ...contact, reason: z.string().trim().min(1).max(512) });
 const createPatSchema = z.strictObject({ name: z.string().trim().min(1).max(64), expiresDays: z.number().int().min(1).max(365).default(90) }) satisfies z.ZodType<CreatePatRequestDTO>;
-const patIdSchema = z.strictObject({
-  id: z.string().regex(/^[1-9][0-9]{0,19}$/).refine((id) => id.length < 20 || id <= '18446744073709551615'),
-});
 
-export async function registerAuthRoutes(app: FastifyInstance, { service, patService, secureCookies, ready }: RouteOptions): Promise<void> {
+export async function registerAuthRoutes(app: FastifyInstance, { service, patService, userAdministration, userQueries, secureCookies, ready }: RouteOptions): Promise<void> {
   await app.register(rateLimit, {
     global: false,
     max: 100,
@@ -36,17 +44,18 @@ export async function registerAuthRoutes(app: FastifyInstance, { service, patSer
       retry_after_sec: Math.max(1, Math.ceil(context.ttl / 1000)),
     }),
   });
-  const users = new WeakMap<FastifyRequest, UserProfileDTO>();
+  const sessions = new WeakMap<FastifyRequest, Awaited<ReturnType<AuthService['authenticate']>>>();
   const guard = (policy: GuardPolicy = {}) => async (request: FastifyRequest) => {
-    const user = await service.authenticate(sessionId(request));
-    assertGuard(user, policy);
-    users.set(request, user);
+    const session = await service.authenticate(sessionId(request));
+    assertGuard(session.user, policy);
+    sessions.set(request, session);
   };
-  function current(request: FastifyRequest): UserProfileDTO {
-    const user = users.get(request);
-    if (!user) throw new ApiError(401, 'ERR_AUTH_UNAUTHORIZED');
-    return user;
+  function currentSession(request: FastifyRequest) {
+    const session = sessions.get(request);
+    if (!session) throw new ApiError(401, 'ERR_AUTH_UNAUTHORIZED');
+    return session;
   }
+  const current = (request: FastifyRequest) => currentSession(request).user;
   const setCookies = (reply: FastifyReply, sid: string, seed: string) => reply.header('set-cookie', [
     cookie(SESSION_COOKIE, sid, secureCookies, SESSION_TTL_SECONDS),
     cookie(CSRF_COOKIE, seed, secureCookies, SESSION_TTL_SECONDS),
@@ -117,11 +126,12 @@ export async function registerAuthRoutes(app: FastifyInstance, { service, patSer
     return patService.create(current(request).id, input.name, input.expiresDays);
   });
   app.post('/api/v1/pats/:id/revoke', { config: { rateLimit: { max: 60, timeWindow: 60_000 } }, preHandler: guard() }, async (request) => {
-    const params = patIdSchema.safeParse(request.params);
+    const params = entityParams.safeParse(request.params);
     if (!params.success) throw new ApiError(404, 'ERR_NOT_FOUND');
     await patService.revoke(current(request).id, params.data.id);
     return { success: true };
   });
+  registerUserAdministrationRoutes(app, userAdministration, userQueries, (roles) => guard({ roles }), currentSession);
   app.get('/api/v1/profiles/my-options', { config: { rateLimit: { max: 120, timeWindow: 60_000 } }, preHandler: guard() }, async (request) => patService.myOptions(current(request).id));
 }
 
@@ -138,13 +148,7 @@ export function assertGuard(user: UserProfileDTO, policy: GuardPolicy): void {
   if (user.status === 'ACTIVE' && !policy.allowExpired && (user.must_change_password || user.is_password_expired)) {
     throw new ApiError(403, 'ERR_MUST_CHANGE_PASSWORD');
   }
-  if (policy.roles && !policy.roles.some((role) => user.roles.includes(role))) throw new ApiError(403, 'ERR_RBAC_FORBIDDEN');
-}
-
-function parse<T>(schema: z.ZodType<T>, body: unknown): T {
-  const parsed = schema.safeParse(body);
-  if (parsed.success) return parsed.data;
-  throw new ApiError(400, 'ERR_VALIDATION_FAILED', { validation_errors: parsed.error.issues.map(({ path, code }) => ({
-    field: path.map(String).join('.'), message: '字段格式无效。', rule: code,
-  })) });
+  if (policy.roles && !policy.roles.some((role) => user.roles.includes(role))) {
+    throw new ApiError(403, 'ERR_RBAC_FORBIDDEN', { requiredRoles: policy.roles });
+  }
 }
