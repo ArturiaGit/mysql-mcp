@@ -203,8 +203,11 @@ export default function ApprovalsView() {
                 <span>审批授权边界</span>
                 <Icon name="lock" className="size-3.5 text-safe" />
               </div>
-              <div className="mt-1.5 font-mono text-sm font-semibold text-fg-main">
-                {actorIsSuperAdmin ? 'SUPER_ADMIN 全角色可授' : 'SECURITY_ADMIN 提权受限'}
+              <div
+                className="mt-1.5 text-sm font-semibold text-fg-main"
+                title={actorIsSuperAdmin ? 'SUPER_ADMIN' : 'SECURITY_ADMIN'}
+              >
+                {actorIsSuperAdmin ? '超级管理员 · 全角色可授' : '安全管理员 · 提权受限'}
               </div>
               <div className="mt-1 text-[11px] text-fg-subtle">
                 {actorIsSuperAdmin
@@ -235,11 +238,16 @@ export default function ApprovalsView() {
                 <span>待审注册申请列表</span>
               </CardTitle>
               <CardDescription>
-                按提交时间倒序展示处于 PENDING 状态的工单；支持批准赋权激活或填写理由驳回。
+                按提交时间倒序展示处于待审批（PENDING）状态的工单；支持批准赋权激活或填写理由驳回。
               </CardDescription>
             </div>
-            <Badge variant={total > 0 ? 'warning' : 'safe'} mono>
-              {total} PENDING
+            <Badge
+              variant={total > 0 ? 'warning' : 'safe'}
+              title="PENDING"
+              className="tabular-nums"
+              data-testid="approvals-pending-badge"
+            >
+              {total} 条待审批
             </Badge>
           </CardHeader>
 
@@ -426,7 +434,7 @@ export default function ApprovalsView() {
             refreshAll();
             pushToast(
               '已驳回注册申请',
-              `用户「${approval.username}」状态已流转为 REJECTED，可补充信息后重提。`,
+              `用户「${approval.username}」状态已流转为已驳回（REJECTED），可补充信息后重提。`,
               'warning',
             );
           }}

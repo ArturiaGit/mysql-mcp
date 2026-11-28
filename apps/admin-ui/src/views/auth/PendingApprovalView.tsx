@@ -57,8 +57,8 @@ export default function PendingApprovalView() {
               您的身份会话有效，但须待管理员审批激活后方可进入业务控制台
             </CardDescription>
           </div>
-          <Badge variant="warning" pulse mono data-testid="pending-status-badge">
-            PENDING
+          <Badge variant="warning" pulse title="PENDING" data-testid="pending-status-badge">
+            待审批
           </Badge>
         </CardHeader>
 

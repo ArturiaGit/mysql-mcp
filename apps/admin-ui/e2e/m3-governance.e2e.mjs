@@ -172,6 +172,9 @@ async function run() {
     const escCheckUser = 'm3_esc_check';
     const escCheckPwd = strongPassword();
 
+    const rejectedOnlyUser = 'm3_rejected_only';
+    const rejectedOnlyPwd = strongPassword();
+
     const apiPort = await getFreePort();
     const uiPort = await getFreePort();
     const apiBase = `http://127.0.0.1:${apiPort}`;
@@ -306,6 +309,13 @@ async function run() {
       'QA Lab',
       'Pending ticket for SECURITY_ADMIN privilege escalation check',
     );
+    await registerUser(
+      rejectedOnlyUser,
+      rejectedOnlyPwd,
+      'rejected@m3-e2e.test',
+      'External Partner',
+      'Rejected ticket retained for /users status localization and 4-column alignment check',
+    );
 
     // Super admin logs in and navigates to /approvals
     await loginAs(adminUser, adminPwd);
@@ -315,6 +325,15 @@ async function run() {
     await page.getByTestId('approvals-view').waitFor({ state: 'visible' });
     await page.getByTestId(`reject-ticket-btn-${applicantUser}`).waitFor({ state: 'visible' });
     await assertZeroEmoji('/approvals');
+
+    // Verify localized Chinese pending badge on /approvals with title="PENDING"
+    const approvalsPendingBadge = page.getByTestId('approvals-pending-badge');
+    assert.match(
+      (await approvalsPendingBadge.innerText()).trim(),
+      /^\d+\s*条待审批$/,
+      'Expected Chinese pending count badge on /approvals',
+    );
+    assert.equal(await approvalsPendingBadge.getAttribute('title'), 'PENDING');
 
     // Verify Topbar=56px and Table Row=38px on /approvals
     const approvalsTopbarBox = await page.getByTestId('app-topbar').boundingBox();
@@ -347,6 +366,14 @@ async function run() {
     await page.getByTestId('reject-approval-modal').waitFor({ state: 'hidden' });
     await page.getByTestId(`reject-ticket-btn-${applicantUser}`).waitFor({ state: 'hidden' });
 
+    // Reject rejectedOnlyUser so /users renders a REJECTED row alongside ACTIVE/DISABLED/PENDING
+    await page.getByTestId(`reject-ticket-btn-${rejectedOnlyUser}`).click();
+    await page.getByTestId('reject-approval-modal').waitFor({ state: 'visible' });
+    await page.getByTestId('reject-reason-input').fill('外部协作账号暂不开放直连权限');
+    await page.getByTestId('reject-confirm-submit-btn').click();
+    await page.getByTestId('reject-approval-modal').waitFor({ state: 'hidden' });
+    await page.getByTestId(`reject-ticket-btn-${rejectedOnlyUser}`).waitFor({ state: 'hidden' });
+
     // Also approve secAdminUser (SECURITY_ADMIN) and tempUser (DEVELOPER)
     await page.getByTestId(`approve-ticket-btn-${secAdminUser}`).click();
     await page.getByTestId('approve-approval-modal').waitFor({ state: 'visible' });
@@ -372,6 +399,13 @@ async function run() {
     await loginAs(applicantUser, applicantPwd);
     await page.waitForURL(/\/approvals\/re$/);
     await page.getByTestId('resubmit-approval-card').waitFor({ state: 'visible' });
+    const rejectedBadge = page.getByTestId('rejected-status-badge');
+    assert.equal(
+      (await rejectedBadge.innerText()).trim(),
+      '已驳回',
+      'Expected /approvals/re status badge to display Chinese label 已驳回',
+    );
+    assert.equal(await rejectedBadge.getAttribute('title'), 'REJECTED');
     const displayedRejectReason = (await page.getByTestId('reject-reason-box').innerText()).trim();
     assert(
       displayedRejectReason.includes(rejectReasonText),
@@ -383,6 +417,13 @@ async function run() {
     await page.getByTestId('resubmit-submit-btn').click();
     await page.waitForURL(/\/approvals\/wait$/);
     await page.getByTestId('pending-approval-card').waitFor({ state: 'visible' });
+    const pendingBadge = page.getByTestId('pending-status-badge');
+    assert.equal(
+      (await pendingBadge.innerText()).trim(),
+      '待审批',
+      'Expected /approvals/wait status badge to display Chinese label 待审批',
+    );
+    assert.equal(await pendingBadge.getAttribute('title'), 'PENDING');
 
     // Logout applicant -> SECURITY_ADMIN logs in -> verifies privilege escalation lock on SUPER_ADMIN role
     await page.getByTestId('auth-logout-btn').click();
@@ -522,6 +563,41 @@ async function run() {
     await page.getByTestId(`go-approval-link-${escCheckUser}`).waitFor({ state: 'visible' });
     assert.equal(await page.locator(`[data-testid="toggle-status-btn-${escCheckUser}"]`).count(), 0);
 
+    // REJECTED user row (rejectedOnlyUser) must display approval flow indicator instead of toggle button
+    await page.getByTestId(`approval-flow-badge-${rejectedOnlyUser}`).waitFor({ state: 'visible' });
+    assert.equal(await page.locator(`[data-testid="toggle-status-btn-${rejectedOnlyUser}"]`).count(), 0);
+
+    // Verify Chinese status badges + English code hover titles on /users
+    const assertStatusBadge = async (username, expectedLabel, expectedCode) => {
+      const badge = page.getByTestId(`user-status-badge-${username}`);
+      assert.equal(
+        (await badge.innerText()).trim(),
+        expectedLabel,
+        `Expected status badge for ${username} to be "${expectedLabel}"`,
+      );
+      assert.equal(
+        await badge.getAttribute('title'),
+        expectedCode,
+        `Expected status badge title for ${username} to be "${expectedCode}"`,
+      );
+    };
+    await assertStatusBadge(adminUser, '活跃', 'ACTIVE');
+    await assertStatusBadge(escCheckUser, '待审批', 'PENDING');
+    await assertStatusBadge(rejectedOnlyUser, '已驳回', 'REJECTED');
+
+    // Verify Chinese bound role display names + English role_name hover titles
+    const superAdminRoleBadge = page.locator(
+      `[data-testid="user-roles-cell-${adminUser}"] [data-role-name="SUPER_ADMIN"]`,
+    );
+    assert.equal((await superAdminRoleBadge.innerText()).trim(), '超级管理员');
+    assert.equal(await superAdminRoleBadge.getAttribute('title'), 'SUPER_ADMIN');
+
+    const secAdminRoleBadge = page.locator(
+      `[data-testid="user-roles-cell-${secAdminUser}"] [data-role-name="SECURITY_ADMIN"]`,
+    );
+    assert.equal((await secAdminRoleBadge.innerText()).trim(), '安全管理员');
+    assert.equal(await secAdminRoleBadge.getAttribute('title'), 'SECURITY_ADMIN');
+
     // URL SearchParams SSOT filter check (search + status + role + reload persistence)
     await page.getByTestId('users-search-input').fill(tempUser);
     await page.getByTestId('users-search-submit-btn').click();
@@ -582,41 +658,97 @@ async function run() {
     await page.waitForFunction(
       (uname) => {
         const cell = document.querySelector(`[data-testid="user-roles-cell-${uname}"]`);
-        const text = cell?.textContent ?? '';
-        return text.includes('DEVELOPER') && text.includes('ANALYST');
+        const dev = cell?.querySelector('[data-role-name="DEVELOPER"]');
+        const analyst = cell?.querySelector('[data-role-name="ANALYST"]');
+        return (
+          dev?.textContent?.trim() === '业务研发人员' &&
+          dev?.getAttribute('title') === 'DEVELOPER' &&
+          analyst?.textContent?.trim() === '数据分析师' &&
+          analyst?.getAttribute('title') === 'ANALYST'
+        );
       },
       tempUser,
     );
-    console.log('PASS: Script 3 — Edit roles 409 conflict preserved draft, reloaded latest version, and persisted to real MySQL');
+    console.log('PASS: Script 3 — Edit roles 409 conflict preserved draft, reloaded latest version, persisted to real MySQL, and rendered Chinese role badges with English code titles');
 
     // ------------------------------------------------------------------
-    // Script 4: Status Toggle (ACTIVE -> DISABLED -> ACTIVE)
+    // Script 4: Status Toggle (ACTIVE -> DISABLED -> ACTIVE) + 4-Column Alignment Across All 4 Statuses
     // ------------------------------------------------------------------
     await page.getByTestId(`toggle-status-btn-${tempUser}`).click();
     await page.getByTestId('toggle-user-status-modal').waitFor({ state: 'visible' });
+    assert.equal((await page.getByTestId('toggle-status-from-badge').innerText()).trim(), '活跃');
+    assert.equal(await page.getByTestId('toggle-status-from-badge').getAttribute('title'), 'ACTIVE');
+    assert.equal((await page.getByTestId('toggle-status-to-badge').innerText()).trim(), '已停用');
+    assert.equal(await page.getByTestId('toggle-status-to-badge').getAttribute('title'), 'DISABLED');
     await page.getByTestId('toggle-status-confirm-btn').click();
     await page.getByTestId('toggle-user-status-modal').waitFor({ state: 'hidden' });
     await page.waitForFunction(
-      (uname) =>
-        document.querySelector(`[data-testid="user-status-badge-${uname}"]`)?.textContent?.trim() ===
-        'DISABLED',
+      (uname) => {
+        const badge = document.querySelector(`[data-testid="user-status-badge-${uname}"]`);
+        return badge?.textContent?.trim() === '已停用' && badge?.getAttribute('title') === 'DISABLED';
+      },
       tempUser,
     );
     assert.equal(mysqlQuery(`SELECT status FROM sys_users WHERE username = '${tempUser}'`), 'DISABLED');
 
+    // Now all 4 statuses (ACTIVE, DISABLED, PENDING, REJECTED) are simultaneously rendered in /users!
+    // Verify 38px row height AND pixel-exact 4-column action alignment across all 4 status rows.
+    const mixedStatusRows = [
+      { status: 'ACTIVE', user: adminUser, slot2TestId: `toggle-status-btn-${adminUser}` },
+      { status: 'DISABLED', user: tempUser, slot2TestId: `toggle-status-btn-${tempUser}` },
+      { status: 'PENDING', user: escCheckUser, slot2TestId: `go-approval-link-${escCheckUser}` },
+      { status: 'REJECTED', user: rejectedOnlyUser, slot2TestId: `approval-flow-badge-${rejectedOnlyUser}` },
+    ];
+
+    const slotBoxes = { slot1: [], slot2: [], slot3: [], slot4: [] };
+    for (const entry of mixedStatusRows) {
+      const rowBox = await page
+        .locator(`[data-testid="user-table-row"][data-username="${entry.user}"]`)
+        .boundingBox();
+      assert(
+        rowBox && Math.round(rowBox.height) === 38,
+        `Expected 38px row height for ${entry.status} row (${entry.user}), got ${rowBox?.height}`,
+      );
+      const b1 = await page.getByTestId(`edit-roles-btn-${entry.user}`).boundingBox();
+      const b2 = await page.getByTestId(entry.slot2TestId).boundingBox();
+      const b3 = await page.getByTestId(`reset-password-btn-${entry.user}`).boundingBox();
+      const b4 = await page.getByTestId(`delete-user-btn-${entry.user}`).boundingBox();
+      assert(b1 && b2 && b3 && b4, `Missing action slot boundingBox for ${entry.status} (${entry.user})`);
+      slotBoxes.slot1.push({ ...entry, ...b1 });
+      slotBoxes.slot2.push({ ...entry, ...b2 });
+      slotBoxes.slot3.push({ ...entry, ...b3 });
+      slotBoxes.slot4.push({ ...entry, ...b4 });
+    }
+
+    for (const [slotName, boxes] of Object.entries(slotBoxes)) {
+      const ref = boxes[0];
+      for (const box of boxes.slice(1)) {
+        assert(
+          Math.abs(box.x - ref.x) <= 0.5 && Math.abs(box.width - ref.width) <= 0.5,
+          `Action ${slotName} misaligned between ${ref.status} (${ref.user}: x=${ref.x}, w=${ref.width}) and ${box.status} (${box.user}: x=${box.x}, w=${box.width})`,
+        );
+      }
+    }
+    console.log(
+      `PASS: 4-column action alignment verified across ACTIVE/DISABLED/PENDING/REJECTED rows (slot1 x=${slotBoxes.slot1[0].x.toFixed(1)} w=${slotBoxes.slot1[0].width.toFixed(1)}, slot2 x=${slotBoxes.slot2[0].x.toFixed(1)} w=${slotBoxes.slot2[0].width.toFixed(1)}, slot3 x=${slotBoxes.slot3[0].x.toFixed(1)} w=${slotBoxes.slot3[0].width.toFixed(1)}, slot4 x=${slotBoxes.slot4[0].x.toFixed(1)} w=${slotBoxes.slot4[0].width.toFixed(1)})`,
+    );
+
     // Re-enable back to ACTIVE
     await page.getByTestId(`toggle-status-btn-${tempUser}`).click();
     await page.getByTestId('toggle-user-status-modal').waitFor({ state: 'visible' });
+    assert.equal((await page.getByTestId('toggle-status-from-badge').innerText()).trim(), '已停用');
+    assert.equal((await page.getByTestId('toggle-status-to-badge').innerText()).trim(), '活跃');
     await page.getByTestId('toggle-status-confirm-btn').click();
     await page.getByTestId('toggle-user-status-modal').waitFor({ state: 'hidden' });
     await page.waitForFunction(
-      (uname) =>
-        document.querySelector(`[data-testid="user-status-badge-${uname}"]`)?.textContent?.trim() ===
-        'ACTIVE',
+      (uname) => {
+        const badge = document.querySelector(`[data-testid="user-status-badge-${uname}"]`);
+        return badge?.textContent?.trim() === '活跃' && badge?.getAttribute('title') === 'ACTIVE';
+      },
       tempUser,
     );
     assert.equal(mysqlQuery(`SELECT status FROM sys_users WHERE username = '${tempUser}'`), 'ACTIVE');
-    console.log('PASS: Script 4 — User status disable & re-enable persisted in real MySQL and updated UI');
+    console.log('PASS: Script 4 — User status disable & re-enable persisted in real MySQL and updated Chinese status UI');
 
     // ------------------------------------------------------------------
     // Script 5: Reset Password (409 Draft Preservation + One-Time Reveal + Close Memory Wipe)

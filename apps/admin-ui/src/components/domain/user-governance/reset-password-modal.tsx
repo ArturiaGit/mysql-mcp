@@ -457,8 +457,8 @@ export function ResetPasswordModal({
           <DialogHeader>
             <div>
               <div className="mb-1.5 flex items-center gap-2">
-                <Badge variant="safe" mono>
-                  PASSWORD RESET · v{state.workingVersion}
+                <Badge variant="safe" className="tabular-nums">
+                  密码已重置 · v{state.workingVersion}
                 </Badge>
               </div>
               <DialogTitle id="reset-password-dialog-title">

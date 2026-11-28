@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Alert } from '@/components/ui/form-controls';
 import { Icon } from '@/components/ui/icon';
+import { getUserStatusLabel, getUserStatusMeta } from '@/lib/user-display';
 import type { GuardrailViolationInfo } from './guardrail-error-modal';
 
 export interface ToggleUserStatusModalProps {
@@ -185,12 +186,20 @@ export function ToggleUserStatusModal({
             <div className="flex items-center justify-between rounded-md border border-border-line bg-bg-surface/60 px-3 py-2.5 text-xs">
               <span className="text-fg-muted">状态流转方向</span>
               <div className="flex items-center gap-2">
-                <Badge variant={effectiveTarget.status === 'ACTIVE' ? 'safe' : 'danger'} mono>
-                  {effectiveTarget.status}
+                <Badge
+                  variant={getUserStatusMeta(effectiveTarget.status).variant}
+                  title={effectiveTarget.status}
+                  data-testid="toggle-status-from-badge"
+                >
+                  {getUserStatusLabel(effectiveTarget.status)}
                 </Badge>
                 <Icon name="arrow-right" className="size-3.5 text-fg-subtle" />
-                <Badge variant={isDisabling ? 'danger' : 'safe'} mono>
-                  {nextStatus}
+                <Badge
+                  variant={getUserStatusMeta(nextStatus).variant}
+                  title={nextStatus}
+                  data-testid="toggle-status-to-badge"
+                >
+                  {getUserStatusLabel(nextStatus)}
                 </Badge>
               </div>
             </div>
@@ -203,7 +212,7 @@ export function ToggleUserStatusModal({
               </Alert>
             ) : (
               <Alert variant="safe">
-                解冻后，账号将恢复为 <code className="font-mono text-[11px]">ACTIVE</code> 状态，并继续受既有角色权限与密码策略约束。
+                解冻后，账号将恢复为活跃（<code className="font-mono text-[11px]">ACTIVE</code>）状态，并继续受既有角色权限与密码策略约束。
               </Alert>
             )}
 

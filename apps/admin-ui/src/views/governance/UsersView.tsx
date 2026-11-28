@@ -50,6 +50,13 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useActiveUser } from '@/guards/auth-guards';
 import { ConsoleShell } from '@/layouts/ConsoleShell';
+import {
+  formatRoleDisplayLabel,
+  getUserStatusLabel,
+  getUserStatusMeta,
+  USER_STATUS_META,
+  USER_STATUS_ORDER,
+} from '@/lib/user-display';
 import { useToastStore } from '@/stores/useToastStore';
 
 function formatTimestamp(iso: string): string {
@@ -63,22 +70,6 @@ function formatTimestamp(iso: string): string {
     minute: '2-digit',
     hour12: false,
   });
-}
-
-function getStatusBadgeConfig(status: UserStatus): {
-  label: UserStatus;
-  variant: 'safe' | 'danger' | 'warning' | 'neutral';
-} {
-  switch (status) {
-    case 'ACTIVE':
-      return { label: 'ACTIVE', variant: 'safe' };
-    case 'DISABLED':
-      return { label: 'DISABLED', variant: 'danger' };
-    case 'PENDING':
-      return { label: 'PENDING', variant: 'warning' };
-    case 'REJECTED':
-      return { label: 'REJECTED', variant: 'neutral' };
-  }
 }
 
 export default function UsersView() {
@@ -257,8 +248,8 @@ export default function UsersView() {
                 筛选条件与分页实时同步至 URL 查询参数；所有修改携带乐观锁版本号（409 冲突完整保留草稿）。
               </CardDescription>
             </div>
-            <Badge variant="neutral" dot={false} mono>
-              {total} USERS
+            <Badge variant="neutral" dot={false} className="tabular-nums">
+              共 {total} 位用户
             </Badge>
           </CardHeader>
 
@@ -297,7 +288,7 @@ export default function UsersView() {
             <Select
               aria-label="按账号状态筛选"
               data-testid="users-status-filter"
-              className="h-7 w-[140px] px-2 text-xs"
+              className="h-7 w-[152px] px-2 text-xs"
               value={query.status}
               onChange={(event) => {
                 const value = event.target.value as UserStatus | '';
@@ -305,23 +296,24 @@ export default function UsersView() {
               }}
             >
               <option value="">全部状态</option>
-              <option value="ACTIVE">ACTIVE (活跃)</option>
-              <option value="DISABLED">DISABLED (已停用)</option>
-              <option value="PENDING">PENDING (待审批)</option>
-              <option value="REJECTED">REJECTED (已驳回)</option>
+              {USER_STATUS_ORDER.map((status) => (
+                <option key={status} value={status}>
+                  {USER_STATUS_META[status].filterOptionLabel}
+                </option>
+              ))}
             </Select>
 
             <Select
               aria-label="按角色筛选"
               data-testid="users-role-filter"
-              className="h-7 w-[176px] px-2 text-xs"
+              className="h-7 w-[184px] px-2 text-xs"
               value={query.role}
               onChange={(event) => updateQuery({ role: event.target.value, page: 1 })}
             >
               <option value="">全部角色</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.role_name}>
-                  {role.display_name} ({role.role_name})
+                  {formatRoleDisplayLabel(role)} ({role.role_name})
                 </option>
               ))}
             </Select>
@@ -398,7 +390,7 @@ export default function UsersView() {
                   <TableBody>
                     {items.map((rowUser) => {
                       const guardrails = evaluateUserGuardrails(rowUser, currentUser.id);
-                      const statusConfig = getStatusBadgeConfig(rowUser.status);
+                      const statusConfig = getUserStatusMeta(rowUser.status);
 
                       return (
                         <TableRow
@@ -452,7 +444,8 @@ export default function UsersView() {
                             <div className="flex items-center gap-1.5">
                               <Badge
                                 variant={statusConfig.variant}
-                                mono
+                                title={rowUser.status}
+                                data-status={rowUser.status}
                                 data-testid={`user-status-badge-${rowUser.username}`}
                               >
                                 {statusConfig.label}
@@ -480,7 +473,7 @@ export default function UsersView() {
 
                           <TableCell>
                             <div
-                              className="flex flex-wrap items-center gap-1"
+                              className="flex items-center gap-1 whitespace-nowrap"
                               data-testid={`user-roles-cell-${rowUser.username}`}
                             >
                               {rowUser.roles.length > 0 ? (
@@ -489,10 +482,11 @@ export default function UsersView() {
                                     key={role.id}
                                     variant={role.role_name === 'SUPER_ADMIN' ? 'secret' : 'neutral'}
                                     dot={false}
-                                    mono
-                                    className="px-1.5 py-0 text-[10px]"
+                                    title={role.role_name}
+                                    data-role-name={role.role_name}
+                                    className="px-1.5 py-0 text-[11px]"
                                   >
-                                    {role.role_name}
+                                    {formatRoleDisplayLabel(role)}
                                   </Badge>
                                 ))
                               ) : (
@@ -510,11 +504,15 @@ export default function UsersView() {
                           </TableCell>
 
                           <TableCell className="text-right">
-                            <div className="inline-flex items-center justify-end gap-1.5">
-                              {/* Edit Roles */}
+                            <div
+                              className="inline-grid grid-cols-[66px_80px_88px_66px] items-center gap-1.5"
+                              data-testid={`user-actions-grid-${rowUser.username}`}
+                            >
+                              {/* Slot 1: Edit Roles */}
                               <Button
                                 variant="outline"
                                 size="xs"
+                                className="w-full px-2"
                                 data-testid={`edit-roles-btn-${rowUser.username}`}
                                 onClick={() => setEditRolesTarget(rowUser)}
                               >
@@ -522,13 +520,14 @@ export default function UsersView() {
                                 <span>角色</span>
                               </Button>
 
-                              {/* Status Toggle (ONLY for ACTIVE/DISABLED; PENDING/REJECTED routed to /approvals) */}
+                              {/* Slot 2: Status Toggle (ONLY for ACTIVE/DISABLED; PENDING/REJECTED routed to /approvals) */}
                               {guardrails.isManageableStatus ? (
                                 rowUser.status === 'ACTIVE' ? (
                                   guardrails.canDisable ? (
                                     <Button
                                       variant="outline"
                                       size="xs"
+                                      className="w-full px-2"
                                       data-testid={`toggle-status-btn-${rowUser.username}`}
                                       onClick={() => setToggleStatusTarget(rowUser)}
                                     >
@@ -540,13 +539,14 @@ export default function UsersView() {
                                       <TooltipTrigger asChild>
                                         <span
                                           tabIndex={0}
-                                          className="inline-flex cursor-not-allowed"
+                                          className="inline-flex w-full cursor-not-allowed"
                                           data-testid={`toggle-status-guard-wrap-${rowUser.username}`}
                                         >
                                           <Button
                                             variant="outline"
                                             size="xs"
                                             disabled
+                                            className="w-full px-2"
                                             data-testid={`toggle-status-btn-${rowUser.username}`}
                                             aria-label={`停用 ${rowUser.username}（已受保护禁用）`}
                                           >
@@ -566,6 +566,7 @@ export default function UsersView() {
                                   <Button
                                     variant="secondary"
                                     size="xs"
+                                    className="w-full px-2"
                                     data-testid={`toggle-status-btn-${rowUser.username}`}
                                     onClick={() => setToggleStatusTarget(rowUser)}
                                   >
@@ -578,6 +579,7 @@ export default function UsersView() {
                                   variant="ghost"
                                   size="xs"
                                   asChild
+                                  className="w-full px-2"
                                   data-testid={`go-approval-link-${rowUser.username}`}
                                 >
                                   <Link to="/approvals">
@@ -590,7 +592,8 @@ export default function UsersView() {
                                   <TooltipTrigger asChild>
                                     <span
                                       tabIndex={0}
-                                      className="inline-flex items-center px-1.5 text-[11px] text-fg-subtle"
+                                      data-testid={`approval-flow-badge-${rowUser.username}`}
+                                      className="inline-flex h-7 w-full items-center justify-center rounded-md px-1.5 text-[11px] text-fg-subtle select-none"
                                     >
                                       审批流转
                                     </span>
@@ -601,10 +604,11 @@ export default function UsersView() {
                                 </Tooltip>
                               )}
 
-                              {/* Reset Password */}
+                              {/* Slot 3: Reset Password */}
                               <Button
                                 variant="outline"
                                 size="xs"
+                                className="w-full px-2"
                                 data-testid={`reset-password-btn-${rowUser.username}`}
                                 onClick={() => setResetPwdTarget(rowUser)}
                               >
@@ -612,11 +616,12 @@ export default function UsersView() {
                                 <span>重置密码</span>
                               </Button>
 
-                              {/* Delete User (Guarded for self and last SUPER_ADMIN) */}
+                              {/* Slot 4: Delete User (Guarded for self and last SUPER_ADMIN) */}
                               {guardrails.canDelete ? (
                                 <Button
                                   variant="destructive"
                                   size="xs"
+                                  className="w-full px-2"
                                   data-testid={`delete-user-btn-${rowUser.username}`}
                                   onClick={() => setDeleteTarget(rowUser)}
                                 >
@@ -628,13 +633,14 @@ export default function UsersView() {
                                   <TooltipTrigger asChild>
                                     <span
                                       tabIndex={0}
-                                      className="inline-flex cursor-not-allowed"
+                                      className="inline-flex w-full cursor-not-allowed"
                                       data-testid={`delete-user-guard-wrap-${rowUser.username}`}
                                     >
                                       <Button
                                         variant="destructive"
                                         size="xs"
                                         disabled
+                                        className="w-full px-2"
                                         data-testid={`delete-user-btn-${rowUser.username}`}
                                         aria-label={`删除 ${rowUser.username}（已受保护禁用）`}
                                       >
@@ -738,7 +744,7 @@ export default function UsersView() {
             refreshUsersList();
             pushToast(
               nextStatus === 'DISABLED' ? '账号已停用' : '账号已解冻',
-              `账号「${updatedUser.username}」已变更为 ${nextStatus}（v${nextVersion}）。`,
+              `账号「${updatedUser.username}」已变更为${getUserStatusLabel(nextStatus)}（v${nextVersion}）。`,
               nextStatus === 'DISABLED' ? 'warning' : 'safe',
             );
           }}

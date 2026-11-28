@@ -144,8 +144,8 @@ export default function ResubmitApprovalView() {
               <span className="font-mono tabular-nums">{user.id}</span>) 可补充资料后重新发起审批
             </CardDescription>
           </div>
-          <Badge variant="danger" mono data-testid="rejected-status-badge">
-            REJECTED
+          <Badge variant="danger" title="REJECTED" data-testid="rejected-status-badge">
+            已驳回
           </Badge>
         </CardHeader>
 

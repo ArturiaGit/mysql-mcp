@@ -195,7 +195,7 @@ export function ApprovalApproveModal({
             <div>
               <DialogTitle id="approve-dialog-title">批准注册申请并分配角色</DialogTitle>
               <DialogDescription id="approve-dialog-desc">
-                批准后账号将直接激活为 ACTIVE，用户可使用注册时的强密码登录控制台（非乐观更新，等待服务端确认）。
+                批准后账号将直接激活为活跃（ACTIVE）状态，用户可使用注册时的强密码登录控制台（非乐观更新，等待服务端确认）。
               </DialogDescription>
             </div>
             <Button
@@ -443,7 +443,7 @@ export function ApprovalRejectModal({
             <div>
               <DialogTitle id="reject-dialog-title">驳回用户注册申请</DialogTitle>
               <DialogDescription id="reject-dialog-desc">
-                驳回后账号将流转为 REJECTED，申请人可在重新提交页面查看您填写的驳回理由。
+                驳回后账号将流转为已驳回（REJECTED）状态，申请人可在重新提交页面查看您填写的驳回理由。
               </DialogDescription>
             </div>
             <Button
